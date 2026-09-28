@@ -32,13 +32,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let activo = true;
 
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!activo) return;
-      setSession(data.session);
-      ultimaCarga.current = data.session?.user.id ?? null;
-      await cargarPerfil(data.session);
-      if (activo) setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(async ({ data }) => {
+        if (!activo) return;
+        setSession(data.session);
+        ultimaCarga.current = data.session?.user.id ?? null;
+        await cargarPerfil(data.session);
+        if (activo) setLoading(false);
+      })
+      .catch(() => {
+        if (activo) setLoading(false);
+      });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_evento, s) => {
       setSession(s);

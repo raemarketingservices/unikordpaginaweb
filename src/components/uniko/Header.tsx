@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { useAuth } from "@/lib/auth";
+import { useCart } from "@/lib/cart";
 import { provincias } from "@/data/marketplace";
 
 const navegacion = [
@@ -27,6 +28,7 @@ const navegacion = [
 export function Header() {
   const navigate = useNavigate();
   const { session, profile, loading, salir, isAdmin } = useAuth();
+  const { unidades } = useCart();
   const [abierto, setAbierto] = useState(false);
   const [consulta, setConsulta] = useState("");
   const [ubicacion, setUbicacion] = useState("Toda RD");
@@ -109,9 +111,11 @@ export function Header() {
               className="relative grid h-10 w-10 place-items-center rounded-full text-primary hover:bg-accent"
             >
               <ShoppingCart className="h-5 w-5" />
-              <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[10px] font-bold text-brand-foreground">
-                0
-              </span>
+              {unidades > 0 ? (
+                <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[10px] font-bold text-brand-foreground">
+                  {unidades}
+                </span>
+              ) : null}
             </Link>
             {autenticado ? (
               <>

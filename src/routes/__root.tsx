@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth";
+import { CartProvider } from "@/lib/cart";
 import { Toaster } from "@/components/ui/sonner";
 import { Header } from "@/components/uniko/Header";
 import { Footer } from "@/components/uniko/Footer";
@@ -140,17 +141,19 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <div className="flex min-h-screen flex-col bg-background">
-          <Header />
-          <main className="flex-1">
-            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-            <Outlet />
-          </main>
-          <Footer />
-          <NavMovil />
-          <Chatbot />
-        </div>
-        <Toaster position="top-center" richColors closeButton />
+        <CartProvider>
+          <div className="flex min-h-screen flex-col bg-background">
+            <Header />
+            <main className="flex-1">
+              {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+              <Outlet />
+            </main>
+            <Footer />
+            <NavMovil />
+            <Chatbot />
+          </div>
+          <Toaster position="top-center" richColors closeButton />
+        </CartProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

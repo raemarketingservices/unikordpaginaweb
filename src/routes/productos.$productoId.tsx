@@ -1,5 +1,6 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 import {
   MapPin,
   Truck,
@@ -14,6 +15,7 @@ import { formatearRD } from "@/data/marketplace";
 import { BadgeVerificado, Estrellas, Etiqueta, TituloSeccion } from "@/components/uniko/Primitivos";
 import { TarjetaProducto } from "@/components/uniko/Tarjetas";
 import { fetchProductos } from "@/lib/queries";
+import { useCart } from "@/lib/cart";
 import type { Producto } from "@/data/marketplace";
 
 export const Route = createFileRoute("/productos/$productoId")({
@@ -54,6 +56,8 @@ function DetalleProducto() {
   const { producto, productos } = Route.useLoaderData();
   const [cantidad, setCantidad] = useState(1);
   const [tab, setTab] = useState("descripcion");
+  const { agregar } = useCart();
+  const navigate = useNavigate();
   const imagenes = producto.galeria?.length
     ? producto.galeria
     : producto.imagen
@@ -200,12 +204,26 @@ function DetalleProducto() {
           </div>
 
           <div className="mt-5 grid gap-2 sm:grid-cols-2">
-            <Link to="/carrito" className="btn-base btn-brand">
+            <button
+              type="button"
+              onClick={() => {
+                agregar(producto, cantidad);
+                toast.success("Producto agregado al carrito");
+              }}
+              className="btn-base btn-brand"
+            >
               Agregar al carrito
-            </Link>
-            <Link to="/checkout" className="btn-base btn-primary">
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                agregar(producto, cantidad);
+                navigate({ to: "/checkout" });
+              }}
+              className="btn-base btn-primary"
+            >
               Comprar ahora
-            </Link>
+            </button>
             <Link to="/mensajes" className="btn-base btn-outline sm:col-span-2">
               Contactar vendedor
             </Link>
