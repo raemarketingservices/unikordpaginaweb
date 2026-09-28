@@ -1,0 +1,8 @@
+node_modules
+.output
+.output.prev
+dist
+.git
+.env
+*.log
+.DS_Store
