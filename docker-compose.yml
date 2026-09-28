@@ -1,0 +1,29 @@
+services:
+  uniko-web:
+    build: .
+    container_name: uniko-web
+    restart: unless-stopped
+    ports:
+      - "8090:3000"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - default
+      - coolify
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=coolify"
+      - "traefik.http.routers.uniko-web.rule=Host(`uniko-rd.com`) || Host(`www.uniko-rd.com`)"
+      - "traefik.http.routers.uniko-web.entrypoints=https"
+      - "traefik.http.routers.uniko-web.tls=true"
+      - "traefik.http.routers.uniko-web.tls.certresolver=letsencrypt"
+      - "traefik.http.services.uniko-web.loadbalancer.server.port=3000"
+      - "traefik.http.routers.uniko-web-http.rule=Host(`uniko-rd.com`) || Host(`www.uniko-rd.com`)"
+      - "traefik.http.routers.uniko-web-http.entrypoints=http"
+      - "traefik.http.routers.uniko-web-http.middlewares=uniko-web-redirect"
+      - "traefik.http.middlewares.uniko-web-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.uniko-web-redirect.redirectscheme.permanent=true"
+
+networks:
+  coolify:
+    external: true

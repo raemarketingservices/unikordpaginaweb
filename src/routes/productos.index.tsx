@@ -1,9 +1,17 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { Search, MapPin, ChevronDown } from "lucide-react";
 import { TarjetaProducto } from "@/components/uniko/Tarjetas";
-import { categorias, productos, provincias } from "@/data/marketplace";
+import { TituloSeccion, BadgeVerificado, Estrellas, Etiqueta } from "@/components/uniko/Primitivos";
+import { fetchProductos, fetchCategorias } from "@/lib/queries";
+import { provincias } from "@/data/marketplace";
+import type { Categoria, Producto } from "@/data/marketplace";
 
 export const Route = createFileRoute("/productos/")({
+  loader: async () => ({
+    productos: await fetchProductos(),
+    categorias: await fetchCategorias(),
+  }),
   head: () => ({
     meta: [
       { title: "Productos · UNIKO-RD" },
@@ -23,6 +31,7 @@ export const Route = createFileRoute("/productos/")({
 });
 
 function Productos() {
+  const { productos, categorias } = Route.useLoaderData();
   const [categoria, setCategoria] = useState("todas");
   const [provincia, setProvincia] = useState("todas");
   const [soloVerificados, setSoloVerificados] = useState(false);
@@ -44,7 +53,7 @@ function Productos() {
     if (orden === "precio-desc") copia.sort((a, b) => b.precio - a.precio);
     if (orden === "rating") copia.sort((a, b) => b.rating - a.rating);
     return copia;
-  }, [categoria, provincia, soloVerificados, soloEnvio, maximo, orden]);
+  }, [productos, categoria, provincia, soloVerificados, soloEnvio, maximo, orden]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
@@ -59,10 +68,10 @@ function Productos() {
             <select
               value={categoria}
               onChange={(e) => setCategoria(e.target.value)}
-              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+              className="select-uniko w-full"
             >
               <option value="todas">Todas</option>
-              {categorias.map((c) => (
+              {categorias.map((c: Categoria) => (
                 <option key={c.slug} value={c.slug}>
                   {c.nombre}
                 </option>
@@ -74,7 +83,7 @@ function Productos() {
             <select
               value={provincia}
               onChange={(e) => setProvincia(e.target.value)}
-              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+              className="select-uniko w-full"
             >
               <option value="todas">Toda RD</option>
               {provincias.map((p) => (
@@ -102,11 +111,15 @@ function Productos() {
               type="checkbox"
               checked={soloVerificados}
               onChange={(e) => setSoloVerificados(e.target.checked)}
-            />
+            />{" "}
             Solo vendedores verificados
           </label>
           <label className="flex items-center gap-2 text-sm font-medium">
-            <input type="checkbox" checked={soloEnvio} onChange={(e) => setSoloEnvio(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={soloEnvio}
+              onChange={(e) => setSoloEnvio(e.target.checked)}
+            />{" "}
             Envíos a todo el país
           </label>
         </aside>
@@ -117,7 +130,7 @@ function Productos() {
             <select
               value={orden}
               onChange={(e) => setOrden(e.target.value)}
-              className="rounded-full border border-border bg-background px-3 py-1.5 text-sm font-semibold"
+              className="select-uniko"
             >
               <option value="relevancia">Relevancia</option>
               <option value="precio-asc">Menor precio</option>
@@ -126,7 +139,7 @@ function Productos() {
             </select>
           </div>
           {lista.length ? (
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               {lista.map((p) => (
                 <TarjetaProducto key={p.id} producto={p} />
               ))}

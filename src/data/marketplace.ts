@@ -15,10 +15,20 @@ export const categorias: Categoria[] = [
   { slug: "supermercado", nombre: "Supermercado", icono: "ShoppingBasket", tipo: "producto" },
   { slug: "servicios", nombre: "Servicios", icono: "Wrench", tipo: "servicio" },
   { slug: "deportes", nombre: "Deportes", icono: "Dumbbell", tipo: "producto" },
-  { slug: "electrodomesticos", nombre: "Electrodomésticos", icono: "WashingMachine", tipo: "producto" },
+  {
+    slug: "electrodomesticos",
+    nombre: "Electrodomésticos",
+    icono: "WashingMachine",
+    tipo: "producto",
+  },
   { slug: "mascotas", nombre: "Mascotas", icono: "PawPrint", tipo: "ambos" },
   { slug: "construccion", nombre: "Construcción", icono: "HardHat", tipo: "ambos" },
-  { slug: "restaurantes", nombre: "Restaurantes / Comida", icono: "UtensilsCrossed", tipo: "ambos" },
+  {
+    slug: "restaurantes",
+    nombre: "Restaurantes / Comida",
+    icono: "UtensilsCrossed",
+    tipo: "ambos",
+  },
   { slug: "profesionales", nombre: "Profesionales", icono: "Briefcase", tipo: "servicio" },
   { slug: "educacion", nombre: "Educación", icono: "GraduationCap", tipo: "servicio" },
   { slug: "eventos", nombre: "Eventos", icono: "PartyPopper", tipo: "servicio" },
@@ -55,6 +65,11 @@ export type Producto = {
   precio: number;
   precioAnterior?: number;
   tienda: string;
+  tiendaId?: string;
+  sku?: string;
+  descripcion?: string;
+  galeria?: string[];
+  videos?: string[];
   verificado: boolean;
   rating: number;
   resenas: number;
@@ -87,7 +102,7 @@ export const productos: Producto[] = [
   },
   {
     id: "laptop-gamer",
-    titulo: "Laptop Gamer 16\" RTX 4060 · 16GB RAM",
+    titulo: 'Laptop Gamer 16" RTX 4060 · 16GB RAM',
     categoria: "tecnologia",
     precio: 68500,
     precioAnterior: 75900,
@@ -175,7 +190,7 @@ export const productos: Producto[] = [
   },
   {
     id: "bicicleta-mtb",
-    titulo: "Bicicleta MTB 29\" aluminio",
+    titulo: 'Bicicleta MTB 29" aluminio',
     categoria: "deportes",
     precio: 19900,
     precioAnterior: 23500,
@@ -319,6 +334,9 @@ export type Tienda = {
   nombre: string;
   categoria: string;
   ubicacion: string;
+  rnc?: string;
+  descripcion?: string;
+  propietario?: string;
   verificado: boolean;
   rating: number;
   resenas: number;
@@ -326,6 +344,7 @@ export type Tienda = {
   productos: number;
   logo: string;
   portada: string;
+  destacado?: boolean;
 };
 
 export const tiendas: Tienda[] = [
@@ -384,4 +403,4 @@ export const tiendas: Tienda[] = [
 ];
 
 export const formatearRD = (valor: number) =>
-  `RD$${valor.toLocaleString("es-DO", { maximumFractionDigits: 0 })}`;
+  `RD$${valor.toLocaleString("es-DO", { maximumFractionDigits: 2 })}`;

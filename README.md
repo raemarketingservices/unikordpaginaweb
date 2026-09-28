@@ -1444,23 +1444,23 @@ UNIKO-RD should become a digital ecosystem connecting:
 
 BUYERS
 
-+
+-
 
 SELLERS
 
-+
+-
 
 LOCAL BUSINESSES
 
-+
+-
 
 ENTREPRENEURS
 
-+
+-
 
 SERVICE PROVIDERS
 
-+
+-
 
 PROFESSIONALS
 

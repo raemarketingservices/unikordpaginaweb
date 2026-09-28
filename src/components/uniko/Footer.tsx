@@ -55,9 +55,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4">
         <div className="grid gap-8 lg:grid-cols-[1.2fr_repeat(5,minmax(0,1fr))]">
           <div className="min-w-0">
-            <div className="rounded-2xl bg-white/95 p-3 inline-block">
-              <Logo className="h-12" />
-            </div>
+            <Logo variante="blanco" className="h-14" />
             <p className="mt-4 text-sm font-medium opacity-90">
               Todo lo que buscas. En un solo lugar.
             </p>
@@ -82,7 +80,10 @@ export function Footer() {
               <ul className="mt-3 space-y-2">
                 {col.enlaces.map((e) => (
                   <li key={e.label}>
-                    <Link to={e.to} className="text-sm opacity-80 hover:opacity-100 hover:underline">
+                    <Link
+                      to={e.to}
+                      className="text-sm opacity-80 hover:opacity-100 hover:underline"
+                    >
                       {e.label}
                     </Link>
                   </li>

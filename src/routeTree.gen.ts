@@ -10,6 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AyudaRouteImport } from './routes/ayuda'
+import { Route as BuscarRouteImport } from './routes/buscar'
+import { Route as CarritoRouteImport } from './routes/carrito'
+import { Route as CategoriasRouteImport } from './routes/categorias'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as CuentaRouteImport } from './routes/cuenta'
+import { Route as FavoritosRouteImport } from './routes/favoritos'
+import { Route as LegalRouteImport } from './routes/legal'
+import { Route as MensajesRouteImport } from './routes/mensajes'
+import { Route as OfertasRouteImport } from './routes/ofertas'
+import { Route as PublicarRouteImport } from './routes/publicar'
+import { Route as VenderRouteImport } from './routes/vender'
+import { Route as CategoriasCategoriaSlugRouteImport } from './routes/categorias.$categoriaSlug'
 import { Route as ProductosIndexRouteImport } from './routes/productos.index'
 import { Route as ProductosProductoIdRouteImport } from './routes/productos.$productoId'
 import { Route as ServiciosIndexRouteImport } from './routes/servicios.index'
@@ -21,6 +36,81 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AyudaRoute = AyudaRouteImport.update({
+  id: '/ayuda',
+  path: '/ayuda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuscarRoute = BuscarRouteImport.update({
+  id: '/buscar',
+  path: '/buscar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarritoRoute = CarritoRouteImport.update({
+  id: '/carrito',
+  path: '/carrito',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriasRoute = CategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CuentaRoute = CuentaRouteImport.update({
+  id: '/cuenta',
+  path: '/cuenta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritosRoute = FavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MensajesRoute = MensajesRouteImport.update({
+  id: '/mensajes',
+  path: '/mensajes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OfertasRoute = OfertasRouteImport.update({
+  id: '/ofertas',
+  path: '/ofertas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicarRoute = PublicarRouteImport.update({
+  id: '/publicar',
+  path: '/publicar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VenderRoute = VenderRouteImport.update({
+  id: '/vender',
+  path: '/vender',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriasCategoriaSlugRoute = CategoriasCategoriaSlugRouteImport.update({
+  id: '/$categoriaSlug',
+  path: '/$categoriaSlug',
+  getParentRoute: () => CategoriasRoute,
 } as any)
 const ProductosIndexRoute = ProductosIndexRouteImport.update({
   id: '/productos/',
@@ -55,6 +145,21 @@ const TiendasTiendaIdRoute = TiendasTiendaIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
+  '/ayuda': typeof AyudaRoute
+  '/buscar': typeof BuscarRoute
+  '/carrito': typeof CarritoRoute
+  '/categorias': typeof CategoriasRouteWithChildren
+  '/checkout': typeof CheckoutRoute
+  '/cuenta': typeof CuentaRoute
+  '/favoritos': typeof FavoritosRoute
+  '/legal': typeof LegalRoute
+  '/mensajes': typeof MensajesRoute
+  '/ofertas': typeof OfertasRoute
+  '/publicar': typeof PublicarRoute
+  '/vender': typeof VenderRoute
+  '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
@@ -64,6 +169,21 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
+  '/ayuda': typeof AyudaRoute
+  '/buscar': typeof BuscarRoute
+  '/carrito': typeof CarritoRoute
+  '/categorias': typeof CategoriasRouteWithChildren
+  '/checkout': typeof CheckoutRoute
+  '/cuenta': typeof CuentaRoute
+  '/favoritos': typeof FavoritosRoute
+  '/legal': typeof LegalRoute
+  '/mensajes': typeof MensajesRoute
+  '/ofertas': typeof OfertasRoute
+  '/publicar': typeof PublicarRoute
+  '/vender': typeof VenderRoute
+  '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
@@ -74,6 +194,21 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
+  '/ayuda': typeof AyudaRoute
+  '/buscar': typeof BuscarRoute
+  '/carrito': typeof CarritoRoute
+  '/categorias': typeof CategoriasRouteWithChildren
+  '/checkout': typeof CheckoutRoute
+  '/cuenta': typeof CuentaRoute
+  '/favoritos': typeof FavoritosRoute
+  '/legal': typeof LegalRoute
+  '/mensajes': typeof MensajesRoute
+  '/ofertas': typeof OfertasRoute
+  '/publicar': typeof PublicarRoute
+  '/vender': typeof VenderRoute
+  '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
@@ -85,6 +220,21 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
+    | '/auth'
+    | '/ayuda'
+    | '/buscar'
+    | '/carrito'
+    | '/categorias'
+    | '/checkout'
+    | '/cuenta'
+    | '/favoritos'
+    | '/legal'
+    | '/mensajes'
+    | '/ofertas'
+    | '/publicar'
+    | '/vender'
+    | '/categorias/$categoriaSlug'
     | '/productos/$productoId'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
@@ -94,6 +244,21 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
+    | '/auth'
+    | '/ayuda'
+    | '/buscar'
+    | '/carrito'
+    | '/categorias'
+    | '/checkout'
+    | '/cuenta'
+    | '/favoritos'
+    | '/legal'
+    | '/mensajes'
+    | '/ofertas'
+    | '/publicar'
+    | '/vender'
+    | '/categorias/$categoriaSlug'
     | '/productos/$productoId'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
@@ -103,6 +268,21 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
+    | '/auth'
+    | '/ayuda'
+    | '/buscar'
+    | '/carrito'
+    | '/categorias'
+    | '/checkout'
+    | '/cuenta'
+    | '/favoritos'
+    | '/legal'
+    | '/mensajes'
+    | '/ofertas'
+    | '/publicar'
+    | '/vender'
+    | '/categorias/$categoriaSlug'
     | '/productos/$productoId'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
@@ -113,6 +293,20 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  AuthRoute: typeof AuthRoute
+  AyudaRoute: typeof AyudaRoute
+  BuscarRoute: typeof BuscarRoute
+  CarritoRoute: typeof CarritoRoute
+  CategoriasRoute: typeof CategoriasRouteWithChildren
+  CheckoutRoute: typeof CheckoutRoute
+  CuentaRoute: typeof CuentaRoute
+  FavoritosRoute: typeof FavoritosRoute
+  LegalRoute: typeof LegalRoute
+  MensajesRoute: typeof MensajesRoute
+  OfertasRoute: typeof OfertasRoute
+  PublicarRoute: typeof PublicarRoute
+  VenderRoute: typeof VenderRoute
   ProductosProductoIdRoute: typeof ProductosProductoIdRoute
   ServiciosServicioIdRoute: typeof ServiciosServicioIdRoute
   TiendasTiendaIdRoute: typeof TiendasTiendaIdRoute
@@ -129,6 +323,111 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ayuda': {
+      id: '/ayuda'
+      path: '/ayuda'
+      fullPath: '/ayuda'
+      preLoaderRoute: typeof AyudaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buscar': {
+      id: '/buscar'
+      path: '/buscar'
+      fullPath: '/buscar'
+      preLoaderRoute: typeof BuscarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carrito': {
+      id: '/carrito'
+      path: '/carrito'
+      fullPath: '/carrito'
+      preLoaderRoute: typeof CarritoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categorias': {
+      id: '/categorias'
+      path: '/categorias'
+      fullPath: '/categorias'
+      preLoaderRoute: typeof CategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cuenta': {
+      id: '/cuenta'
+      path: '/cuenta'
+      fullPath: '/cuenta'
+      preLoaderRoute: typeof CuentaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favoritos': {
+      id: '/favoritos'
+      path: '/favoritos'
+      fullPath: '/favoritos'
+      preLoaderRoute: typeof FavoritosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mensajes': {
+      id: '/mensajes'
+      path: '/mensajes'
+      fullPath: '/mensajes'
+      preLoaderRoute: typeof MensajesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ofertas': {
+      id: '/ofertas'
+      path: '/ofertas'
+      fullPath: '/ofertas'
+      preLoaderRoute: typeof OfertasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/publicar': {
+      id: '/publicar'
+      path: '/publicar'
+      fullPath: '/publicar'
+      preLoaderRoute: typeof PublicarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vender': {
+      id: '/vender'
+      path: '/vender'
+      fullPath: '/vender'
+      preLoaderRoute: typeof VenderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categorias/$categoriaSlug': {
+      id: '/categorias/$categoriaSlug'
+      path: '/$categoriaSlug'
+      fullPath: '/categorias/$categoriaSlug'
+      preLoaderRoute: typeof CategoriasCategoriaSlugRouteImport
+      parentRoute: typeof CategoriasRoute
     }
     '/productos/': {
       id: '/productos/'
@@ -175,8 +474,34 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface CategoriasRouteChildren {
+  CategoriasCategoriaSlugRoute: typeof CategoriasCategoriaSlugRoute
+}
+
+const CategoriasRouteChildren: CategoriasRouteChildren = {
+  CategoriasCategoriaSlugRoute: CategoriasCategoriaSlugRoute,
+}
+
+const CategoriasRouteWithChildren = CategoriasRoute._addFileChildren(
+  CategoriasRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  AuthRoute: AuthRoute,
+  AyudaRoute: AyudaRoute,
+  BuscarRoute: BuscarRoute,
+  CarritoRoute: CarritoRoute,
+  CategoriasRoute: CategoriasRouteWithChildren,
+  CheckoutRoute: CheckoutRoute,
+  CuentaRoute: CuentaRoute,
+  FavoritosRoute: FavoritosRoute,
+  LegalRoute: LegalRoute,
+  MensajesRoute: MensajesRoute,
+  OfertasRoute: OfertasRoute,
+  PublicarRoute: PublicarRoute,
+  VenderRoute: VenderRoute,
   ProductosProductoIdRoute: ProductosProductoIdRoute,
   ServiciosServicioIdRoute: ServiciosServicioIdRoute,
   TiendasTiendaIdRoute: TiendasTiendaIdRoute,

@@ -47,16 +47,14 @@ export function TituloSeccion({
   accion,
 }: {
   titulo: string;
-  descripcion?: string;
-  accion?: ReactNode;
+  descripcion?: string | undefined;
+  accion?: ReactNode | undefined;
 }) {
   return (
     <div className="mb-6 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
       <div className="min-w-0">
         <h2 className="text-xl font-bold sm:text-2xl">{titulo}</h2>
-        {descripcion ? (
-          <p className="mt-1 text-sm text-muted-foreground">{descripcion}</p>
-        ) : null}
+        {descripcion ? <p className="mt-1 text-sm text-muted-foreground">{descripcion}</p> : null}
       </div>
       {accion}
     </div>

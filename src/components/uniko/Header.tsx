@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
+import { useAuth } from "@/lib/auth";
 import { provincias } from "@/data/marketplace";
 
 const navegacion = [
@@ -25,9 +26,11 @@ const navegacion = [
 
 export function Header() {
   const navigate = useNavigate();
+  const { session, profile, loading, salir, isAdmin } = useAuth();
   const [abierto, setAbierto] = useState(false);
   const [consulta, setConsulta] = useState("");
   const [ubicacion, setUbicacion] = useState("Toda RD");
+  const autenticado = !loading && session;
 
   const buscar = (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,15 +113,46 @@ export function Header() {
                 0
               </span>
             </Link>
-            <Link
-              to="/auth"
-              className="ml-1 hidden text-sm font-semibold text-primary hover:underline lg:block"
-            >
-              Iniciar sesión
-            </Link>
-            <Link to="/auth" className="btn-base btn-brand ml-1 hidden px-4 py-2 text-sm lg:inline-flex">
-              Crear cuenta
-            </Link>
+            {autenticado ? (
+              <>
+                {isAdmin ? (
+                  <Link
+                    to="/admin"
+                    className="ml-1 hidden text-sm font-semibold text-brand hover:underline lg:block"
+                  >
+                    Admin
+                  </Link>
+                ) : null}
+                <Link
+                  to="/cuenta"
+                  className="ml-1 hidden max-w-[11rem] truncate text-sm font-semibold text-primary hover:underline lg:block"
+                >
+                  {profile?.full_name ?? profile?.email ?? "Mi cuenta"}
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => void salir()}
+                  className="btn-base btn-outline ml-1 hidden px-4 py-2 text-sm lg:inline-flex"
+                >
+                  Salir
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/auth"
+                  className="ml-1 hidden text-sm font-semibold text-primary hover:underline lg:block"
+                >
+                  Iniciar sesión
+                </Link>
+                <Link
+                  to="/auth"
+                  className="btn-base btn-brand ml-1 hidden px-4 py-2 text-sm lg:inline-flex"
+                >
+                  Crear cuenta
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -166,12 +200,29 @@ export function Header() {
             ))}
           </ul>
           <div className="mt-3 flex gap-2">
-            <Link to="/auth" className="btn-base btn-brand flex-1">
-              Crear cuenta
-            </Link>
-            <Link to="/auth" className="btn-base btn-outline flex-1">
-              Iniciar sesión
-            </Link>
+            {autenticado ? (
+              <>
+                <Link to="/cuenta" className="btn-base btn-outline flex-1">
+                  Mi cuenta
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => void salir()}
+                  className="btn-base btn-brand flex-1"
+                >
+                  Salir
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/auth" className="btn-base btn-brand flex-1">
+                  Crear cuenta
+                </Link>
+                <Link to="/auth" className="btn-base btn-outline flex-1">
+                  Iniciar sesión
+                </Link>
+              </>
+            )}
           </div>
         </nav>
       ) : null}

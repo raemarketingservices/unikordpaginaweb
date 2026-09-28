@@ -246,3 +246,39 @@
     background-color: oklch(1 0 0 / 24%);
   }
 }
+
+@utility input-uniko {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  outline: none;
+  transition: border-color 150ms ease;
+
+  &:focus {
+    border-color: var(--brand);
+  }
+
+  &::placeholder {
+    color: var(--muted-foreground);
+  }
+}
+
+@utility select-uniko {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  outline: none;
+  transition: border-color 150ms ease;
+
+  &:focus {
+    border-color: var(--brand);
+  }
+}
