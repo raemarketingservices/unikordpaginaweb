@@ -1,5 +1,6 @@
 FROM node:22-alpine AS build
 WORKDIR /app
+ENV NITRO_PRESET=node-server
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
