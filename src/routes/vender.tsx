@@ -5,6 +5,7 @@ import { Store, Upload } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { fetchCategorias, slugUnico, subirImagen } from "@/lib/queries";
+import { Checkbox } from "@/components/ui/checkbox";
 import { provincias } from "@/data/marketplace";
 import type { Categoria } from "@/data/marketplace";
 import type { StoreRow } from "@/lib/types";
@@ -39,6 +40,8 @@ function Vender() {
   const [ubicacion, setUbicacion] = useState("");
   const [logo, setLogo] = useState<File | null>(null);
   const [portada, setPortada] = useState<File | null>(null);
+  const [faltaConsentimiento, setFaltaConsentimiento] = useState(false);
+  const [aceptaNormas, setAceptaNormas] = useState(false);
   const [enviando, setEnviando] = useState(false);
 
   const categoriasVender = categorias.filter((c) => c.tipo !== "servicio");
@@ -57,7 +60,7 @@ function Vender() {
       supabase.from("stores").select("*").eq("owner_id", userId),
       supabase
         .from("profiles")
-        .select("first_name,last_name,full_name")
+        .select("first_name,last_name,full_name,terms_accepted_at")
         .eq("id", userId)
         .maybeSingle(),
     ]).then(([tiendas, perfil]) => {
@@ -67,7 +70,9 @@ function Vender() {
         first_name: string | null;
         last_name: string | null;
         full_name: string | null;
+        terms_accepted_at?: string | null;
       } | null;
+      if (p && !p.terms_accepted_at) setFaltaConsentimiento(true);
       const precargado =
         [p?.first_name, p?.last_name].filter(Boolean).join(" ").trim() ||
         (p?.full_name ?? "").trim();
@@ -95,6 +100,10 @@ function Vender() {
     }
     if (logo && !["image/png", "image/jpeg"].includes(logo.type)) {
       toast.error("El logo debe ser una imagen PNG o JPG.");
+      return;
+    }
+    if (faltaConsentimiento && !aceptaNormas) {
+      toast.error("Debes aceptar los Términos y las normas de venta para crear la tienda.");
       return;
     }
 
@@ -130,6 +139,17 @@ function Vender() {
         })
         .eq("id", session.user.id)
         .or("first_name.is.null,last_name.is.null");
+
+      if (faltaConsentimiento && aceptaNormas) {
+        await supabase
+          .from("profiles")
+          .update({
+            terms_accepted_at: new Date().toISOString(),
+            consent_version: "2026-09",
+          })
+          .eq("id", session.user.id)
+          .is("terms_accepted_at", null);
+      }
 
       toast.success("¡Tu tienda está lista!");
       router.history.push("/publicar");
@@ -339,12 +359,44 @@ function Vender() {
           </Campo>
         </div>
 
+        {faltaConsentimiento && (
+          <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-background p-4">
+            <Checkbox
+              checked={aceptaNormas}
+              onCheckedChange={(v) => setAceptaNormas(v === true)}
+              className="mt-0.5 shrink-0"
+            />
+            <span className="text-xs leading-relaxed text-muted-foreground">
+              He leído y acepto los{" "}
+              <Link
+                to="/legal/$doc"
+                params={{ doc: "terminos" }}
+                target="_blank"
+                className="font-semibold text-brand underline"
+              >
+                Términos y Condiciones
+              </Link>
+              , sus normas de venta y la{" "}
+              <Link
+                to="/legal/$doc"
+                params={{ doc: "privacidad" }}
+                target="_blank"
+                className="font-semibold text-brand underline"
+              >
+                Política de Privacidad
+              </Link>
+              .
+            </span>
+          </label>
+        )}
+
         <button type="submit" disabled={enviando} className="btn-base btn-brand">
           <Store className="h-4 w-4" />
           {enviando ? "Creando tu tienda…" : "Crear mi tienda"}
         </button>
         <p className="text-center text-xs text-muted-foreground">
-          Al crear tu tienda aceptas las normas de venta de UNIKO-RD.
+          Al crear tu tienda confirmas que la información es veraz y aceptas las normas de venta de
+          UNIKO-RD.
         </p>
       </form>
     </div>

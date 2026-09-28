@@ -1,10 +1,11 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { LogIn, Store, Upload, UserPlus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { fetchCategorias, slugUnico, subirImagen } from "@/lib/queries";
+import { Checkbox } from "@/components/ui/checkbox";
 import { provincias } from "@/data/marketplace";
 import type { Categoria } from "@/data/marketplace";
 
@@ -55,6 +56,8 @@ function Auth() {
   const [ubicacionTienda, setUbicacionTienda] = useState("");
   const [descripcionTienda, setDescripcionTienda] = useState("");
   const [logoTienda, setLogoTienda] = useState<File | null>(null);
+  const [aceptaTerminos, setAceptaTerminos] = useState(false);
+  const [aceptaMarketing, setAceptaMarketing] = useState(false);
   const [enviando, setEnviando] = useState(false);
 
   const destino = redirect ?? "/";
@@ -92,6 +95,10 @@ function Auth() {
       toast.error("Indica tus nombres y apellidos.");
       return;
     }
+    if (!aceptaTerminos) {
+      toast.error("Debes aceptar los Términos y la Política de Privacidad para crear tu cuenta.");
+      return;
+    }
     if (tipoCuenta === "vendedor") {
       if (nombreTienda.trim().length < 3) {
         toast.error("Escribe el nombre de tu tienda.");
@@ -112,6 +119,7 @@ function Auth() {
     }
     setEnviando(true);
     const nombreCompleto = `${nombres.trim()} ${apellidos.trim()}`.trim();
+    const ahora = new Date().toISOString();
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
@@ -123,6 +131,10 @@ function Auth() {
           cedula: cedula.trim(),
           phone: telefono.trim(),
           account_type: tipoCuenta === "vendedor" ? "vendor" : "user",
+          terms_accepted_at: ahora,
+          privacy_accepted_at: ahora,
+          marketing_accepted_at: aceptaMarketing ? ahora : null,
+          consent_version: "2026-09",
         },
       },
     });
@@ -468,6 +480,51 @@ function Auth() {
                 autoComplete="new-password"
               />
             </Campo>
+
+            <div className="grid gap-3 rounded-2xl border border-border bg-background p-4">
+              <label className="flex cursor-pointer items-start gap-3">
+                <Checkbox
+                  checked={aceptaTerminos}
+                  onCheckedChange={(v) => setAceptaTerminos(v === true)}
+                  className="mt-0.5 shrink-0"
+                />
+                <span className="text-xs leading-relaxed text-muted-foreground">
+                  He leído y acepto los{" "}
+                  <Link
+                    to="/legal/$doc"
+                    params={{ doc: "terminos" }}
+                    target="_blank"
+                    className="font-semibold text-brand underline"
+                  >
+                    Términos y Condiciones
+                  </Link>{" "}
+                  y la{" "}
+                  <Link
+                    to="/legal/$doc"
+                    params={{ doc: "privacidad" }}
+                    target="_blank"
+                    className="font-semibold text-brand underline"
+                  >
+                    Política de Privacidad y Protección de Datos Personales
+                  </Link>{" "}
+                  (Ley 158-13), y consiento el tratamiento de mis datos para crear y gestionar mi
+                  cuenta.
+                </span>
+              </label>
+              <label className="flex cursor-pointer items-start gap-3">
+                <Checkbox
+                  checked={aceptaMarketing}
+                  onCheckedChange={(v) => setAceptaMarketing(v === true)}
+                  className="mt-0.5 shrink-0"
+                />
+                <span className="text-xs leading-relaxed text-muted-foreground">
+                  Acepto recibir ofertas, novedades y promociones de UNIKO-RD por correo.{" "}
+                  <span className="font-semibold">Opcional</span>: puedes revocarlo cuando quieras
+                  escribiéndonos.
+                </span>
+              </label>
+            </div>
+
             <button type="submit" disabled={enviando} className="btn-base btn-brand">
               <UserPlus className="h-4 w-4" />
               {enviando
@@ -480,7 +537,42 @@ function Auth() {
         )}
 
         <p className="mt-5 text-center text-xs text-muted-foreground">
-          Al continuar aceptas los términos y condiciones de UNIKO-RD.
+          {tab === "entrar" ? (
+            <>
+              Al entrar aceptas los{" "}
+              <Link
+                to="/legal/$doc"
+                params={{ doc: "terminos" }}
+                target="_blank"
+                className="font-semibold text-brand underline"
+              >
+                Términos
+              </Link>{" "}
+              y la{" "}
+              <Link
+                to="/legal/$doc"
+                params={{ doc: "privacidad" }}
+                target="_blank"
+                className="font-semibold text-brand underline"
+              >
+                Política de Privacidad
+              </Link>
+              .
+            </>
+          ) : (
+            <>
+              Tus datos se tratan conforme a nuestra{" "}
+              <Link
+                to="/legal/$doc"
+                params={{ doc: "privacidad" }}
+                target="_blank"
+                className="font-semibold text-brand underline"
+              >
+                Política de Privacidad
+              </Link>
+              .
+            </>
+          )}
         </p>
       </div>
     </div>

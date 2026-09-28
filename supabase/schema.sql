@@ -58,7 +58,10 @@ security definer
 set search_path = public, pg_temp
 as $$
 begin
-  insert into public.profiles (id, email, full_name, first_name, last_name, phone, cedula, role)
+  insert into public.profiles (
+    id, email, full_name, first_name, last_name, phone, cedula, role,
+    terms_accepted_at, privacy_accepted_at, marketing_accepted_at, consent_version
+  )
   values (
     new.id,
     new.email,
@@ -67,7 +70,11 @@ begin
     new.raw_user_meta_data ->> 'last_name',
     new.raw_user_meta_data ->> 'phone',
     new.raw_user_meta_data ->> 'cedula',
-    case when new.raw_user_meta_data ->> 'account_type' = 'vendor' then 'vendor' else 'user' end
+    case when new.raw_user_meta_data ->> 'account_type' = 'vendor' then 'vendor' else 'user' end,
+    nullif(new.raw_user_meta_data ->> 'terms_accepted_at', '')::timestamptz,
+    nullif(new.raw_user_meta_data ->> 'privacy_accepted_at', '')::timestamptz,
+    nullif(new.raw_user_meta_data ->> 'marketing_accepted_at', '')::timestamptz,
+    nullif(new.raw_user_meta_data ->> 'consent_version', '')
   )
   on conflict (id) do nothing;
   return new;
@@ -143,6 +150,10 @@ create table public.profiles (
   phone text,
   role text not null default 'user' check (role in ('user', 'vendor', 'admin')),
   avatar_url text,
+  terms_accepted_at timestamptz,
+  privacy_accepted_at timestamptz,
+  marketing_accepted_at timestamptz,
+  consent_version text,
   created_at timestamptz not null default now()
 );
 

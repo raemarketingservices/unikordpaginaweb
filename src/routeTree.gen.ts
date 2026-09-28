@@ -19,12 +19,13 @@ import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CuentaRouteImport } from './routes/cuenta'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
-import { Route as LegalRouteImport } from './routes/legal'
 import { Route as MensajesRouteImport } from './routes/mensajes'
 import { Route as OfertasRouteImport } from './routes/ofertas'
 import { Route as PublicarRouteImport } from './routes/publicar'
 import { Route as VenderRouteImport } from './routes/vender'
 import { Route as CategoriasCategoriaSlugRouteImport } from './routes/categorias.$categoriaSlug'
+import { Route as LegalIndexRouteImport } from './routes/legal.index'
+import { Route as LegalDocRouteImport } from './routes/legal.$doc'
 import { Route as ProductosIndexRouteImport } from './routes/productos.index'
 import { Route as ProductosProductoIdRouteImport } from './routes/productos.$productoId'
 import { Route as ServiciosIndexRouteImport } from './routes/servicios.index'
@@ -82,11 +83,6 @@ const FavoritosRoute = FavoritosRouteImport.update({
   path: '/favoritos',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LegalRoute = LegalRouteImport.update({
-  id: '/legal',
-  path: '/legal',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MensajesRoute = MensajesRouteImport.update({
   id: '/mensajes',
   path: '/mensajes',
@@ -111,6 +107,16 @@ const CategoriasCategoriaSlugRoute = CategoriasCategoriaSlugRouteImport.update({
   id: '/$categoriaSlug',
   path: '/$categoriaSlug',
   getParentRoute: () => CategoriasRoute,
+} as any)
+const LegalIndexRoute = LegalIndexRouteImport.update({
+  id: '/legal/',
+  path: '/legal/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalDocRoute = LegalDocRouteImport.update({
+  id: '/legal/$doc',
+  path: '/legal/$doc',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ProductosIndexRoute = ProductosIndexRouteImport.update({
   id: '/productos/',
@@ -154,15 +160,16 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/cuenta': typeof CuentaRoute
   '/favoritos': typeof FavoritosRoute
-  '/legal': typeof LegalRoute
   '/mensajes': typeof MensajesRoute
   '/ofertas': typeof OfertasRoute
   '/publicar': typeof PublicarRoute
   '/vender': typeof VenderRoute
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
+  '/legal/$doc': typeof LegalDocRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
+  '/legal/': typeof LegalIndexRoute
   '/productos/': typeof ProductosIndexRoute
   '/servicios/': typeof ServiciosIndexRoute
   '/tiendas/': typeof TiendasIndexRoute
@@ -178,15 +185,16 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/cuenta': typeof CuentaRoute
   '/favoritos': typeof FavoritosRoute
-  '/legal': typeof LegalRoute
   '/mensajes': typeof MensajesRoute
   '/ofertas': typeof OfertasRoute
   '/publicar': typeof PublicarRoute
   '/vender': typeof VenderRoute
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
+  '/legal/$doc': typeof LegalDocRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
+  '/legal': typeof LegalIndexRoute
   '/productos': typeof ProductosIndexRoute
   '/servicios': typeof ServiciosIndexRoute
   '/tiendas': typeof TiendasIndexRoute
@@ -203,15 +211,16 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/cuenta': typeof CuentaRoute
   '/favoritos': typeof FavoritosRoute
-  '/legal': typeof LegalRoute
   '/mensajes': typeof MensajesRoute
   '/ofertas': typeof OfertasRoute
   '/publicar': typeof PublicarRoute
   '/vender': typeof VenderRoute
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
+  '/legal/$doc': typeof LegalDocRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
+  '/legal/': typeof LegalIndexRoute
   '/productos/': typeof ProductosIndexRoute
   '/servicios/': typeof ServiciosIndexRoute
   '/tiendas/': typeof TiendasIndexRoute
@@ -229,15 +238,16 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/cuenta'
     | '/favoritos'
-    | '/legal'
     | '/mensajes'
     | '/ofertas'
     | '/publicar'
     | '/vender'
     | '/categorias/$categoriaSlug'
+    | '/legal/$doc'
     | '/productos/$productoId'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
+    | '/legal/'
     | '/productos/'
     | '/servicios/'
     | '/tiendas/'
@@ -253,15 +263,16 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/cuenta'
     | '/favoritos'
-    | '/legal'
     | '/mensajes'
     | '/ofertas'
     | '/publicar'
     | '/vender'
     | '/categorias/$categoriaSlug'
+    | '/legal/$doc'
     | '/productos/$productoId'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
+    | '/legal'
     | '/productos'
     | '/servicios'
     | '/tiendas'
@@ -277,15 +288,16 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/cuenta'
     | '/favoritos'
-    | '/legal'
     | '/mensajes'
     | '/ofertas'
     | '/publicar'
     | '/vender'
     | '/categorias/$categoriaSlug'
+    | '/legal/$doc'
     | '/productos/$productoId'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
+    | '/legal/'
     | '/productos/'
     | '/servicios/'
     | '/tiendas/'
@@ -302,14 +314,15 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   CuentaRoute: typeof CuentaRoute
   FavoritosRoute: typeof FavoritosRoute
-  LegalRoute: typeof LegalRoute
   MensajesRoute: typeof MensajesRoute
   OfertasRoute: typeof OfertasRoute
   PublicarRoute: typeof PublicarRoute
   VenderRoute: typeof VenderRoute
+  LegalDocRoute: typeof LegalDocRoute
   ProductosProductoIdRoute: typeof ProductosProductoIdRoute
   ServiciosServicioIdRoute: typeof ServiciosServicioIdRoute
   TiendasTiendaIdRoute: typeof TiendasTiendaIdRoute
+  LegalIndexRoute: typeof LegalIndexRoute
   ProductosIndexRoute: typeof ProductosIndexRoute
   ServiciosIndexRoute: typeof ServiciosIndexRoute
   TiendasIndexRoute: typeof TiendasIndexRoute
@@ -387,13 +400,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FavoritosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/legal': {
-      id: '/legal'
-      path: '/legal'
-      fullPath: '/legal'
-      preLoaderRoute: typeof LegalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/mensajes': {
       id: '/mensajes'
       path: '/mensajes'
@@ -428,6 +434,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/categorias/$categoriaSlug'
       preLoaderRoute: typeof CategoriasCategoriaSlugRouteImport
       parentRoute: typeof CategoriasRoute
+    }
+    '/legal/': {
+      id: '/legal/'
+      path: '/legal'
+      fullPath: '/legal/'
+      preLoaderRoute: typeof LegalIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/$doc': {
+      id: '/legal/$doc'
+      path: '/legal/$doc'
+      fullPath: '/legal/$doc'
+      preLoaderRoute: typeof LegalDocRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/productos/': {
       id: '/productos/'
@@ -497,14 +517,15 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   CuentaRoute: CuentaRoute,
   FavoritosRoute: FavoritosRoute,
-  LegalRoute: LegalRoute,
   MensajesRoute: MensajesRoute,
   OfertasRoute: OfertasRoute,
   PublicarRoute: PublicarRoute,
   VenderRoute: VenderRoute,
+  LegalDocRoute: LegalDocRoute,
   ProductosProductoIdRoute: ProductosProductoIdRoute,
   ServiciosServicioIdRoute: ServiciosServicioIdRoute,
   TiendasTiendaIdRoute: TiendasTiendaIdRoute,
+  LegalIndexRoute: LegalIndexRoute,
   ProductosIndexRoute: ProductosIndexRoute,
   ServiciosIndexRoute: ServiciosIndexRoute,
   TiendasIndexRoute: TiendasIndexRoute,

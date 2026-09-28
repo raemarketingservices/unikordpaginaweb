@@ -42,9 +42,10 @@ const columnas = [
   {
     titulo: "Legal",
     enlaces: [
-      { label: "Términos y condiciones", to: "/legal" as const },
-      { label: "Privacidad", to: "/legal" as const },
-      { label: "Política de cookies", to: "/legal" as const },
+      { label: "Términos y condiciones", doc: "terminos" },
+      { label: "Privacidad", doc: "privacidad" },
+      { label: "Política de cookies", doc: "cookies" },
+      { label: "Aviso de comercio electrónico", doc: "aviso" },
     ],
   },
 ];
@@ -80,12 +81,22 @@ export function Footer() {
               <ul className="mt-3 space-y-2">
                 {col.enlaces.map((e) => (
                   <li key={e.label}>
-                    <Link
-                      to={e.to}
-                      className="text-sm opacity-80 hover:opacity-100 hover:underline"
-                    >
-                      {e.label}
-                    </Link>
+                    {"doc" in e ? (
+                      <Link
+                        to="/legal/$doc"
+                        params={{ doc: e.doc }}
+                        className="text-sm opacity-80 hover:opacity-100 hover:underline"
+                      >
+                        {e.label}
+                      </Link>
+                    ) : (
+                      <Link
+                        to={e.to}
+                        className="text-sm opacity-80 hover:opacity-100 hover:underline"
+                      >
+                        {e.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

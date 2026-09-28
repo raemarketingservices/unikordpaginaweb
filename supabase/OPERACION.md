@@ -81,14 +81,33 @@ Por eso `VITE_SUPABASE_URL` es `https://uniko-rd.com`: el navegador habla con
 Supabase por el mismo origen, asi no hay contenido mixto ni CORS. Los builds de
 produccion deben usar ese valor (`.env.local` ya lo trae).
 
-Para desplegar una nueva version:
+Despliegue automatico (vigente desde 2026-09-28):
+
+1. `git push origin main` desde cualquier equipo.
+2. GitHub entrega el push a `https://uniko-rd.com/webhooks/source/github/events/manual`
+   (firma HMAC con el secret del webhook, guardado en la app de Coolify como
+   `manual_webhook_secret_github`).
+3. Coolify reconstruye la imagen con el `Dockerfile` (multi-stage con
+   `NITRO_PRESET=node-server`) y redespliega el recurso `unikord-web`
+   (proyecto `unikord` / environment `production`), que sirve
+   `https://uniko-rd.com` y `https://www.uniko-rd.com`.
+
+El stack manual `/opt/uniko-rd` quedo en parada y funciona como rollback:
+`cd /opt/uniko-rd && docker compose up -d --build`.
+
+Migraciones incrementales de BD (aplicar antes del push correspondiente):
+`docker exec -i supabase-db psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -f - < supabase/migration_vN.sql`.
+La `migration_v6.sql` (consentimientos de registro, Ley 158-13) ya esta
+aplicada.
+
+Despliegue manual (solo como alternativa al automatico):
 
 1. `VITE_SUPABASE_URL=https://uniko-rd.com NITRO_PRESET=node-server npm run build`
 2. `tar --exclude='.output/public/_libs' -czf uniko-deploy.tar.gz .output`
 3. Subir el paquete con `scripts/vps-upload.py` (requiere `VPS_PASS` en el
    entorno; la contrasena nunca se guarda en el repo).
 4. En el VPS: `cd /opt/uniko-rd && rm -rf .output && tar -xzf
-   /root/uniko-deploy.tar.gz && docker compose up -d --build`. El `rm -rf`
+/root/uniko-deploy.tar.gz && docker compose up -d --build`. El `rm -rf`
    evita arrastrar assets de builds anteriores.
 
 El contenedor sirve el build Nitro standalone con Node 22, publicado en el
