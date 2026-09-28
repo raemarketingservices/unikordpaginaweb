@@ -1520,3 +1520,9 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Despliegue
+
+El sitio se sirve desde Coolify (recurso `unikord-web`) en `https://uniko-rd.com` y `https://www.uniko-rd.com`.
+
+- Cada `git push` a `main` dispara el webhook de GitHub hacia Coolify, que reconstruye y redespliega automaticamente.- Build de produccion: Docker multi-stage con `NITRO_PRESET=node-server` (ver `Dockerfile`).
