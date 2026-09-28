@@ -23,6 +23,9 @@ comment on table public.purchase_requests is
 
 alter table public.purchase_requests enable row level security;
 
+-- el checkout funciona sin sesión (invitado), por eso anon necesita INSERT
+grant insert on public.purchase_requests to anon;
+
 drop policy if exists purchase_requests_insert on public.purchase_requests;
 create policy purchase_requests_insert
   on public.purchase_requests

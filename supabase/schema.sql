@@ -259,12 +259,31 @@ insert into public.chatbot_settings (id, greeting)
 values ('default', '¡Hola! Soy UNIKO, el asistente de UNIKO-RD. Pregúntame por productos, precios, ofertas o tiendas.')
 on conflict (id) do nothing;
 
+-- purchase_requests: solicitudes de compra del checkout (web y app Android).
+-- El comprador envía sus datos de contacto; el admin coordina entrega/pago.
+create table if not exists public.purchase_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users (id) on delete set null,
+  full_name text not null,
+  address text not null,
+  phone text not null,
+  email text not null,
+  cedula text,
+  note text,
+  items jsonb not null default '[]'::jsonb,
+  total numeric,
+  source text not null default 'web',
+  status text not null default 'pendiente',
+  created_at timestamptz not null default now()
+);
+
 create index page_blocks_page_position_idx on public.page_blocks (page, position);
 create index products_store_idx on public.products (store_id);
 create index products_category_idx on public.products (category);
 create index products_sku_idx on public.products (sku);
 create index services_category_idx on public.services (category);
 create index stores_owner_idx on public.stores (owner_id);
+create index purchase_requests_created_idx on public.purchase_requests (created_at desc);
 
 create or replace function public.is_admin()
 returns boolean
@@ -312,6 +331,8 @@ create trigger touch_chatbot_settings
 grant usage on schema public to anon, authenticated;
 grant select on all tables in schema public to anon, authenticated;
 grant insert, update, delete on all tables in schema public to authenticated;
+-- invitados (checkout sin sesión) pueden crear solicitudes de compra
+grant insert on public.purchase_requests to anon;
 grant usage, select on all sequences in schema public to anon, authenticated;
 
 -- ------------------------------------------------------------
@@ -463,6 +484,21 @@ create policy "chatbot_settings_admin_update" on public.chatbot_settings
   for update to authenticated
   using (coalesce(public.is_admin(), false))
   with check (coalesce(public.is_admin(), false));
+
+-- purchase_requests: cualquiera (incluido invitado) puede enviar una solicitud;
+-- solo el admin puede leerlas. Ojo: leer la fila de vuelta (returning/select)
+-- exige la política SELECT, por eso el checkout no hace .select().
+alter table public.purchase_requests enable row level security;
+
+create policy "purchase_requests_insert" on public.purchase_requests
+  for insert to anon, authenticated with check (true);
+
+create policy "purchase_requests_select_admin" on public.purchase_requests
+  for select to authenticated
+  using (exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  ));
 
 -- ------------------------------------------------------------
 -- 7. Bucket de almacenamiento (imágenes)
