@@ -1525,4 +1525,16 @@ npm run dev
 
 El sitio se sirve desde Coolify (recurso `unikord-web`) en `https://uniko-rd.com` y `https://www.uniko-rd.com`.
 
-- Cada `git push` a `main` dispara el webhook de GitHub hacia Coolify, que reconstruye y redespliega automaticamente.- Build de produccion: Docker multi-stage con `NITRO_PRESET=node-server` (ver `Dockerfile`).
+- Cada `git push` a `main` dispara el webhook de GitHub hacia Coolify, que reconstruye y redespliega automaticamente.
+- Build de produccion: Docker multi-stage con `NITRO_PRESET=node-server` (ver `Dockerfile`).
+- Las variables de secreto (`META_WA_*`) se guardan cifradas en Coolify y se
+  inyectan en runtime; nunca van en el repositorio.
+
+## Ordenes y WhatsApp
+
+- `/ordenes`: panel del vendedor con sus ordenes por tienda (lectura y cambio
+  de `status` gobernados por RLS, `supabase/migration_v8.sql`).
+- `POST /api/whatsapp/avisar`: aviso al vendedor de una compra nueva y al
+  comprador de un cambio de estado.
+- `GET|POST /api/whatsapp/webhook`: verificacion de Meta y respuestas
+  automaticas dentro de la ventana de 24 h.
