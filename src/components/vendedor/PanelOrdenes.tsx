@@ -56,10 +56,7 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
 
     const [resTiendas, resOrdenes] = await Promise.all([
       supabase.from("stores").select("id, name").eq("owner_id", userId),
-      supabase
-        .from("purchase_requests")
-        .select("*")
-        .order("created_at", { ascending: false }),
+      supabase.from("purchase_requests").select("*").order("created_at", { ascending: false }),
     ]);
 
     if (resTiendas.error) console.error(resTiendas.error);
@@ -77,8 +74,7 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
 
   const misNombres = new Set(tiendas.map((t) => t.name));
 
-  const itemsMios = (o: Orden) =>
-    (o.items ?? []).filter((it) => misNombres.has(it.tienda ?? ""));
+  const itemsMios = (o: Orden) => (o.items ?? []).filter((it) => misNombres.has(it.tienda ?? ""));
 
   const cambiarEstado = async (o: Orden, nuevo: string) => {
     const { error } = await supabase
@@ -91,9 +87,7 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
       return;
     }
 
-    setOrdenes((lista) =>
-      lista.map((x) => (x.id === o.id ? { ...x, status: nuevo } : x)),
-    );
+    setOrdenes((lista) => lista.map((x) => (x.id === o.id ? { ...x, status: nuevo } : x)));
     setDetalle((d) => (d && d.id === o.id ? { ...d, status: nuevo } : d));
     toast.success(`Orden ${o.id.slice(0, 8)} → ${nuevo}`);
 
@@ -112,13 +106,10 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
     }
   };
 
-  const visibles =
-    filtro === "todas" ? ordenes : ordenes.filter((o) => o.status === filtro);
+  const visibles = filtro === "todas" ? ordenes : ordenes.filter((o) => o.status === filtro);
 
   const pendientes = ordenes.filter((o) => o.status === "pendiente").length;
-  const confirmadas = ordenes.filter((o) =>
-    ["confirmada", "enviada"].includes(o.status),
-  ).length;
+  const confirmadas = ordenes.filter((o) => ["confirmada", "enviada"].includes(o.status)).length;
   const totalVentas = ordenes
     .filter((o) => o.status !== "cancelada")
     .reduce((suma, o) => suma + (Number(o.total) || 0), 0);
@@ -134,9 +125,7 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl font-bold">
-          Órdenes {modo === "admin" ? "(admin)" : ""}
-        </h2>
+        <h2 className="text-xl font-bold">Órdenes {modo === "admin" ? "(admin)" : ""}</h2>
         <button className="btn-outline" onClick={() => void cargar()} type="button">
           Actualizar
         </button>
@@ -173,11 +162,7 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
             key={e}
             type="button"
             onClick={() => setFiltro(e)}
-            className={
-              filtro === e
-                ? "btn-base btn-brand"
-                : "btn-outline"
-            }
+            className={filtro === e ? "btn-base btn-brand" : "btn-outline"}
           >
             {e === "todas" ? "Todas" : e}
           </button>
@@ -217,9 +202,7 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
                 const mios = itemsMios(o);
                 const resumen =
                   mios.length > 0
-                    ? `${mios.length} × ${mios[0]?.titulo ?? ""}${
-                        mios.length > 1 ? " …" : ""
-                      }`
+                    ? `${mios.length} × ${mios[0]?.titulo ?? ""}${mios.length > 1 ? " …" : ""}`
                     : `${(o.items ?? []).length} ítems`;
 
                 return (
@@ -249,11 +232,7 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
                       </select>
                     </td>
                     <td className="p-3 text-right">
-                      <button
-                        type="button"
-                        className="btn-outline"
-                        onClick={() => setDetalle(o)}
-                      >
+                      <button type="button" className="btn-outline" onClick={() => setDetalle(o)}>
                         Ver detalle
                       </button>
                     </td>
@@ -269,18 +248,12 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
           <div className="card-uniko max-h-[85vh] w-full max-w-lg overflow-y-auto p-6">
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-lg font-bold">
-                  Orden #{detalle.id.slice(0, 8)}
-                </h3>
+                <h3 className="text-lg font-bold">Orden #{detalle.id.slice(0, 8)}</h3>
                 <p className="text-xs text-muted-foreground">
                   {formatearFecha(detalle.created_at)} · {detalle.status}
                 </p>
               </div>
-              <button
-                type="button"
-                className="btn-outline"
-                onClick={() => setDetalle(null)}
-              >
+              <button type="button" className="btn-outline" onClick={() => setDetalle(null)}>
                 Cerrar
               </button>
             </div>
@@ -330,7 +303,9 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
                   >
                     <div className="flex justify-between gap-3">
                       <span className="font-medium">{it.titulo ?? "Producto"}</span>
-                      <span>{formatearRD((Number(it.precio) || 0) * (Number(it.cantidad) || 1))}</span>
+                      <span>
+                        {formatearRD((Number(it.precio) || 0) * (Number(it.cantidad) || 1))}
+                      </span>
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {it.tienda ?? "Tienda"} · {Number(it.cantidad) || 1} u.

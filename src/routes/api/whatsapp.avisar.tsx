@@ -13,8 +13,7 @@ export const Route = createFileRoute("/api/whatsapp/avisar")({
 
         const role = body?.role;
         const nombre = typeof body?.nombre === "string" ? body.nombre.trim() : "";
-        const telefono =
-          typeof body?.telefono === "string" ? body.telefono.trim() : "";
+        const telefono = typeof body?.telefono === "string" ? body.telefono.trim() : "";
         const total = Number(body?.total) || 0;
         const estado = typeof body?.estado === "string" ? body.estado.trim() : "";
         const tiendas: string[] = Array.isArray(body?.tiendas)
@@ -47,22 +46,19 @@ export const Route = createFileRoute("/api/whatsapp/avisar")({
           const destino = normalizar(para);
           if (!destino) return { ok: false, motivo: "telefono invalido" };
           try {
-            const res = await fetch(
-              `https://graph.facebook.com/v20.0/${phoneId}/messages`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  messaging_product: "whatsapp",
-                  to: destino,
-                  type: "text",
-                  text: { body: texto },
-                }),
+            const res = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
               },
-            );
+              body: JSON.stringify({
+                messaging_product: "whatsapp",
+                to: destino,
+                type: "text",
+                text: { body: texto },
+              }),
+            });
             const textoRes = await res.text();
             if (!res.ok) {
               console.error("Meta API", res.status, textoRes);
@@ -92,9 +88,7 @@ export const Route = createFileRoute("/api/whatsapp/avisar")({
             `Total: ${formatearRD(total)}\n` +
             `Tienda${tiendas.length > 1 ? "s" : ""}: ${tiendas.join(", ") || "-"}\n` +
             "Gestionala desde tu panel de Ordenes en UNIKO-RD.";
-          const resultados = await Promise.all(
-            telefonos.map((t) => enviar(t, texto)),
-          );
+          const resultados = await Promise.all(telefonos.map((t) => enviar(t, texto)));
           const enviados = resultados.filter((r) => r.ok).length;
           return Response.json({
             ok: enviados > 0,
@@ -122,9 +116,7 @@ async function vendedoresDeTiendas(tiendas: string[]): Promise<string[]> {
   if (!tiendas.length) return [];
   const { createClient } = await import("@supabase/supabase-js");
   const url =
-    process.env["SUPABASE_URL"] ??
-    process.env["VITE_SUPABASE_URL"] ??
-    "https://uniko-rd.com";
+    process.env["SUPABASE_URL"] ?? process.env["VITE_SUPABASE_URL"] ?? "https://uniko-rd.com";
   const key =
     process.env["SUPABASE_PUBLISHABLE_KEY"] ??
     process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ??

@@ -13,6 +13,6 @@ export const Route = createFileRoute("/ordenes")({
           Volver a la tienda
         </Link>
       </div>
-    )
+    );
   },
-})
+});

@@ -39,9 +39,7 @@ export const Route = createFileRoute("/api/whatsapp/webhook")({
           .replace(/^0/, "");
 
         const texto =
-          mensaje.type === "text" && mensaje.text?.body
-            ? String(mensaje.text.body)
-            : "";
+          mensaje.type === "text" && mensaje.text?.body ? String(mensaje.text.body) : "";
 
         // Auto-respuesta segun palabras clave (solo dentro de la ventana de 24h).
         const bajo = texto.toLowerCase().trim();
@@ -52,32 +50,30 @@ export const Route = createFileRoute("/api/whatsapp/webhook")({
           respuesta = "Hola! Gracias por escribir a UNIKO-RD. En que podemos ayudarte?";
         } else if (bajo.includes("precio") || bajo.includes("cuanto")) {
           respuesta = "Los precios varian segun el producto. Cuentanos que buscas y te ayudamos.";
-        } else if (bajo.includes("orden") || bajo.includes("pedido") ||bajo.includes("compra")) {
+        } else if (bajo.includes("orden") || bajo.includes("pedido") || bajo.includes("compra")) {
           respuesta = "Recibimos tu mensaje sobre tu orden. Un vendedor te contactara pronto.";
         } else if (bajo.includes("estado")) {
-          respuesta = "Para ver el estado de tu orden entra a UNIKO-RD/ordenes o responde con tu numero de orden.";
+          respuesta =
+            "Para ver el estado de tu orden entra a UNIKO-RD/ordenes o responde con tu numero de orden.";
         } else {
           respuesta = "Gracias por escribirnos. Pronto te respondemos.";
         }
 
         if (respuesta && phoneId && token && senderPhone) {
           try {
-            const res = await fetch(
-              `https://graph.facebook.com/v20.0/${phoneId}/messages`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  messaging_product: "whatsapp",
-                  to: senderPhone,
-                  type: "text",
-                  text: { body: respuesta },
-                }),
+            const res = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
               },
-            );
+              body: JSON.stringify({
+                messaging_product: "whatsapp",
+                to: senderPhone,
+                type: "text",
+                text: { body: respuesta },
+              }),
+            });
             if (!res.ok) {
               console.error("Meta API auto-respuesta", res.status, await res.text());
             }
