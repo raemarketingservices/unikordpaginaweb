@@ -24,6 +24,14 @@ denormaliza en la tienda). Se aplico con
 `docker exec -i supabase-db psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -f - < migration_v5.sql`
 y luego `notify pgrst, 'reload schema';` para que PostgREST publique la columna.
 
+La migracion v7 crea `purchase_requests` (checkout de web y app) y la v8 agrega
+`purchase_requests.store_ids text[]` con indice GIN, las politicas RLS del
+vendedor (leer sus ordenes y actualizar solo `status`), el backfill de
+`store_ids` por el nombre de tienda guardado en `items` y la funcion
+`public.tienda_contactos(nombres text[])`, que con `security definer` devuelve
+solo los telefonos de los dueños de las tiendas consultadas (se usa desde el
+servidor para avisar por WhatsApp). Ambas ya estan aplicadas en produccion.
+
 ## Flujos
 
 - `/auth?modo=crear`: cuenta de usuario o tienda. Si se elige "Tienda" el
@@ -114,6 +122,31 @@ El contenedor sirve el build Nitro standalone con Node 22, publicado en el
 puerto 8090 del host y con `restart: unless-stopped`. Supabase sigue en sus
 puertos propios (8000); la app le habla desde el navegador y desde el SSR a
 traves del mismo dominio.
+
+## Ordenes por vendedor y bot de WhatsApp
+
+`/ordenes` (tambien desde `/vender` y `/cuenta`) muestra el panel
+`PanelOrdenes`: carga las tiendas del usuario (`stores.owner_id`) y sus
+`purchase_requests`; el filtrado real lo hace el RLS de `migration_v8.sql`, de
+modo que cada vendedor solo ve y edita las ordenes que incluyen alguna de sus
+tiendas. El estado se cambia solo con `status` (grant de columna) y cada
+cambio dispara un aviso al comprador.
+
+El bot usa la Meta Cloud API (numero `+1 849-627-9994`, negocio "Aqui RD"):
+
+- `GET /api/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=...&hub.challenge=...`
+  responde el challenge. El verify token es `META_WA_VERIFY_TOKEN`.
+- `POST /api/whatsapp/webhook` responde automaticamente mensajes de texto
+  (hola, precio, orden, estado) dentro de la ventana de 24 h.
+- `POST /api/whatsapp/avisar` recibe `{role, nombre, telefono, total,
+  tiendas?|estado?}`. Con `role=buyer` resuelve los telefonos de los vendedores
+  con `tienda_contactos` y les avisa de la compra; con `role=seller` avisa al
+  comprador del cambio de estado. El checkout lo llama tras insertar la orden.
+
+Las variables `META_WA_PHONE_NUMBER_ID`, `META_WA_TOKEN` y
+`META_WA_VERIFY_TOKEN` viven en Coolify (recurso `unikord-web`), no en el repo;
+Coolify las guarda cifradas con `APP_KEY` y las inyecta en runtime, por eso el
+servidor las lee con `process.env["META_WA_*"]`.
 
 ## Desarrollo y pruebas
 
