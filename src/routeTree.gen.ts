@@ -21,6 +21,7 @@ import { Route as CuentaRouteImport } from './routes/cuenta'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as MensajesRouteImport } from './routes/mensajes'
 import { Route as OfertasRouteImport } from './routes/ofertas'
+import { Route as OrdenesRouteImport } from './routes/ordenes'
 import { Route as PublicarRouteImport } from './routes/publicar'
 import { Route as VenderRouteImport } from './routes/vender'
 import { Route as CategoriasCategoriaSlugRouteImport } from './routes/categorias.$categoriaSlug'
@@ -32,6 +33,8 @@ import { Route as ServiciosIndexRouteImport } from './routes/servicios.index'
 import { Route as ServiciosServicioIdRouteImport } from './routes/servicios.$servicioId'
 import { Route as TiendasIndexRouteImport } from './routes/tiendas.index'
 import { Route as TiendasTiendaIdRouteImport } from './routes/tiendas.$tiendaId'
+import { Route as ApiWhatsappAvisarRouteImport } from './routes/api/whatsapp.avisar'
+import { Route as ApiWhatsappWebhookRouteImport } from './routes/api/whatsapp.webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -93,6 +96,11 @@ const OfertasRoute = OfertasRouteImport.update({
   path: '/ofertas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrdenesRoute = OrdenesRouteImport.update({
+  id: '/ordenes',
+  path: '/ordenes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PublicarRoute = PublicarRouteImport.update({
   id: '/publicar',
   path: '/publicar',
@@ -148,6 +156,16 @@ const TiendasTiendaIdRoute = TiendasTiendaIdRouteImport.update({
   path: '/tiendas/$tiendaId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWhatsappAvisarRoute = ApiWhatsappAvisarRouteImport.update({
+  id: '/api/whatsapp/avisar',
+  path: '/api/whatsapp/avisar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWhatsappWebhookRoute = ApiWhatsappWebhookRouteImport.update({
+  id: '/api/whatsapp/webhook',
+  path: '/api/whatsapp/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -162,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
   '/ofertas': typeof OfertasRoute
+  '/ordenes': typeof OrdenesRoute
   '/publicar': typeof PublicarRoute
   '/vender': typeof VenderRoute
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
@@ -173,6 +192,8 @@ export interface FileRoutesByFullPath {
   '/productos/': typeof ProductosIndexRoute
   '/servicios/': typeof ServiciosIndexRoute
   '/tiendas/': typeof TiendasIndexRoute
+  '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
+  '/api/whatsapp/webhook': typeof ApiWhatsappWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -187,6 +208,7 @@ export interface FileRoutesByTo {
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
   '/ofertas': typeof OfertasRoute
+  '/ordenes': typeof OrdenesRoute
   '/publicar': typeof PublicarRoute
   '/vender': typeof VenderRoute
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
@@ -198,6 +220,8 @@ export interface FileRoutesByTo {
   '/productos': typeof ProductosIndexRoute
   '/servicios': typeof ServiciosIndexRoute
   '/tiendas': typeof TiendasIndexRoute
+  '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
+  '/api/whatsapp/webhook': typeof ApiWhatsappWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -213,6 +237,7 @@ export interface FileRoutesById {
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
   '/ofertas': typeof OfertasRoute
+  '/ordenes': typeof OrdenesRoute
   '/publicar': typeof PublicarRoute
   '/vender': typeof VenderRoute
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
@@ -224,6 +249,8 @@ export interface FileRoutesById {
   '/productos/': typeof ProductosIndexRoute
   '/servicios/': typeof ServiciosIndexRoute
   '/tiendas/': typeof TiendasIndexRoute
+  '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
+  '/api/whatsapp/webhook': typeof ApiWhatsappWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -240,6 +267,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/mensajes'
     | '/ofertas'
+    | '/ordenes'
     | '/publicar'
     | '/vender'
     | '/categorias/$categoriaSlug'
@@ -251,6 +279,8 @@ export interface FileRouteTypes {
     | '/productos/'
     | '/servicios/'
     | '/tiendas/'
+    | '/api/whatsapp/avisar'
+    | '/api/whatsapp/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -265,6 +295,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/mensajes'
     | '/ofertas'
+    | '/ordenes'
     | '/publicar'
     | '/vender'
     | '/categorias/$categoriaSlug'
@@ -276,6 +307,8 @@ export interface FileRouteTypes {
     | '/productos'
     | '/servicios'
     | '/tiendas'
+    | '/api/whatsapp/avisar'
+    | '/api/whatsapp/webhook'
   id:
     | '__root__'
     | '/'
@@ -290,6 +323,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/mensajes'
     | '/ofertas'
+    | '/ordenes'
     | '/publicar'
     | '/vender'
     | '/categorias/$categoriaSlug'
@@ -301,6 +335,8 @@ export interface FileRouteTypes {
     | '/productos/'
     | '/servicios/'
     | '/tiendas/'
+    | '/api/whatsapp/avisar'
+    | '/api/whatsapp/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -316,6 +352,7 @@ export interface RootRouteChildren {
   FavoritosRoute: typeof FavoritosRoute
   MensajesRoute: typeof MensajesRoute
   OfertasRoute: typeof OfertasRoute
+  OrdenesRoute: typeof OrdenesRoute
   PublicarRoute: typeof PublicarRoute
   VenderRoute: typeof VenderRoute
   LegalDocRoute: typeof LegalDocRoute
@@ -326,6 +363,8 @@ export interface RootRouteChildren {
   ProductosIndexRoute: typeof ProductosIndexRoute
   ServiciosIndexRoute: typeof ServiciosIndexRoute
   TiendasIndexRoute: typeof TiendasIndexRoute
+  ApiWhatsappAvisarRoute: typeof ApiWhatsappAvisarRoute
+  ApiWhatsappWebhookRoute: typeof ApiWhatsappWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -414,6 +453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OfertasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ordenes': {
+      id: '/ordenes'
+      path: '/ordenes'
+      fullPath: '/ordenes'
+      preLoaderRoute: typeof OrdenesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/publicar': {
       id: '/publicar'
       path: '/publicar'
@@ -491,6 +537,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TiendasTiendaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/whatsapp/avisar': {
+      id: '/api/whatsapp/avisar'
+      path: '/api/whatsapp/avisar'
+      fullPath: '/api/whatsapp/avisar'
+      preLoaderRoute: typeof ApiWhatsappAvisarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/whatsapp/webhook': {
+      id: '/api/whatsapp/webhook'
+      path: '/api/whatsapp/webhook'
+      fullPath: '/api/whatsapp/webhook'
+      preLoaderRoute: typeof ApiWhatsappWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -519,6 +579,7 @@ const rootRouteChildren: RootRouteChildren = {
   FavoritosRoute: FavoritosRoute,
   MensajesRoute: MensajesRoute,
   OfertasRoute: OfertasRoute,
+  OrdenesRoute: OrdenesRoute,
   PublicarRoute: PublicarRoute,
   VenderRoute: VenderRoute,
   LegalDocRoute: LegalDocRoute,
@@ -529,6 +590,8 @@ const rootRouteChildren: RootRouteChildren = {
   ProductosIndexRoute: ProductosIndexRoute,
   ServiciosIndexRoute: ServiciosIndexRoute,
   TiendasIndexRoute: TiendasIndexRoute,
+  ApiWhatsappAvisarRoute: ApiWhatsappAvisarRoute,
+  ApiWhatsappWebhookRoute: ApiWhatsappWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

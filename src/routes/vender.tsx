@@ -227,6 +227,9 @@ function Vender() {
             >
               Ver mi tienda
             </Link>
+            <Link to="/ordenes" className="btn-outline">
+              Órdenes
+            </Link>
           </div>
         </div>
       </div>

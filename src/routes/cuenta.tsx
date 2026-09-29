@@ -273,6 +273,9 @@ function Cuenta() {
         <Link to="/publicar" className="btn-base btn-brand">
           Publicar producto
         </Link>
+        <Link to="/ordenes" className="btn-outline">
+          Órdenes
+        </Link>
       </div>
 
       {isAdmin && (

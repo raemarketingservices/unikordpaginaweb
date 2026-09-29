@@ -68,6 +68,13 @@ function CheckoutPagina() {
 
     setEnviando(true);
     try {
+      const nombresTiendas = [...new Set(items.map((i) => i.tienda).filter(Boolean))];
+      const { data: tiendasRows } = await supabase
+        .from("stores")
+        .select("id, name")
+        .in("name", nombresTiendas);
+      const storeIds = (tiendasRows ?? []).map((t) => t.id as string);
+
       const { error } = await supabase.from("purchase_requests").insert({
         full_name: nombre.trim(),
         address: direccion.trim(),
@@ -82,6 +89,7 @@ function CheckoutPagina() {
           precio: i.precio,
           cantidad: i.cantidad,
         })),
+        store_ids: storeIds,
         total,
         source: "web",
         user_id: session?.user.id ?? null,
@@ -90,6 +98,19 @@ function CheckoutPagina() {
       setEnviado(true);
       vaciar();
       toast.success("¡Solicitud de compra enviada!");
+
+      // Aviso WhatsApp a los vendedores (mejor esfuerzo, no bloquea la compra)
+      void fetch("/api/whatsapp/avisar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: "buyer",
+          nombre: nombre.trim(),
+          telefono: telefono.trim(),
+          total,
+          tiendas: nombresTiendas,
+        }),
+      }).catch(() => undefined);
     } catch (err) {
       toast.error(
         err instanceof Error
