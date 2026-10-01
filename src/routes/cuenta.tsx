@@ -273,7 +273,7 @@ function Cuenta() {
         <Link to="/publicar" className="btn-base btn-brand">
           Publicar producto
         </Link>
-        <Link to="/ordenes" className="btn-outline">
+        <Link to="/ordenes" className="btn-base btn-outline">
           Órdenes
         </Link>
       </div>
