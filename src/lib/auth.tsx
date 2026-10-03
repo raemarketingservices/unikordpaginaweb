@@ -1,6 +1,9 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
+import { LOCAL_CATALOG } from "./local-catalog";
+import { currentLocalUser, isLocalAdmin, signOutLocal, signOutLocalAdmin } from "./local-db";
+import { api, CLOUDFLARE_API, cloudCurrentProfile, cloudLogout } from "./cloudflare";
 import type { ProfileRow } from "./types";
 
 type AuthState = {
@@ -10,6 +13,7 @@ type AuthState = {
   isAdmin: boolean;
   refrescarPerfil: () => Promise<void>;
   salir: () => Promise<void>;
+  refreshLocal: () => void;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -17,7 +21,8 @@ const AuthContext = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!LOCAL_CATALOG);
+  const [localAdmin, setLocalAdmin] = useState(false);
   const ultimaCarga = useRef<string | null>(null);
 
   const cargarPerfil = async (s: Session | null) => {
@@ -30,6 +35,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    if (LOCAL_CATALOG) {
+      const refresh = () => {
+        const user = currentLocalUser();
+        setProfile(user);
+        setSession(user ? ({ user: { id: user.id, email: user.email } } as Session) : null);
+        setLocalAdmin(isLocalAdmin());
+      };
+      refresh();
+      window.addEventListener("unikord:changed", refresh);
+      return () => window.removeEventListener("unikord:changed", refresh);
+    }
+    if (CLOUDFLARE_API) {
+      let active = true;
+      cloudCurrentProfile().then((p) => {
+        if (!active) return;
+        setProfile(p);
+        setSession(p ? ({ user: { id: p.id, email: p.email } } as Session) : null);
+        setLoading(false);
+      }).catch(() => setLoading(false));
+      return () => { active = false; };
+    }
     let activo = true;
 
     supabase.auth
@@ -68,12 +94,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     profile,
     loading,
-    isAdmin: profile?.role === "admin",
+    isAdmin: LOCAL_CATALOG ? localAdmin : profile?.role === "admin",
     refrescarPerfil: async () => {
-      await cargarPerfil(session);
+      if (LOCAL_CATALOG) setProfile(currentLocalUser());
+      else if (CLOUDFLARE_API) setProfile(await cloudCurrentProfile());
+      else await cargarPerfil(session);
     },
     salir: async () => {
-      await supabase.auth.signOut();
+      if (LOCAL_CATALOG) {
+        signOutLocal();
+        signOutLocalAdmin();
+        setSession(null);
+        setProfile(null);
+        setLocalAdmin(false);
+      } else if (CLOUDFLARE_API) {
+        await cloudLogout();
+        setSession(null);
+        setProfile(null);
+      } else await supabase.auth.signOut();
+    },
+    refreshLocal: () => {
+      const user = currentLocalUser();
+      setProfile(user);
+      setSession(user ? ({ user: { id: user.id, email: user.email } } as Session) : null);
+      setLocalAdmin(isLocalAdmin());
+      if (CLOUDFLARE_API) void cloudCurrentProfile().then((p) => {
+        setProfile(p);
+        setSession(p ? ({ user: { id: p.id, email: p.email } } as Session) : null);
+      });
     },
   };
 

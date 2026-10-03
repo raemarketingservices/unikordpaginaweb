@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { Search, Store, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { fetchTiendasAdmin, fetchPerfilesAdmin } from "@/lib/queries";
+import { api, CLOUDFLARE_API } from "@/lib/cloudflare";
 import type { StoreRow, ProfileRow } from "@/lib/types";
 import {
   AlertDialog,
@@ -57,10 +58,11 @@ export function GestionTiendas() {
     if (!tienda) return;
     const valor = !tienda[campo];
     setGuardandoId(id);
-    const { error } = await supabase
-      .from("stores")
-      .update({ [campo]: valor })
-      .eq("id", id);
+    let error: Error | null = null;
+    try {
+      if (CLOUDFLARE_API) await api(`/api/admin/stores/${id}`, { method: "PATCH", body: JSON.stringify({ [campo]: valor }) });
+      else { const result = await supabase.from("stores").update({ [campo]: valor }).eq("id", id); if (result.error) error = new Error(result.error.message); }
+    } catch (err) { error = err instanceof Error ? err : new Error("No se pudo guardar."); }
     setGuardandoId(null);
     if (error) {
       toast.error(error.message);
@@ -75,8 +77,8 @@ export function GestionTiendas() {
     if (!ids.length || eliminando) return;
     setEliminando(true);
     try {
-      const { error } = await supabase.from("stores").delete().in("id", ids);
-      if (error) throw new Error(error.message);
+      if (CLOUDFLARE_API) await Promise.all(ids.map((id) => api(`/api/admin/stores/${id}`, { method: "DELETE" })));
+      else { const { error } = await supabase.from("stores").delete().in("id", ids); if (error) throw new Error(error.message); }
       setTiendas((prev) => (prev ? prev.filter((t) => !ids.includes(t.id)) : prev));
       toast.success(
         ids.length === 1
@@ -96,8 +98,8 @@ export function GestionTiendas() {
     if (!tiendas?.length || eliminando) return;
     setEliminando(true);
     try {
-      const { error } = await supabase.from("stores").delete().neq("id", "");
-      if (error) throw new Error(error.message);
+      if (CLOUDFLARE_API) await Promise.all((tiendas ?? []).map((store) => api(`/api/admin/stores/${store.id}`, { method: "DELETE" })));
+      else { const { error } = await supabase.from("stores").delete().neq("id", ""); if (error) throw new Error(error.message); }
       setTiendas([]);
       toast.success("Todas las tiendas fueron eliminadas.");
     } catch (err) {

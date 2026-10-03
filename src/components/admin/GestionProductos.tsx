@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Package, Search } from "lucide-react";
+import { Package, Search, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { fetchProductosAdmin } from "@/lib/queries";
 import type { ProductWithStoreRow } from "@/lib/types";
+import { api, CLOUDFLARE_API } from "@/lib/cloudflare";
 
 export function GestionProductos() {
   const [productos, setProductos] = useState<ProductWithStoreRow[] | null>(null);
@@ -41,10 +42,11 @@ export function GestionProductos() {
     if (!producto) return;
     const valor = !producto[campo];
     setGuardandoId(id);
-    const { error } = await supabase
-      .from("products")
-      .update({ [campo]: valor })
-      .eq("id", id);
+    let error: Error | null = null;
+    try {
+      if (CLOUDFLARE_API) await api(`/api/admin/products/${id}`, { method: "PATCH", body: JSON.stringify({ [campo]: valor }) });
+      else { const result = await supabase.from("products").update({ [campo]: valor }).eq("id", id); if (result.error) error = new Error(result.error.message); }
+    } catch (err) { error = err instanceof Error ? err : new Error("No se pudo guardar."); }
     setGuardandoId(null);
     if (error) {
       toast.error(error.message);
@@ -88,12 +90,13 @@ export function GestionProductos() {
               <th className="py-2 pr-3">Verificado</th>
               <th className="py-2 pr-3">Destacado</th>
               <th className="py-2">Más vendido</th>
+              <th className="py-2">Acción</th>
             </tr>
           </thead>
           <tbody>
             {filtrados.length === 0 && (
               <tr>
-                <td colSpan={8} className="py-8 text-center text-muted-foreground">
+                <td colSpan={9} className="py-8 text-center text-muted-foreground">
                   Sin resultados para “{busqueda}”.
                 </td>
               </tr>
@@ -147,6 +150,15 @@ export function GestionProductos() {
                     className="rounded border-border accent-brand"
                   />
                 </td>
+                <td className="py-2.5"><button type="button" title="Eliminar producto" className="btn-base btn-outline px-2" onClick={async () => {
+                  if (!window.confirm(`¿Eliminar ${p.title}?`)) return;
+                  try {
+                    if (CLOUDFLARE_API) await api(`/api/admin/products/${p.id}`, { method: "DELETE" });
+                    else { const { error } = await supabase.from("products").delete().eq("id", p.id); if (error) throw new Error(error.message); }
+                    setProductos((prev) => prev?.filter((item) => item.id !== p.id) ?? []);
+                    toast.success("Producto eliminado.");
+                  } catch (err) { toast.error(err instanceof Error ? err.message : "No se pudo eliminar el producto."); }
+                }}><Trash2 className="h-4 w-4" /></button></td>
               </tr>
             ))}
           </tbody>

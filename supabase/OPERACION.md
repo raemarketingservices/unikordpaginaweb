@@ -1,5 +1,15 @@
 # UNIKO-RD: Supabase
 
+## Catalogo local sin Supabase
+
+Para desarrollo sin acceso al servidor, `.env.development.local` contiene
+`VITE_LOCAL_CATALOG=true`. Se usan los datos de ejemplo de
+`src/data/marketplace.ts` para inicio, busqueda, productos, tiendas, servicios
+y chatbot. No es una recuperacion de cuentas ni una copia actual de la base
+de datos. El acceso y registro de cuentas quedan desactivados en este modo.
+Para reconectar, cambiar esa variable a `false` y reiniciar Vite con una URL
+de Supabase accesible. Las credenciales existentes no se modifican.
+
 La aplicacion usa Auth, Postgres y Storage del VPS configurado en `.env.local`.
 El navegador solo recibe `VITE_SUPABASE_URL` y la clave publica
 `VITE_SUPABASE_PUBLISHABLE_KEY`. No colocar claves secretas en variables VITE.

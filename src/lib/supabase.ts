@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { LOCAL_CATALOG } from "./local-catalog";
 
 const SUPABASE_URL = import.meta.env["VITE_SUPABASE_URL"] ?? "https://uniko-rd.com";
 const SUPABASE_PUBLISHABLE_KEY =
@@ -7,8 +8,8 @@ const SUPABASE_PUBLISHABLE_KEY =
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
+    persistSession: !LOCAL_CATALOG,
+    autoRefreshToken: !LOCAL_CATALOG,
+    detectSessionInUrl: !LOCAL_CATALOG,
   },
 });

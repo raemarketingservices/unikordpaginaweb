@@ -4,6 +4,9 @@ import { toast } from "sonner";
 import { LogOut, Key, Settings, Mail, Shield, Camera, Save, User } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
+import { LOCAL_CATALOG } from "@/lib/local-catalog";
+import { getLocalData, localFileUrl, saveLocalData } from "@/lib/local-db";
+import { api, CLOUDFLARE_API, cloudUpload } from "@/lib/cloudflare";
 import { subirImagen } from "@/lib/queries";
 
 export const Route = createFileRoute("/cuenta")({
@@ -47,6 +50,19 @@ function Cuenta() {
       return;
     }
     setCambiandoPw(true);
+    if (LOCAL_CATALOG) {
+      toast.error("El cambio de contraseña requiere reconectar el servidor.");
+      setCambiandoPw(false);
+      return;
+    }
+    if (CLOUDFLARE_API) {
+      try {
+        await api("/api/auth/password", { method: "POST", body: JSON.stringify({ password: pw1 }) });
+        toast.success("Contraseña actualizada."); setPw1(""); setPw2("");
+      } catch (err) { toast.error(err instanceof Error ? err.message : "No se pudo cambiar la contraseña."); }
+      finally { setCambiandoPw(false); }
+      return;
+    }
     const { error } = await supabase.auth.updateUser({ password: pw1 });
     setCambiandoPw(false);
     if (error) toast.error(error.message);
@@ -66,6 +82,29 @@ function Cuenta() {
     }
     setGuardando(true);
     try {
+      if (LOCAL_CATALOG) {
+        const data = getLocalData();
+        const user = data.users.find((u) => u.id === session.user.id);
+        if (!user) throw new Error("No encontramos tu cuenta local.");
+        user.first_name = nombres.trim(); user.last_name = apellidos.trim();
+        user.full_name = `${nombres.trim()} ${apellidos.trim()}`;
+        user.cedula = cedula.trim() || null; user.phone = telefono.trim() || null;
+        if (avatar) user.avatar_url = await localFileUrl(avatar);
+        data.stores.forEach((s) => { if (data.storeOwners[s.id] === user.id) s.propietario = user.full_name ?? ""; });
+        saveLocalData(data);
+        await refrescarPerfil();
+        setAvatar(null);
+        toast.success("Perfil actualizado.");
+        return;
+      }
+      if (CLOUDFLARE_API) {
+        const avatarUrl = avatar ? await cloudUpload(avatar) : profile?.avatar_url ?? "";
+        await api("/api/profile", { method: "PATCH", body: JSON.stringify({
+          first_name: nombres, last_name: apellidos, cedula, phone: telefono, avatar_url: avatarUrl,
+        }) });
+        await refrescarPerfil(); setAvatar(null); toast.success("Perfil actualizado.");
+        return;
+      }
       let avatarUrl = profile?.avatar_url ?? null;
       if (avatar) avatarUrl = await subirImagen(avatar, session.user.id);
 

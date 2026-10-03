@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Store, Upload } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { LOCAL_CATALOG } from "@/lib/local-catalog";
+import { createLocalStore, getLocalData, localFileUrl } from "@/lib/local-db";
+import { api, CLOUDFLARE_API, cloudUpload } from "@/lib/cloudflare";
 import { useAuth } from "@/lib/auth";
 import { fetchCategorias, slugUnico, subirImagen } from "@/lib/queries";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -28,7 +31,7 @@ export const Route = createFileRoute("/vender")({
 function Vender() {
   const { categorias } = Route.useLoaderData();
   const router = useRouter();
-  const { session, loading } = useAuth();
+  const { session, profile, loading } = useAuth();
 
   const [misTiendas, setMisTiendas] = useState<StoreRow[] | null>(null);
   const [cargandoTiendas, setCargandoTiendas] = useState(true);
@@ -56,6 +59,22 @@ function Vender() {
     }
     let activo = true;
     setCargandoTiendas(true);
+    if (LOCAL_CATALOG) {
+      const data = getLocalData();
+      const owned = data.stores.filter((s) => data.storeOwners[s.id] === userId);
+      setMisTiendas(owned.map((s) => ({ id: s.id, name: s.nombre } as StoreRow)));
+      setCargandoTiendas(false);
+      return;
+    }
+    if (CLOUDFLARE_API) {
+      api<StoreRow[]>("/api/stores").then((all) => {
+        if (!activo) return;
+        setMisTiendas(all.filter((s) => s.owner_id === userId));
+        setPropietario((v) => v || profile?.full_name || "");
+        setCargandoTiendas(false);
+      }).catch(() => { if (activo) setCargandoTiendas(false); });
+      return () => { activo = false; };
+    }
     Promise.all([
       supabase.from("stores").select("*").eq("owner_id", userId),
       supabase
@@ -82,7 +101,7 @@ function Vender() {
     return () => {
       activo = false;
     };
-  }, [userId]);
+  }, [userId, profile?.full_name]);
 
   const crear = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,6 +128,28 @@ function Vender() {
 
     setEnviando(true);
     try {
+      if (LOCAL_CATALOG) {
+        const logoUrl = logo ? await localFileUrl(logo) : "";
+        const portadaUrl = portada ? await localFileUrl(portada) : logoUrl;
+        createLocalStore({ id: slugUnico(nombre), nombre: nombre.trim(), propietario: dueno,
+          rnc: rnc.trim(), descripcion: descripcion.trim(), categoria: cat?.nombre ?? "",
+          ubicacion, logo: logoUrl, portada: portadaUrl, verificado: false, destacado: false,
+          rating: 0, resenas: 0, seguidores: 0, productos: 0 }, session.user.id);
+        await router.invalidate();
+        toast.success("¡Tu tienda está lista!");
+        router.history.push("/publicar");
+        return;
+      }
+      if (CLOUDFLARE_API) {
+        const logoUrl = logo ? await cloudUpload(logo) : "";
+        const coverUrl = portada ? await cloudUpload(portada) : logoUrl;
+        await api("/api/stores", { method: "POST", body: JSON.stringify({ name: nombre, rnc,
+          description: descripcion, category: cat?.nombre, location: ubicacion, logo: logoUrl, cover: coverUrl }) });
+        await router.invalidate();
+        toast.success("¡Tu tienda está lista!");
+        router.history.push("/publicar");
+        return;
+      }
       let logoUrl: string | null = null;
       let portadaUrl: string | null = null;
       if (logo) logoUrl = await subirImagen(logo, session.user.id);

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UNIKO-RD · Todo lo que buscas. En un solo lugar.</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white">
+  <header class="sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-3">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="text-xl font-bold text-red-600">UNIKO-RD</div>
+      <nav class="hidden md:flex gap-8 text-sm font-medium">
+        <a href="#" class="text-red-600">Inicio</a>
+        <a href="#" class="text-gray-600">Productos</a>
+        <a href="#" class="text-gray-600">Tiendas</a>
+        <a href="#" class="text-gray-600">Categorías</a>
+      </nav>
+      <div class="flex gap-2">
+        <button class="px-4 py-2 text-red-600 font-medium">Iniciar sesión</button>
+        <button class="px-4 py-2 bg-red-600 text-white rounded-full font-medium">Crear cuenta</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="bg-gradient-to-r from-blue-900 to-blue-800 text-white py-20 px-4">
+    <div class="max-w-7xl mx-auto text-center">
+      <h1 class="text-5xl font-bold mb-4">Todo lo que buscas</h1>
+      <p class="text-xl mb-8 text-blue-100">En un solo lugar. Productos, servicios y oportunidades en toda República Dominicana.</p>
+      <div class="flex gap-4 justify-center">
+        <button class="px-8 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">Explorar</button>
+        <button class="px-8 py-3 bg-white text-blue-900 rounded-lg font-medium hover:bg-gray-100">Vender</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 px-4 max-w-7xl mx-auto">
+    <h2 class="text-3xl font-bold mb-8">Categorías</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="p-4 border rounded-lg hover:shadow-lg cursor-pointer text-center">
+        <div class="text-4xl mb-2">⚡</div>
+        <div class="font-medium">Electrónica</div>
+      </div>
+      <div class="p-4 border rounded-lg hover:shadow-lg cursor-pointer text-center">
+        <div class="text-4xl mb-2">👕</div>
+        <div class="font-medium">Ropa</div>
+      </div>
+      <div class="p-4 border rounded-lg hover:shadow-lg cursor-pointer text-center">
+        <div class="text-4xl mb-2">🏠</div>
+        <div class="font-medium">Hogar</div>
+      </div>
+      <div class="p-4 border rounded-lg hover:shadow-lg cursor-pointer text-center">
+        <div class="text-4xl mb-2">🍕</div>
+        <div class="font-medium">Comida</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 px-4 max-w-7xl mx-auto bg-gray-50">
+    <h2 class="text-3xl font-bold mb-8">Tiendas Destacadas</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-lg p-4 border">
+        <div class="h-24 bg-gradient-to-r from-blue-400 to-blue-600 rounded mb-3"></div>
+        <div class="text-lg font-bold">TechDom</div>
+        <div class="text-sm text-gray-600 mb-2">Electrónica y gadgets</div>
+        <div class="flex items-center gap-2">
+          <span class="text-yellow-500">★★★★★</span>
+          <span class="text-sm">4.8 (142 reseñas)</span>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg p-4 border">
+        <div class="h-24 bg-gradient-to-r from-pink-400 to-pink-600 rounded mb-3"></div>
+        <div class="text-lg font-bold">Moda RD</div>
+        <div class="text-sm text-gray-600 mb-2">Ropa y accesorios</div>
+        <div class="flex items-center gap-2">
+          <span class="text-yellow-500">★★★★☆</span>
+          <span class="text-sm">4.6 (89 reseñas)</span>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg p-4 border">
+        <div class="h-24 bg-gradient-to-r from-orange-400 to-orange-600 rounded mb-3"></div>
+        <div class="text-lg font-bold">Delicias RD</div>
+        <div class="text-sm text-gray-600 mb-2">Comida dominicana</div>
+        <div class="flex items-center gap-2">
+          <span class="text-yellow-500">★★★★★</span>
+          <span class="text-sm">4.9 (203 reseñas)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 px-4 max-w-7xl mx-auto">
+    <h2 class="text-3xl font-bold mb-8">Lo Más Vendido</h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="bg-white rounded-lg border overflow-hidden hover:shadow-lg">
+        <div class="h-40 bg-gradient-to-br from-gray-300 to-gray-400"></div>
+        <div class="p-3">
+          <div class="font-medium text-sm">iPhone 15 Pro</div>
+          <div class="text-red-600 font-bold mt-1">$119,999</div>
+          <div class="text-yellow-500 text-sm mt-1">★★★★★</div>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg border overflow-hidden hover:shadow-lg">
+        <div class="h-40 bg-gradient-to-br from-blue-300 to-blue-400"></div>
+        <div class="p-3">
+          <div class="font-medium text-sm">Samsung S24</div>
+          <div class="text-red-600 font-bold mt-1">$89,999</div>
+          <div class="text-yellow-500 text-sm mt-1">★★★★☆</div>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg border overflow-hidden hover:shadow-lg">
+        <div class="h-40 bg-gradient-to-br from-pink-300 to-pink-400"></div>
+        <div class="p-3">
+          <div class="font-medium text-sm">Vestido Verano</div>
+          <div class="text-red-600 font-bold mt-1">$2,500</div>
+          <div class="text-yellow-500 text-sm mt-1">★★★★★</div>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg border overflow-hidden hover:shadow-lg">
+        <div class="h-40 bg-gradient-to-br from-orange-300 to-orange-400"></div>
+        <div class="p-3">
+          <div class="font-medium text-sm">Bandeja Paisa</div>
+          <div class="text-red-600 font-bold mt-1">$450</div>
+          <div class="text-yellow-500 text-sm mt-1">★★★★★</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-blue-900 text-white py-12 px-4">
+    <div class="max-w-7xl mx-auto grid grid-cols-5 gap-8 text-sm">
+      <div>
+        <div class="font-bold mb-3">UNIKO-RD</div>
+        <div class="text-blue-200">Todo lo que buscas. En un solo lugar.</div>
+      </div>
+      <div>
+        <div class="font-bold mb-3">Comprar</div>
+        <div class="text-blue-200">Productos</div>
+        <div class="text-blue-200">Servicios</div>
+      </div>
+      <div>
+        <div class="font-bold mb-3">Vender</div>
+        <div class="text-blue-200">Crear tienda</div>
+        <div class="text-blue-200">Publicar</div>
+      </div>
+      <div>
+        <div class="font-bold mb-3">Ayuda</div>
+        <div class="text-blue-200">Contacto</div>
+        <div class="text-blue-200">Preguntas</div>
+      </div>
+      <div>
+        <div class="font-bold mb-3">Legal</div>
+        <div class="text-blue-200">Términos</div>
+        <div class="text-blue-200">Privacidad</div>
+      </div>
+    </div>
+    <div class="max-w-7xl mx-auto mt-8 pt-8 border-t border-blue-800 text-center text-blue-300 text-sm">
+      © 2026 UNIKO-RD. Todos los derechos reservados.
+    </div>
+  </footer>
+</body>
+</html>

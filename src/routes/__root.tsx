@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth";
+import { LOCAL_CATALOG } from "@/lib/local-catalog";
 import { CartProvider } from "@/lib/cart";
 import { Toaster } from "@/components/ui/sonner";
 import { Header } from "@/components/uniko/Header";
@@ -80,6 +81,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  ssr: false,
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -137,6 +139,10 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  useEffect(() => {
+    if (LOCAL_CATALOG) void router.invalidate();
+  }, [router]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -144,6 +150,15 @@ function RootComponent() {
         <CartProvider>
           <div className="flex min-h-screen flex-col bg-background">
             <Header />
+            {LOCAL_CATALOG && (
+              <p
+                role="status"
+                className="border-b border-border bg-muted px-4 py-2 text-center text-sm"
+              >
+                Modo local de prueba · Sin conexión a Supabase. Cuentas y publicaciones se guardan
+                solo en este navegador; los datos de ejemplo pueden estar desactualizados.
+              </p>
+            )}
             <main className="flex-1">
               {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
               <Outlet />

@@ -1,4 +1,7 @@
 import { supabase } from "./supabase";
+import { LOCAL_CATALOG } from "./local-catalog";
+import { getLocalData, updateLocalData } from "./local-db";
+import { api, CLOUDFLARE_API } from "./cloudflare";
 import type {
   CategoriaRow,
   ChatbotSettingsRow,
@@ -19,6 +22,12 @@ function fallo(message: string): never {
 function mapCategoria(c: CategoriaRow): Categoria {
   const tipo: Categoria["tipo"] = c.tipo === "producto" || c.tipo === "servicio" ? c.tipo : "ambos";
   return { slug: c.id, nombre: c.name, icono: c.icon ?? "Package", tipo };
+}
+
+function asArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
+  if (typeof value === "string") { try { return asArray(JSON.parse(value)); } catch { return []; } }
+  return [];
 }
 
 function mapProducto(r: ProductWithStoreRow): Producto {
@@ -42,8 +51,10 @@ function mapProducto(r: ProductWithStoreRow): Producto {
   if (r.store_id) p.tiendaId = r.store_id;
   if (r.sku) p.sku = r.sku;
   if (r.description) p.descripcion = r.description;
-  if (r.gallery && r.gallery.length) p.galeria = r.gallery;
-  if (r.videos && r.videos.length) p.videos = r.videos;
+  const gallery = asArray(r.gallery);
+  const videos = asArray(r.videos);
+  if (gallery.length) p.galeria = gallery;
+  if (videos.length) p.videos = videos;
   return p;
 }
 
@@ -89,6 +100,8 @@ function mapTienda(r: StoreRow): Tienda {
 // --- Fetchers públicos ----------------------------------------------
 
 export async function fetchCategorias(): Promise<Categoria[]> {
+  if (LOCAL_CATALOG) return getLocalData().categories;
+  if (CLOUDFLARE_API) return (await api<CategoriaRow[]>("/api/categories")).map(mapCategoria);
   const { data, error } = await supabase
     .from("categories")
     .select("id,name,icon,tipo,position")
@@ -98,6 +111,15 @@ export async function fetchCategorias(): Promise<Categoria[]> {
 }
 
 export async function fetchProductos(): Promise<Producto[]> {
+  if (LOCAL_CATALOG) return getLocalData().products;
+  if (CLOUDFLARE_API) {
+    const [products, stores] = await Promise.all([api<ProductRow[]>("/api/products"), api<StoreRow[]>("/api/stores")]);
+    return products.map((product) => mapProducto({ ...product,
+      gallery: asArray(product.gallery), videos: asArray(product.videos),
+      stores: { name: stores.find((store) => store.id === product.store_id)?.name,
+        verified: stores.find((store) => store.id === product.store_id)?.verified },
+    }));
+  }
   const { data, error } = await supabase
     .from("products")
     .select("*, stores(name, verified)")
@@ -107,6 +129,8 @@ export async function fetchProductos(): Promise<Producto[]> {
 }
 
 export async function fetchServicios(): Promise<Servicio[]> {
+  if (LOCAL_CATALOG) return getLocalData().services;
+  if (CLOUDFLARE_API) return (await api<ServiceRow[]>("/api/services")).map(mapServicio);
   const { data, error } = await supabase
     .from("services")
     .select("*")
@@ -116,6 +140,8 @@ export async function fetchServicios(): Promise<Servicio[]> {
 }
 
 export async function fetchTiendas(): Promise<Tienda[]> {
+  if (LOCAL_CATALOG) return getLocalData().stores;
+  if (CLOUDFLARE_API) return (await api<StoreRow[]>("/api/stores")).map(mapTienda);
   const { data, error } = await supabase
     .from("stores")
     .select("*")
@@ -125,6 +151,8 @@ export async function fetchTiendas(): Promise<Tienda[]> {
 }
 
 export async function fetchBloquesHome(): Promise<PageBlockRow[]> {
+  if (LOCAL_CATALOG) return [];
+  if (CLOUDFLARE_API) return (await api<PageBlockRow[]>("/api/page-blocks")).filter((b) => b.enabled);
   const { data, error } = await supabase
     .from("page_blocks")
     .select("*")
@@ -136,6 +164,8 @@ export async function fetchBloquesHome(): Promise<PageBlockRow[]> {
 }
 
 export async function fetchTodosBloques(): Promise<PageBlockRow[]> {
+  if (LOCAL_CATALOG) return [];
+  if (CLOUDFLARE_API) return api<PageBlockRow[]>("/api/page-blocks");
   const { data, error } = await supabase
     .from("page_blocks")
     .select("*")
@@ -228,6 +258,11 @@ export function generarSku(): string {
 // --- Ratings de tiendas ----------------------------------------------
 
 export async function fetchMiRating(storeId: string, userId: string): Promise<number | null> {
+  if (LOCAL_CATALOG) return getLocalData().ratings[`${storeId}:${userId}`] ?? null;
+  if (CLOUDFLARE_API) {
+    const row = await api<{ rating?: number } | null>(`/api/ratings?store_id=${encodeURIComponent(storeId)}`);
+    return row?.rating ?? null;
+  }
   const { data, error } = await supabase
     .from("store_ratings")
     .select("rating")
@@ -243,6 +278,19 @@ export async function guardarRating(
   userId: string,
   rating: number,
 ): Promise<void> {
+  if (LOCAL_CATALOG) {
+    updateLocalData((data) => {
+      data.ratings[`${storeId}:${userId}`] = rating;
+      const scores = Object.entries(data.ratings).filter(([key]) => key.startsWith(`${storeId}:`)).map(([, value]) => value);
+      const store = data.stores.find((s) => s.id === storeId);
+      if (store) { store.resenas = scores.length; store.rating = scores.reduce((a, b) => a + b, 0) / scores.length; }
+    });
+    return;
+  }
+  if (CLOUDFLARE_API) {
+    await api("/api/ratings", { method: "POST", body: JSON.stringify({ store_id: storeId, rating }) });
+    return;
+  }
   const { error } = await supabase
     .from("store_ratings")
     .upsert({ store_id: storeId, user_id: userId, rating });
@@ -263,6 +311,11 @@ const CONFIG_CHATBOT_PREDETERMINADA: ChatbotSettingsRow = {
 };
 
 export async function fetchConfigChatbot(): Promise<ChatbotSettingsRow> {
+  if (LOCAL_CATALOG) return getLocalData().chatbot;
+  if (CLOUDFLARE_API) {
+    const row = await api<ChatbotSettingsRow & { allowed_stores: string | string[] }>("/api/chatbot");
+    return { ...row, enabled: Boolean(row.enabled), allowed_stores: asArray(row.allowed_stores) };
+  }
   const { data, error } = await supabase
     .from("chatbot_settings")
     .select("*")
@@ -273,6 +326,22 @@ export async function fetchConfigChatbot(): Promise<ChatbotSettingsRow> {
 }
 
 export async function fetchConocimientoChatbot() {
+  if (LOCAL_CATALOG) {
+    const data = getLocalData();
+    const allowed = data.chatbot.allowed_stores;
+    const tiendas = allowed.includes("*") ? data.stores : data.stores.filter((s) => allowed.includes(s.id));
+    return { categorias: data.categories, servicios: data.services, tiendas,
+      productos: data.products.filter((p) => tiendas.some((s) => s.id === p.tiendaId)), cfg: data.chatbot };
+  }
+  if (CLOUDFLARE_API) {
+    const [cfg, categorias, servicios, tiendas, productos] = await Promise.all([
+      fetchConfigChatbot(), fetchCategorias(), fetchServicios(), fetchTiendas(), fetchProductos(),
+    ]);
+    const allowed = cfg.allowed_stores;
+    const visibleStores = allowed.includes("*") ? tiendas : tiendas.filter((s) => allowed.includes(s.id));
+    return { cfg, categorias, servicios, tiendas: visibleStores,
+      productos: productos.filter((p) => visibleStores.some((s) => s.id === p.tiendaId)) };
+  }
   const { data, error } = await supabase.rpc("marketplace_chatbot_catalog");
   if (error) fallo(error.message);
   return {
@@ -289,6 +358,14 @@ export async function guardarConfigChatbot(cfg: {
   greeting: string;
   allowed_stores: string[];
 }): Promise<void> {
+  if (LOCAL_CATALOG) {
+    updateLocalData((data) => { data.chatbot = { ...data.chatbot, ...cfg, updated_at: new Date().toISOString() }; });
+    return;
+  }
+  if (CLOUDFLARE_API) {
+    await api("/api/admin/chatbot_settings/default", { method: "PATCH", body: JSON.stringify(cfg) });
+    return;
+  }
   const { error } = await supabase
     .from("chatbot_settings")
     .upsert({ id: CONFIG_CHATBOT_ID, ...cfg });
@@ -298,6 +375,7 @@ export async function guardarConfigChatbot(cfg: {
 // --- Consultas de administración -------------------------------------
 
 export async function fetchPerfilesAdmin() {
+  if (CLOUDFLARE_API) return api<ProfileRow[]>("/api/admin/profiles");
   const { data, error } = await supabase
     .from("profiles")
     .select("*")
@@ -307,6 +385,7 @@ export async function fetchPerfilesAdmin() {
 }
 
 export async function fetchTiendasAdmin() {
+  if (CLOUDFLARE_API) return api<StoreRow[]>("/api/admin/stores");
   const { data, error } = await supabase
     .from("stores")
     .select("*")
@@ -316,6 +395,11 @@ export async function fetchTiendasAdmin() {
 }
 
 export async function fetchProductosAdmin() {
+  if (CLOUDFLARE_API) {
+    const [products, stores] = await Promise.all([api<ProductRow[]>("/api/admin/products"), api<StoreRow[]>("/api/stores")]);
+    return products.map((p) => ({ ...p, gallery: asArray(p.gallery), videos: asArray(p.videos),
+      stores: { name: stores.find((s) => s.id === p.store_id)?.name } }));
+  }
   const { data, error } = await supabase
     .from("products")
     .select("*, stores(name)")

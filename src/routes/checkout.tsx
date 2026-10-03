@@ -6,6 +6,7 @@ import { formatearRD } from "@/data/marketplace";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
+import { api, CLOUDFLARE_API } from "@/lib/cloudflare";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -69,6 +70,17 @@ function CheckoutPagina() {
     setEnviando(true);
     try {
       const nombresTiendas = [...new Set(items.map((i) => i.tienda).filter(Boolean))];
+      if (CLOUDFLARE_API) {
+        const tiendasRows = await api<{ id: string; name: string }[]>("/api/stores");
+        const storeIds = tiendasRows.filter((store) => nombresTiendas.includes(store.name)).map((store) => store.id);
+        await api("/api/purchase-requests", { method: "POST", body: JSON.stringify({
+          full_name: nombre.trim(), address: direccion.trim(), phone: telefono.trim(), email: correo.trim(),
+          cedula: cedula.trim(), note: nota.trim(), items: items.map((i) => ({ id: i.id, titulo: i.titulo,
+            tienda: i.tienda, precio: i.precio, cantidad: i.cantidad })), store_ids: storeIds, total,
+        }) });
+        setEnviado(true); vaciar(); toast.success("¡Solicitud de compra enviada!");
+        return;
+      }
       const { data: tiendasRows } = await supabase
         .from("stores")
         .select("id, name")

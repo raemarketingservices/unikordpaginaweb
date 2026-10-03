@@ -22,6 +22,8 @@ import { fetchHome, type HomeData } from "@/lib/queries";
 import type { PageBlockRow } from "@/lib/types";
 import type { Categoria, Producto, Servicio, Tienda } from "@/data/marketplace";
 import { notFound } from "@tanstack/react-router";
+import { LOCAL_CATALOG } from "@/lib/local-catalog";
+import { getLocalData } from "@/lib/local-db";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -53,6 +55,7 @@ function Inicio() {
 
 // ====== FALLBACK ESTÁTICO (código original) ======
 function InicioEstatico({ data }: { data: HomeData }) {
+  const home = LOCAL_CATALOG ? getLocalData().home : null;
   const { categorias, productos, servicios, tiendas } = data;
   const ofertas = productos.filter((p: Producto) => p.precioAnterior);
   const masVendidos = productos.filter((p: Producto) => p.masVendido);
@@ -68,13 +71,10 @@ function InicioEstatico({ data }: { data: HomeData }) {
               Marketplace Dominicano
             </p>
             <h1 className="mt-3 text-3xl leading-tight sm:text-4xl lg:text-5xl">
-              Todo lo que buscas.
-              <br />
-              En un solo lugar.
+              {home ? home.headline : <>Todo lo que buscas.<br />En un solo lugar.</>}
             </h1>
             <p className="mt-4 max-w-xl text-base text-muted-foreground">
-              Compra productos, descubre negocios dominicanos y encuentra profesionales para todo lo
-              que necesitas.
+              {home?.subtitle ?? "Compra productos, descubre negocios dominicanos y encuentra profesionales para todo lo que necesitas."}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link to="/productos" className="btn-base btn-brand">

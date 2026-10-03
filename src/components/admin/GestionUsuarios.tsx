@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { Search, Users } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { fetchPerfilesAdmin } from "@/lib/queries";
+import { api, CLOUDFLARE_API } from "@/lib/cloudflare";
 import type { ProfileRow } from "@/lib/types";
 
 const ROLES = [
@@ -44,7 +45,11 @@ export function GestionUsuarios() {
 
   const cambiarRol = async (id: string, rol: string) => {
     setGuardandoId(id);
-    const { error } = await supabase.from("profiles").update({ role: rol }).eq("id", id);
+    let error: Error | null = null;
+    try {
+      if (CLOUDFLARE_API) await api(`/api/admin/profiles/${id}`, { method: "PATCH", body: JSON.stringify({ role: rol }) });
+      else { const result = await supabase.from("profiles").update({ role: rol }).eq("id", id); if (result.error) error = new Error(result.error.message); }
+    } catch (err) { error = err instanceof Error ? err : new Error("No se pudo guardar."); }
     setGuardandoId(null);
     if (error) {
       toast.error(error.message);

@@ -41,6 +41,10 @@ import { GestionUsuarios } from "@/components/admin/GestionUsuarios";
 import { GestionTiendas } from "@/components/admin/GestionTiendas";
 import { GestionProductos } from "@/components/admin/GestionProductos";
 import { ConfigChatbot } from "@/components/admin/ConfigChatbot";
+import { LocalAdmin } from "@/components/admin/LocalAdmin";
+import { LOCAL_CATALOG } from "@/lib/local-catalog";
+import { CLOUDFLARE_API } from "@/lib/cloudflare";
+import { CloudflareAdmin } from "@/components/admin/CloudflareAdmin";
 import { NOMBRES_TIPO } from "@/lib/types";
 import type {
   PageBlockRow,
@@ -833,6 +837,8 @@ function Admin() {
   };
 
   // vista login / no admin
+  if (LOCAL_CATALOG) return <LocalAdmin onAuthChange={() => void router.invalidate()} />;
+  if (CLOUDFLARE_API) return <CloudflareAdmin />;
   if (loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">

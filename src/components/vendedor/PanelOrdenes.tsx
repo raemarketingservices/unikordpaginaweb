@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase";
+import { api, CLOUDFLARE_API } from "@/lib/cloudflare";
 import { useAuth } from "@/lib/auth";
 import { formatearRD } from "@/data/marketplace";
 import { toast } from "sonner";
@@ -103,6 +104,22 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
     }
     setActualizando(true);
 
+    if (CLOUDFLARE_API) {
+      try {
+        const [allStores, rows] = await Promise.all([
+          api<{ id: string; name: string; owner_id: string | null }[]>("/api/stores"),
+          api<Record<string, unknown>[]>("/api/orders"),
+        ]);
+        setTiendas(allStores.filter((store) => modo === "admin" || store.owner_id === userId));
+        setOrdenes(rows.map((row) => ({ ...row,
+          items: typeof row["items"] === "string" ? JSON.parse(row["items"] as string) as ItemOrden[] : row["items"] as ItemOrden[],
+          store_ids: typeof row["store_ids"] === "string" ? JSON.parse(row["store_ids"] as string) as string[] : row["store_ids"] as string[],
+        })) as Orden[]);
+      } catch (err) { toast.error(err instanceof Error ? err.message : "No se pudieron cargar las órdenes."); }
+      setCargando(false); setActualizando(false);
+      return;
+    }
+
     const [resTiendas, resOrdenes] = await Promise.all([
       supabase.from("stores").select("id, name").eq("owner_id", userId),
       supabase.from("purchase_requests").select("*").order("created_at", { ascending: false }),
@@ -116,7 +133,7 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
 
     setCargando(false);
     setActualizando(false);
-  }, [userId]);
+  }, [userId, modo]);
 
   useEffect(() => {
     void cargar();
@@ -127,6 +144,10 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
   const itemsMios = (o: Orden) => (o.items ?? []).filter((it) => misNombres.has(it.tienda ?? ""));
 
   const cambiarEstado = async (o: Orden, nuevo: string) => {
+    if (CLOUDFLARE_API) {
+      try { await api(`/api/orders/${o.id}`, { method: "PATCH", body: JSON.stringify({ status: nuevo }) }); }
+      catch (err) { toast.error(`No se pudo actualizar: ${err instanceof Error ? err.message : "error desconocido"}`); return; }
+    } else {
     const { error } = await supabase
       .from("purchase_requests")
       .update({ status: nuevo })
@@ -135,6 +156,7 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
     if (error) {
       toast.error(`No se pudo actualizar: ${error.message}`);
       return;
+    }
     }
 
     setOrdenes((lista) => lista.map((x) => (x.id === o.id ? { ...x, status: nuevo } : x)));

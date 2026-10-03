@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, MapPin, Truck, CalendarCheck, Store as StoreIcon, Users } from "lucide-react";
+import { Heart, MapPin, Truck, CalendarCheck, Store as StoreIcon, Users, ArrowUpRight, Package, Briefcase } from "lucide-react";
 import { formatearRD, type Producto, type Servicio, type Tienda } from "@/data/marketplace";
 import { BadgeVerificado, Estrellas, Etiqueta } from "./Primitivos";
 
@@ -11,12 +11,12 @@ export function TarjetaProducto({ producto }: { producto: Producto }) {
   return (
     <article className="card-uniko group flex flex-col overflow-hidden">
       <div className="relative aspect-4/3 overflow-hidden bg-muted">
-        <img
+        {producto.imagen ? <img
           src={producto.imagen}
           alt={producto.titulo}
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+        /> : <div className="grid h-full place-items-center text-muted-foreground"><Package className="h-10 w-10" /></div>}
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
           {descuento > 0 ? <Etiqueta>-{descuento}%</Etiqueta> : null}
           {producto.nuevo ? <Etiqueta tono="primary">Nuevo</Etiqueta> : null}
@@ -76,12 +76,12 @@ export function TarjetaServicio({ servicio }: { servicio: Servicio }) {
   return (
     <article className="card-uniko group flex flex-col overflow-hidden">
       <div className="relative aspect-16/9 overflow-hidden bg-muted">
-        <img
+        {servicio.imagen ? <img
           src={servicio.imagen}
           alt={servicio.titulo}
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+        /> : <div className="grid h-full place-items-center text-muted-foreground"><Briefcase className="h-10 w-10" /></div>}
         {servicio.recomendado ? (
           <div className="absolute left-3 top-3">
             <Etiqueta tono="primary">Recomendado</Etiqueta>
@@ -110,13 +110,11 @@ export function TarjetaServicio({ servicio }: { servicio: Servicio }) {
           <Link
             to="/servicios/$servicioId"
             params={{ servicioId: servicio.id }}
-            className="btn-base btn-primary flex-1 px-3 py-2 text-[13px]"
+            className="btn-base btn-brand flex-1 justify-between px-4 py-2.5 text-sm font-semibold transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
             Ver servicio
+            <ArrowUpRight className="h-4 w-4 shrink-0" />
           </Link>
-          <button type="button" className="btn-base btn-outline px-3 py-2 text-[13px]">
-            Contactar
-          </button>
         </div>
       </div>
     </article>
@@ -127,15 +125,16 @@ export function TarjetaTienda({ tienda }: { tienda: Tienda }) {
   return (
     <article className="card-uniko overflow-hidden">
       <div className="h-24 overflow-hidden bg-muted">
-        <img src={tienda.portada} alt="" loading="lazy" className="h-full w-full object-cover" />
+        {tienda.portada ? <img src={tienda.portada} alt="" loading="lazy" className="h-full w-full object-cover" /> :
+          <div className="grid h-full place-items-center text-muted-foreground"><StoreIcon className="h-8 w-8" /></div>}
       </div>
       <div className="px-4 pb-4">
-        <img
+        {tienda.logo ? <img
           src={tienda.logo}
           alt={tienda.nombre}
           loading="lazy"
           className="-mt-8 h-16 w-16 rounded-2xl border-4 border-card object-cover"
-        />
+        /> : <div className="-mt-8 grid h-16 w-16 place-items-center rounded-2xl border-4 border-card bg-muted text-muted-foreground"><StoreIcon className="h-6 w-6" /></div>}
         <div className="mt-2 flex min-w-0 items-center gap-1.5">
           <h3 className="truncate text-sm font-bold text-foreground">{tienda.nombre}</h3>
           {tienda.verificado ? <BadgeVerificado texto="" /> : null}

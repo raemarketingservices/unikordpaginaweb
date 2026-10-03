@@ -91,6 +91,7 @@ export function Header() {
           </form>
 
           <div className="flex shrink-0 items-center gap-1">
+            <Link to="/admin" className="hidden px-2 text-xs font-semibold text-muted-foreground hover:text-brand lg:block">Admin</Link>
             <Link
               to="/favoritos"
               aria-label="Favoritos"

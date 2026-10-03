@@ -3,6 +3,9 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { LogIn, Store, Upload, UserPlus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { LOCAL_CATALOG } from "@/lib/local-catalog";
+import { createLocalStore, localFileUrl, registerLocalUser, signInLocal } from "@/lib/local-db";
+import { api, CLOUDFLARE_API, cloudLogin, cloudRegister, cloudUpload } from "@/lib/cloudflare";
 import { useAuth } from "@/lib/auth";
 import { fetchCategorias, slugUnico, subirImagen } from "@/lib/queries";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -40,7 +43,7 @@ function Auth() {
   const { redirect, modo } = Route.useSearch();
   const { categorias } = Route.useLoaderData();
   const router = useRouter();
-  const { session, loading } = useAuth();
+  const { session, loading, refreshLocal } = useAuth();
   const [tab, setTab] = useState<"entrar" | "crear">(modo ?? "entrar");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -71,6 +74,27 @@ function Auth() {
     e.preventDefault();
     if (enviando) return;
     setEnviando(true);
+    if (LOCAL_CATALOG) {
+      try {
+        await signInLocal(email, password);
+        refreshLocal();
+        toast.success("¡Bienvenido de vuelta!");
+        irADestino();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "No se pudo iniciar sesión.");
+      } finally { setEnviando(false); }
+      return;
+    }
+    if (CLOUDFLARE_API) {
+      try {
+        await cloudLogin(email, password);
+        refreshLocal();
+        toast.success("¡Bienvenido de vuelta!");
+        irADestino();
+      } catch (err) { toast.error(err instanceof Error ? err.message : "No se pudo iniciar sesión."); }
+      finally { setEnviando(false); }
+      return;
+    }
     const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
@@ -119,6 +143,46 @@ function Auth() {
     }
     setEnviando(true);
     const nombreCompleto = `${nombres.trim()} ${apellidos.trim()}`.trim();
+    if (LOCAL_CATALOG) {
+      try {
+        const user = await registerLocalUser({ email, password, firstName: nombres, lastName: apellidos,
+          cedula, phone: telefono, role: tipoCuenta === "vendedor" ? "vendor" : "user" });
+        if (tipoCuenta === "vendedor") {
+          const logo = logoTienda ? await localFileUrl(logoTienda) : "";
+          createLocalStore({ id: slugUnico(nombreTienda), nombre: nombreTienda.trim(),
+            categoria: categoriasTienda.find((c) => c.slug === categoriaTienda)?.nombre ?? "",
+            ubicacion: ubicacionTienda, descripcion: descripcionTienda.trim(),
+            propietario: nombreCompleto, verificado: false, rating: 0, resenas: 0,
+            seguidores: 0, productos: 0, logo, portada: logo }, user.id);
+        }
+        refreshLocal();
+        await router.invalidate();
+        toast.success(tipoCuenta === "vendedor" ? "¡Cuenta y tienda creadas!" : "¡Cuenta creada!");
+        router.history.push(tipoCuenta === "vendedor" ? "/publicar" : destino);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "No se pudo crear la cuenta.");
+      } finally { setEnviando(false); }
+      return;
+    }
+    if (CLOUDFLARE_API) {
+      try {
+        const user = await cloudRegister({ email, password, first_name: nombres, last_name: apellidos,
+          cedula, phone: telefono, role: tipoCuenta === "vendedor" ? "vendor" : "user" });
+        if (tipoCuenta === "vendedor") {
+          const logo = logoTienda ? await cloudUpload(logoTienda) : "";
+          await api("/api/stores", { method: "POST", body: JSON.stringify({
+            name: nombreTienda, category: categoriasTienda.find((c) => c.slug === categoriaTienda)?.nombre,
+            location: ubicacionTienda, description: descripcionTienda, logo,
+          }) });
+        }
+        refreshLocal();
+        await router.invalidate();
+        toast.success(tipoCuenta === "vendedor" ? "¡Cuenta y tienda creadas!" : "¡Cuenta creada!");
+        router.history.push(tipoCuenta === "vendedor" ? "/publicar" : destino);
+      } catch (err) { toast.error(err instanceof Error ? err.message : "No se pudo crear la cuenta."); }
+      finally { setEnviando(false); }
+      return;
+    }
     const ahora = new Date().toISOString();
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),

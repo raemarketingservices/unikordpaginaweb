@@ -3,8 +3,11 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Package, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { LOCAL_CATALOG } from "@/lib/local-catalog";
+import { addLocalProduct, localFileUrl, localStoreForOwner } from "@/lib/local-db";
+import { api, CLOUDFLARE_API, cloudUpload } from "@/lib/cloudflare";
 import { useAuth } from "@/lib/auth";
-import { fetchCategorias, slugUnico, subirArchivos } from "@/lib/queries";
+import { fetchCategorias, generarSku, slugUnico, subirArchivos } from "@/lib/queries";
 import { provincias } from "@/data/marketplace";
 import type { Categoria } from "@/data/marketplace";
 import type { StoreRow } from "@/lib/types";
@@ -54,6 +57,21 @@ function Publicar() {
     }
     let activo = true;
     setCargandoTienda(true);
+    if (LOCAL_CATALOG) {
+      const own = localStoreForOwner(userId);
+      setTienda(own ? ({ id: own.id, name: own.nombre, location: own.ubicacion } as StoreRow) : null);
+      setCargandoTienda(false);
+      return;
+    }
+    if (CLOUDFLARE_API) {
+      api<StoreRow[]>("/api/stores").then((all) => {
+        if (!activo) return;
+        const found = all.find((store) => store.owner_id === userId);
+        setTienda(found ?? null);
+        setCargandoTienda(false);
+      }).catch(() => { if (activo) setCargandoTienda(false); });
+      return () => { activo = false; };
+    }
     supabase
       .from("stores")
       .select("*")
@@ -88,6 +106,34 @@ function Publicar() {
     setEnviando(true);
     try {
       const id = slugUnico(titulo);
+      if (LOCAL_CATALOG) {
+        const fotosUrls = await Promise.all(fotos.map(localFileUrl));
+        const videosUrls = await Promise.all(videos.map(localFileUrl));
+        const sku = generarSku();
+        addLocalProduct({ id, titulo: titulo.trim(), descripcion: descripcion.trim(),
+          categoria: categoria || "otros", precio: Number(precio),
+          ...(precioAnterior ? { precioAnterior: Number(precioAnterior) } : {}),
+          tienda: tienda.name, tiendaId: tienda.id, sku, verificado: false,
+          rating: 0, resenas: 0, ubicacion: ubicacion || tienda.location || "",
+          envioNacional, imagen: fotosUrls[0] ?? "", galeria: fotosUrls, videos: videosUrls, nuevo: true });
+        await router.invalidate();
+        toast.success(`¡Producto publicado! SKU ${sku}`);
+        router.history.push(`/productos/${id}`);
+        return;
+      }
+      if (CLOUDFLARE_API) {
+        const fotosUrls = await Promise.all(fotos.map(cloudUpload));
+        const videosUrls = await Promise.all(videos.map(cloudUpload));
+        const result = await api<{ id: string; sku: string }>("/api/products", { method: "POST", body: JSON.stringify({
+          id, store_id: tienda.id, title: titulo.trim(), description: descripcion.trim(), category: categoria,
+          price: Number(precio), compare_at_price: precioAnterior ? Number(precioAnterior) : null,
+          location: ubicacion, shipping: envioNacional, gallery: fotosUrls, videos: videosUrls,
+        }) });
+        await router.invalidate();
+        toast.success(`¡Producto publicado! SKU ${result.sku}`);
+        router.history.push(`/productos/${result.id}`);
+        return;
+      }
       const carpeta = session.user.id;
       const fotosUrls = await subirArchivos(fotos, carpeta);
       const videosUrls = videos.length ? await subirArchivos(videos, carpeta) : [];
