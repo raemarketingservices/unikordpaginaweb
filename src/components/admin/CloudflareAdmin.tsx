@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Bot, Home, Lock, Package, Store, Users } from "lucide-react";
+import { BarChart3, Bot, Home, Headset, Lock, MessageSquare, Package, Store, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { cloudLogin } from "@/lib/cloudflare";
 import { GestionUsuarios } from "./GestionUsuarios";
@@ -9,11 +9,19 @@ import { GestionTiendas } from "./GestionTiendas";
 import { GestionProductos } from "./GestionProductos";
 import { GestionServicios } from "./GestionServicios";
 import { ConfigChatbot } from "./ConfigChatbot";
+import { CRMDashboard } from "@/routes/admin/crm";
+import { ChatAdminPage } from "@/routes/admin/chat";
+import { AdminSupportChat } from "@/routes/admin/support";
 
 const tabs = [
-  { id: "inicio", label: "Portada", icon: Home }, { id: "usuarios", label: "Usuarios", icon: Users },
-  { id: "tiendas", label: "Tiendas", icon: Store }, { id: "productos", label: "Productos", icon: Package },
+  { id: "inicio", label: "Portada", icon: Home },
+  { id: "usuarios", label: "Usuarios", icon: Users },
+  { id: "tiendas", label: "Tiendas", icon: Store },
+  { id: "productos", label: "Productos", icon: Package },
   { id: "servicios", label: "Servicios", icon: Package },
+  { id: "crm", label: "CRM", icon: BarChart3 },
+  { id: "chat", label: "Chat", icon: MessageSquare },
+  { id: "support", label: "Soporte", icon: Headset },
   { id: "chatbot", label: "Chatbot", icon: Bot },
 ] as const;
 
@@ -53,7 +61,12 @@ export function CloudflareAdmin() {
       {tab === "productos" && <GestionProductos />}
       {tab === "servicios" && <GestionServicios />}
       {tab === "chatbot" && <ConfigChatbot />}
-      {tab === "inicio" && <p className="py-6 text-sm text-muted-foreground">La portada todavía usa las secciones predeterminadas. Los bloques editables estarán disponibles cuando se creen en D1.</p>}
+      {tab === "crm" && <CRMDashboard />}
+      {tab === "chat" && <ChatAdminPage />}
+      {tab === "support" && <AdminSupportChat />}
+      {tab === "inicio" && (
+        <p className="py-6 text-sm text-muted-foreground">La portada todavía usa las secciones predeterminadas. Los bloques editables estarán disponibles cuando se creen en D1.</p>
+      )}
     </section>
   </main>;
 }

@@ -15,6 +15,6 @@ export default defineConfig({
   },
   vite: {
     cacheDir: process.env["UNIKO_VITE_CACHE_DIR"] ?? "node_modules/.vite",
-    server: { port: 5050, strictPort: true },
+    server: { port: 5050, strictPort: false },
   },
 });

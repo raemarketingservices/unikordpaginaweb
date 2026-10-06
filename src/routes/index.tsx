@@ -13,6 +13,9 @@ import {
   Package,
   Users,
   Sparkles,
+  Car,
+  Navigation,
+  Calendar,
 } from "lucide-react";
 import heroImg from "@/assets/hero-uniko.jpg";
 import { GrillaCategorias } from "@/components/uniko/Categorias";
@@ -24,6 +27,7 @@ import type { Categoria, Producto, Servicio, Tienda } from "@/data/marketplace";
 import { notFound } from "@tanstack/react-router";
 import { LOCAL_CATALOG } from "@/lib/local-catalog";
 import { getLocalData } from "@/lib/local-db";
+import { MapaRD } from "@/components/MapaRD";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -113,6 +117,99 @@ function InicioEstatico({ data }: { data: HomeData }) {
           </div>
         </div>
       </section>
+
+      {/* BANNER DE RENTA DE VEHÍCULOS */}
+      <div className="mx-auto max-w-7xl px-4 py-10">
+        <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+          {/* Imagen de fondo - Carretera */}
+          <div className="absolute inset-0">
+            <img
+              src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1200&q=80"
+              alt="Carretera"
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/85 to-transparent"></div>
+          </div>
+
+          {/* Contenido */}
+          <div className="relative grid gap-8 p-8 md:grid-cols-2 md:items-center md:p-12">
+            <div className="text-white">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-bold backdrop-blur-sm">
+                <Car className="h-5 w-5" />
+                Nuevo en UNIKO-RD
+              </div>
+              <h2 className="mt-4 text-3xl font-bold leading-tight md:text-4xl">
+                Renta el vehículo perfecto para tu viaje
+              </h2>
+              <p className="mt-4 text-lg opacity-95">
+                Encuentra desde sedanes hasta vans. Con GPS, seguro incluido y seguimiento en tiempo real.
+              </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <div className="flex items-center gap-2">
+                  <div className="rounded-full bg-white/20 p-2 backdrop-blur-sm">
+                    <Navigation className="h-5 w-5" />
+                  </div>
+                  <span className="text-sm font-semibold">Tracking GPS</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="rounded-full bg-white/20 p-2 backdrop-blur-sm">
+                    <Calendar className="h-5 w-5" />
+                  </div>
+                  <span className="text-sm font-semibold">Reserva fácil</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="rounded-full bg-white/20 p-2 backdrop-blur-sm">
+                    <Car className="h-5 w-5" />
+                  </div>
+                  <span className="text-sm font-semibold">50+ vehículos</span>
+                </div>
+              </div>
+              <Link
+                to="/vehiculos"
+                className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 font-bold text-primary shadow-lg transition-transform hover:scale-105"
+              >
+                Ver vehículos disponibles
+                <ArrowRight className="h-5 w-5" />
+              </Link>
+            </div>
+
+            {/* Tarjeta de precio flotante */}
+            <div className="relative flex justify-center md:justify-end">
+              <div className="rounded-2xl bg-white p-6 shadow-2xl">
+                <div className="flex items-center gap-3 border-b pb-4">
+                  <div className="rounded-full bg-primary/10 p-3">
+                    <Car className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-muted-foreground">Desde</p>
+                    <p className="text-3xl font-bold text-primary">RD$ 1,500</p>
+                    <p className="text-sm text-muted-foreground">por día</p>
+                  </div>
+                </div>
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                    <span>Disponibilidad inmediata</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                    <span>Cancelación gratis</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                    <span>Seguro incluido</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MAPA DE REPÚBLICA DOMINICANA */}
+      <div className="mx-auto max-w-7xl px-4 py-10">
+        <MapaRD />
+      </div>
 
       {/* CONFIANZA */}
       <section className="section-muted border-b border-border">

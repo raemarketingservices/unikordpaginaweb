@@ -1,10 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { Home, LayoutGrid, Plus, MessageCircle, User } from "lucide-react";
+import { Home, LayoutGrid, Plus, MessageCircle, User, Car } from "lucide-react";
 
 export function NavMovil() {
   const items = [
     { label: "Inicio", to: "/" as const, icono: Home },
-    { label: "Categorías", to: "/categorias" as const, icono: LayoutGrid },
+    { label: "Vehículos", to: "/vehiculos" as const, icono: Car },
     { label: "Mensajes", to: "/mensajes" as const, icono: MessageCircle },
     { label: "Mi cuenta", to: "/cuenta" as const, icono: User },
   ];
@@ -38,7 +38,7 @@ function ItemNav({
   icono: Icono,
 }: {
   label: string;
-  to: "/" | "/categorias" | "/mensajes" | "/cuenta";
+  to: "/" | "/vehiculos" | "/mensajes" | "/cuenta";
   icono: typeof Home;
 }) {
   return (

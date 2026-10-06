@@ -18,13 +18,22 @@ import { Route as CarritoRouteImport } from './routes/carrito'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CuentaRouteImport } from './routes/cuenta'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as MensajesRouteImport } from './routes/mensajes'
 import { Route as OfertasRouteImport } from './routes/ofertas'
 import { Route as OrdenesRouteImport } from './routes/ordenes'
 import { Route as PublicarRouteImport } from './routes/publicar'
+import { Route as ServiciosRouteImport } from './routes/servicios'
+import { Route as TiendasRouteImport } from './routes/tiendas'
+import { Route as VehiculosRouteImport } from './routes/vehiculos'
 import { Route as VenderRouteImport } from './routes/vender'
+import { Route as AdminAyudaRouteImport } from './routes/admin/ayuda'
+import { Route as AdminChatRouteImport } from './routes/admin/chat'
+import { Route as AdminCrmRouteImport } from './routes/admin/crm'
+import { Route as AdminSupportRouteImport } from './routes/admin/support'
 import { Route as CategoriasCategoriaSlugRouteImport } from './routes/categorias.$categoriaSlug'
+import { Route as DeliveryIdRouteImport } from './routes/delivery.$id'
 import { Route as LegalIndexRouteImport } from './routes/legal.index'
 import { Route as LegalDocRouteImport } from './routes/legal.$doc'
 import { Route as ProductosIndexRouteImport } from './routes/productos.index'
@@ -33,6 +42,8 @@ import { Route as ServiciosIndexRouteImport } from './routes/servicios.index'
 import { Route as ServiciosServicioIdRouteImport } from './routes/servicios.$servicioId'
 import { Route as TiendasIndexRouteImport } from './routes/tiendas.index'
 import { Route as TiendasTiendaIdRouteImport } from './routes/tiendas.$tiendaId'
+import { Route as VehiculosIdRouteImport } from './routes/vehiculos.$id'
+import { Route as AdminStoresStoreIdRouteImport } from './routes/admin/stores/$storeId'
 import { Route as ApiWhatsappAvisarRouteImport } from './routes/api/whatsapp.avisar'
 import { Route as ApiWhatsappWebhookRouteImport } from './routes/api/whatsapp.webhook'
 
@@ -81,6 +92,11 @@ const CuentaRoute = CuentaRouteImport.update({
   path: '/cuenta',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FavoritosRoute = FavoritosRouteImport.update({
   id: '/favoritos',
   path: '/favoritos',
@@ -106,15 +122,55 @@ const PublicarRoute = PublicarRouteImport.update({
   path: '/publicar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServiciosRoute = ServiciosRouteImport.update({
+  id: '/servicios',
+  path: '/servicios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TiendasRoute = TiendasRouteImport.update({
+  id: '/tiendas',
+  path: '/tiendas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VehiculosRoute = VehiculosRouteImport.update({
+  id: '/vehiculos',
+  path: '/vehiculos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VenderRoute = VenderRouteImport.update({
   id: '/vender',
   path: '/vender',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAyudaRoute = AdminAyudaRouteImport.update({
+  id: '/ayuda',
+  path: '/ayuda',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminChatRoute = AdminChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCrmRoute = AdminCrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSupportRoute = AdminSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AdminRoute,
+} as any)
 const CategoriasCategoriaSlugRoute = CategoriasCategoriaSlugRouteImport.update({
   id: '/$categoriaSlug',
   path: '/$categoriaSlug',
   getParentRoute: () => CategoriasRoute,
+} as any)
+const DeliveryIdRoute = DeliveryIdRouteImport.update({
+  id: '/delivery/$id',
+  path: '/delivery/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LegalIndexRoute = LegalIndexRouteImport.update({
   id: '/legal/',
@@ -137,24 +193,34 @@ const ProductosProductoIdRoute = ProductosProductoIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServiciosIndexRoute = ServiciosIndexRouteImport.update({
-  id: '/servicios/',
-  path: '/servicios/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => ServiciosRoute,
 } as any)
 const ServiciosServicioIdRoute = ServiciosServicioIdRouteImport.update({
-  id: '/servicios/$servicioId',
-  path: '/servicios/$servicioId',
-  getParentRoute: () => rootRouteImport,
+  id: '/$servicioId',
+  path: '/$servicioId',
+  getParentRoute: () => ServiciosRoute,
 } as any)
 const TiendasIndexRoute = TiendasIndexRouteImport.update({
-  id: '/tiendas/',
-  path: '/tiendas/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => TiendasRoute,
 } as any)
 const TiendasTiendaIdRoute = TiendasTiendaIdRouteImport.update({
-  id: '/tiendas/$tiendaId',
-  path: '/tiendas/$tiendaId',
-  getParentRoute: () => rootRouteImport,
+  id: '/$tiendaId',
+  path: '/$tiendaId',
+  getParentRoute: () => TiendasRoute,
+} as any)
+const VehiculosIdRoute = VehiculosIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => VehiculosRoute,
+} as any)
+const AdminStoresStoreIdRoute = AdminStoresStoreIdRouteImport.update({
+  id: '/stores/$storeId',
+  path: '/stores/$storeId',
+  getParentRoute: () => AdminRoute,
 } as any)
 const ApiWhatsappAvisarRoute = ApiWhatsappAvisarRouteImport.update({
   id: '/api/whatsapp/avisar',
@@ -169,7 +235,7 @@ const ApiWhatsappWebhookRoute = ApiWhatsappWebhookRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/ayuda': typeof AyudaRoute
   '/buscar': typeof BuscarRoute
@@ -177,27 +243,38 @@ export interface FileRoutesByFullPath {
   '/categorias': typeof CategoriasRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/cuenta': typeof CuentaRoute
+  '/dashboard': typeof DashboardRoute
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
   '/ofertas': typeof OfertasRoute
   '/ordenes': typeof OrdenesRoute
   '/publicar': typeof PublicarRoute
+  '/servicios': typeof ServiciosRouteWithChildren
+  '/tiendas': typeof TiendasRouteWithChildren
+  '/vehiculos': typeof VehiculosRouteWithChildren
   '/vender': typeof VenderRoute
+  '/admin/ayuda': typeof AdminAyudaRoute
+  '/admin/chat': typeof AdminChatRoute
+  '/admin/crm': typeof AdminCrmRoute
+  '/admin/support': typeof AdminSupportRoute
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
+  '/delivery/$id': typeof DeliveryIdRoute
   '/legal/$doc': typeof LegalDocRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
+  '/vehiculos/$id': typeof VehiculosIdRoute
   '/legal/': typeof LegalIndexRoute
   '/productos/': typeof ProductosIndexRoute
   '/servicios/': typeof ServiciosIndexRoute
   '/tiendas/': typeof TiendasIndexRoute
+  '/admin/stores/$storeId': typeof AdminStoresStoreIdRoute
   '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
   '/api/whatsapp/webhook': typeof ApiWhatsappWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/ayuda': typeof AyudaRoute
   '/buscar': typeof BuscarRoute
@@ -205,28 +282,37 @@ export interface FileRoutesByTo {
   '/categorias': typeof CategoriasRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/cuenta': typeof CuentaRoute
+  '/dashboard': typeof DashboardRoute
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
   '/ofertas': typeof OfertasRoute
   '/ordenes': typeof OrdenesRoute
   '/publicar': typeof PublicarRoute
+  '/vehiculos': typeof VehiculosRouteWithChildren
   '/vender': typeof VenderRoute
+  '/admin/ayuda': typeof AdminAyudaRoute
+  '/admin/chat': typeof AdminChatRoute
+  '/admin/crm': typeof AdminCrmRoute
+  '/admin/support': typeof AdminSupportRoute
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
+  '/delivery/$id': typeof DeliveryIdRoute
   '/legal/$doc': typeof LegalDocRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
+  '/vehiculos/$id': typeof VehiculosIdRoute
   '/legal': typeof LegalIndexRoute
   '/productos': typeof ProductosIndexRoute
   '/servicios': typeof ServiciosIndexRoute
   '/tiendas': typeof TiendasIndexRoute
+  '/admin/stores/$storeId': typeof AdminStoresStoreIdRoute
   '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
   '/api/whatsapp/webhook': typeof ApiWhatsappWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/ayuda': typeof AyudaRoute
   '/buscar': typeof BuscarRoute
@@ -234,21 +320,32 @@ export interface FileRoutesById {
   '/categorias': typeof CategoriasRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/cuenta': typeof CuentaRoute
+  '/dashboard': typeof DashboardRoute
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
   '/ofertas': typeof OfertasRoute
   '/ordenes': typeof OrdenesRoute
   '/publicar': typeof PublicarRoute
+  '/servicios': typeof ServiciosRouteWithChildren
+  '/tiendas': typeof TiendasRouteWithChildren
+  '/vehiculos': typeof VehiculosRouteWithChildren
   '/vender': typeof VenderRoute
+  '/admin/ayuda': typeof AdminAyudaRoute
+  '/admin/chat': typeof AdminChatRoute
+  '/admin/crm': typeof AdminCrmRoute
+  '/admin/support': typeof AdminSupportRoute
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
+  '/delivery/$id': typeof DeliveryIdRoute
   '/legal/$doc': typeof LegalDocRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
+  '/vehiculos/$id': typeof VehiculosIdRoute
   '/legal/': typeof LegalIndexRoute
   '/productos/': typeof ProductosIndexRoute
   '/servicios/': typeof ServiciosIndexRoute
   '/tiendas/': typeof TiendasIndexRoute
+  '/admin/stores/$storeId': typeof AdminStoresStoreIdRoute
   '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
   '/api/whatsapp/webhook': typeof ApiWhatsappWebhookRoute
 }
@@ -264,21 +361,32 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/checkout'
     | '/cuenta'
+    | '/dashboard'
     | '/favoritos'
     | '/mensajes'
     | '/ofertas'
     | '/ordenes'
     | '/publicar'
+    | '/servicios'
+    | '/tiendas'
+    | '/vehiculos'
     | '/vender'
+    | '/admin/ayuda'
+    | '/admin/chat'
+    | '/admin/crm'
+    | '/admin/support'
     | '/categorias/$categoriaSlug'
+    | '/delivery/$id'
     | '/legal/$doc'
     | '/productos/$productoId'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
+    | '/vehiculos/$id'
     | '/legal/'
     | '/productos/'
     | '/servicios/'
     | '/tiendas/'
+    | '/admin/stores/$storeId'
     | '/api/whatsapp/avisar'
     | '/api/whatsapp/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -292,21 +400,30 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/checkout'
     | '/cuenta'
+    | '/dashboard'
     | '/favoritos'
     | '/mensajes'
     | '/ofertas'
     | '/ordenes'
     | '/publicar'
+    | '/vehiculos'
     | '/vender'
+    | '/admin/ayuda'
+    | '/admin/chat'
+    | '/admin/crm'
+    | '/admin/support'
     | '/categorias/$categoriaSlug'
+    | '/delivery/$id'
     | '/legal/$doc'
     | '/productos/$productoId'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
+    | '/vehiculos/$id'
     | '/legal'
     | '/productos'
     | '/servicios'
     | '/tiendas'
+    | '/admin/stores/$storeId'
     | '/api/whatsapp/avisar'
     | '/api/whatsapp/webhook'
   id:
@@ -320,28 +437,39 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/checkout'
     | '/cuenta'
+    | '/dashboard'
     | '/favoritos'
     | '/mensajes'
     | '/ofertas'
     | '/ordenes'
     | '/publicar'
+    | '/servicios'
+    | '/tiendas'
+    | '/vehiculos'
     | '/vender'
+    | '/admin/ayuda'
+    | '/admin/chat'
+    | '/admin/crm'
+    | '/admin/support'
     | '/categorias/$categoriaSlug'
+    | '/delivery/$id'
     | '/legal/$doc'
     | '/productos/$productoId'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
+    | '/vehiculos/$id'
     | '/legal/'
     | '/productos/'
     | '/servicios/'
     | '/tiendas/'
+    | '/admin/stores/$storeId'
     | '/api/whatsapp/avisar'
     | '/api/whatsapp/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   AyudaRoute: typeof AyudaRoute
   BuscarRoute: typeof BuscarRoute
@@ -349,20 +477,21 @@ export interface RootRouteChildren {
   CategoriasRoute: typeof CategoriasRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
   CuentaRoute: typeof CuentaRoute
+  DashboardRoute: typeof DashboardRoute
   FavoritosRoute: typeof FavoritosRoute
   MensajesRoute: typeof MensajesRoute
   OfertasRoute: typeof OfertasRoute
   OrdenesRoute: typeof OrdenesRoute
   PublicarRoute: typeof PublicarRoute
+  ServiciosRoute: typeof ServiciosRouteWithChildren
+  TiendasRoute: typeof TiendasRouteWithChildren
+  VehiculosRoute: typeof VehiculosRouteWithChildren
   VenderRoute: typeof VenderRoute
+  DeliveryIdRoute: typeof DeliveryIdRoute
   LegalDocRoute: typeof LegalDocRoute
   ProductosProductoIdRoute: typeof ProductosProductoIdRoute
-  ServiciosServicioIdRoute: typeof ServiciosServicioIdRoute
-  TiendasTiendaIdRoute: typeof TiendasTiendaIdRoute
   LegalIndexRoute: typeof LegalIndexRoute
   ProductosIndexRoute: typeof ProductosIndexRoute
-  ServiciosIndexRoute: typeof ServiciosIndexRoute
-  TiendasIndexRoute: typeof TiendasIndexRoute
   ApiWhatsappAvisarRoute: typeof ApiWhatsappAvisarRoute
   ApiWhatsappWebhookRoute: typeof ApiWhatsappWebhookRoute
 }
@@ -432,6 +561,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CuentaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/favoritos': {
       id: '/favoritos'
       path: '/favoritos'
@@ -467,6 +603,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/servicios': {
+      id: '/servicios'
+      path: '/servicios'
+      fullPath: '/servicios'
+      preLoaderRoute: typeof ServiciosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tiendas': {
+      id: '/tiendas'
+      path: '/tiendas'
+      fullPath: '/tiendas'
+      preLoaderRoute: typeof TiendasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vehiculos': {
+      id: '/vehiculos'
+      path: '/vehiculos'
+      fullPath: '/vehiculos'
+      preLoaderRoute: typeof VehiculosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vender': {
       id: '/vender'
       path: '/vender'
@@ -474,12 +631,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VenderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/ayuda': {
+      id: '/admin/ayuda'
+      path: '/ayuda'
+      fullPath: '/admin/ayuda'
+      preLoaderRoute: typeof AdminAyudaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/chat': {
+      id: '/admin/chat'
+      path: '/chat'
+      fullPath: '/admin/chat'
+      preLoaderRoute: typeof AdminChatRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/crm': {
+      id: '/admin/crm'
+      path: '/crm'
+      fullPath: '/admin/crm'
+      preLoaderRoute: typeof AdminCrmRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/support': {
+      id: '/admin/support'
+      path: '/support'
+      fullPath: '/admin/support'
+      preLoaderRoute: typeof AdminSupportRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/categorias/$categoriaSlug': {
       id: '/categorias/$categoriaSlug'
       path: '/$categoriaSlug'
       fullPath: '/categorias/$categoriaSlug'
       preLoaderRoute: typeof CategoriasCategoriaSlugRouteImport
       parentRoute: typeof CategoriasRoute
+    }
+    '/delivery/$id': {
+      id: '/delivery/$id'
+      path: '/delivery/$id'
+      fullPath: '/delivery/$id'
+      preLoaderRoute: typeof DeliveryIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/legal/': {
       id: '/legal/'
@@ -511,31 +703,45 @@ declare module '@tanstack/react-router' {
     }
     '/servicios/': {
       id: '/servicios/'
-      path: '/servicios'
+      path: '/'
       fullPath: '/servicios/'
       preLoaderRoute: typeof ServiciosIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ServiciosRoute
     }
     '/servicios/$servicioId': {
       id: '/servicios/$servicioId'
-      path: '/servicios/$servicioId'
+      path: '/$servicioId'
       fullPath: '/servicios/$servicioId'
       preLoaderRoute: typeof ServiciosServicioIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ServiciosRoute
     }
     '/tiendas/': {
       id: '/tiendas/'
-      path: '/tiendas'
+      path: '/'
       fullPath: '/tiendas/'
       preLoaderRoute: typeof TiendasIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TiendasRoute
     }
     '/tiendas/$tiendaId': {
       id: '/tiendas/$tiendaId'
-      path: '/tiendas/$tiendaId'
+      path: '/$tiendaId'
       fullPath: '/tiendas/$tiendaId'
       preLoaderRoute: typeof TiendasTiendaIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TiendasRoute
+    }
+    '/vehiculos/$id': {
+      id: '/vehiculos/$id'
+      path: '/$id'
+      fullPath: '/vehiculos/$id'
+      preLoaderRoute: typeof VehiculosIdRouteImport
+      parentRoute: typeof VehiculosRoute
+    }
+    '/admin/stores/$storeId': {
+      id: '/admin/stores/$storeId'
+      path: '/stores/$storeId'
+      fullPath: '/admin/stores/$storeId'
+      preLoaderRoute: typeof AdminStoresStoreIdRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/api/whatsapp/avisar': {
       id: '/api/whatsapp/avisar'
@@ -554,6 +760,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminAyudaRoute: typeof AdminAyudaRoute
+  AdminChatRoute: typeof AdminChatRoute
+  AdminCrmRoute: typeof AdminCrmRoute
+  AdminSupportRoute: typeof AdminSupportRoute
+  AdminStoresStoreIdRoute: typeof AdminStoresStoreIdRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAyudaRoute: AdminAyudaRoute,
+  AdminChatRoute: AdminChatRoute,
+  AdminCrmRoute: AdminCrmRoute,
+  AdminSupportRoute: AdminSupportRoute,
+  AdminStoresStoreIdRoute: AdminStoresStoreIdRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface CategoriasRouteChildren {
   CategoriasCategoriaSlugRoute: typeof CategoriasCategoriaSlugRoute
 }
@@ -566,9 +790,48 @@ const CategoriasRouteWithChildren = CategoriasRoute._addFileChildren(
   CategoriasRouteChildren,
 )
 
+interface ServiciosRouteChildren {
+  ServiciosServicioIdRoute: typeof ServiciosServicioIdRoute
+  ServiciosIndexRoute: typeof ServiciosIndexRoute
+}
+
+const ServiciosRouteChildren: ServiciosRouteChildren = {
+  ServiciosServicioIdRoute: ServiciosServicioIdRoute,
+  ServiciosIndexRoute: ServiciosIndexRoute,
+}
+
+const ServiciosRouteWithChildren = ServiciosRoute._addFileChildren(
+  ServiciosRouteChildren,
+)
+
+interface TiendasRouteChildren {
+  TiendasTiendaIdRoute: typeof TiendasTiendaIdRoute
+  TiendasIndexRoute: typeof TiendasIndexRoute
+}
+
+const TiendasRouteChildren: TiendasRouteChildren = {
+  TiendasTiendaIdRoute: TiendasTiendaIdRoute,
+  TiendasIndexRoute: TiendasIndexRoute,
+}
+
+const TiendasRouteWithChildren =
+  TiendasRoute._addFileChildren(TiendasRouteChildren)
+
+interface VehiculosRouteChildren {
+  VehiculosIdRoute: typeof VehiculosIdRoute
+}
+
+const VehiculosRouteChildren: VehiculosRouteChildren = {
+  VehiculosIdRoute: VehiculosIdRoute,
+}
+
+const VehiculosRouteWithChildren = VehiculosRoute._addFileChildren(
+  VehiculosRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   AyudaRoute: AyudaRoute,
   BuscarRoute: BuscarRoute,
@@ -576,20 +839,21 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriasRoute: CategoriasRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
   CuentaRoute: CuentaRoute,
+  DashboardRoute: DashboardRoute,
   FavoritosRoute: FavoritosRoute,
   MensajesRoute: MensajesRoute,
   OfertasRoute: OfertasRoute,
   OrdenesRoute: OrdenesRoute,
   PublicarRoute: PublicarRoute,
+  ServiciosRoute: ServiciosRouteWithChildren,
+  TiendasRoute: TiendasRouteWithChildren,
+  VehiculosRoute: VehiculosRouteWithChildren,
   VenderRoute: VenderRoute,
+  DeliveryIdRoute: DeliveryIdRoute,
   LegalDocRoute: LegalDocRoute,
   ProductosProductoIdRoute: ProductosProductoIdRoute,
-  ServiciosServicioIdRoute: ServiciosServicioIdRoute,
-  TiendasTiendaIdRoute: TiendasTiendaIdRoute,
   LegalIndexRoute: LegalIndexRoute,
   ProductosIndexRoute: ProductosIndexRoute,
-  ServiciosIndexRoute: ServiciosIndexRoute,
-  TiendasIndexRoute: TiendasIndexRoute,
   ApiWhatsappAvisarRoute: ApiWhatsappAvisarRoute,
   ApiWhatsappWebhookRoute: ApiWhatsappWebhookRoute,
 }

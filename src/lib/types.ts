@@ -181,3 +181,107 @@ export const NOMBRES_TIPO: Record<TipoBloque, string> = {
 export type FiltroProducto = "all" | "offers" | "best_seller" | "is_new" | "featured";
 export type FiltroServicio = "all" | "recommended";
 export type FiltroTienda = "all" | "featured";
+
+// --- Tipos para Renta de Vehículos ---
+
+export type VehiculoRow = {
+  id: string;
+  store_id: string;
+  nombre: string;
+  marca: string;
+  modelo: string;
+  año: number;
+  tipo: 'sedan' | 'suv' | 'van' | 'pickup' | 'moto' | 'otro';
+  precio_dia: number;
+  disponible: boolean;
+  imagenes: string[];
+  ubicacion: {
+    lat: number;
+    lng: number;
+    direccion: string;
+  };
+  caracteristicas: {
+    transmision: 'manual' | 'automatica';
+    combustible: 'gasolina' | 'diesel' | 'electrico' | 'hibrido';
+    pasajeros: number;
+    maletas: number;
+    puertas: number;
+    aire_acondicionado: boolean;
+  };
+  created_at: string;
+  updated_at: string;
+};
+
+export type RentaRow = {
+  id: string;
+  vehiculo_id: string;
+  usuario_id: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  dias: number;
+  precio_total: number;
+  estado: 'pendiente' | 'confirmada' | 'en_curso' | 'completada' | 'cancelada';
+  ubicacion_recogida: {
+    lat: number;
+    lng: number;
+    direccion: string;
+  };
+  ubicacion_entrega: {
+    lat: number;
+    lng: number;
+    direccion: string;
+  };
+  tracking?: {
+    lat: number;
+    lng: number;
+    timestamp: string;
+  };
+  created_at: string;
+  updated_at: string;
+};
+
+// --- Tipos para Delivery Tracking ---
+
+export type DeliveryRow = {
+  id: string;
+  pedido_id: string;
+  store_id: string;
+  repartidor_id: string | null;
+  estado: 'preparando' | 'en_camino' | 'cerca' | 'entregado' | 'cancelado';
+  ubicacion_origen: {
+    lat: number;
+    lng: number;
+    direccion: string;
+  };
+  ubicacion_destino: {
+    lat: number;
+    lng: number;
+    direccion: string;
+  };
+  ubicacion_actual?: {
+    lat: number;
+    lng: number;
+    timestamp: string;
+  };
+  tiempo_estimado?: number; // minutos
+  distancia?: number; // metros
+  created_at: string;
+  updated_at: string;
+};
+
+export type RepartidorRow = {
+  id: string;
+  store_id: string;
+  nombre: string;
+  telefono: string;
+  vehiculo: string;
+  placa: string;
+  foto_url: string | null;
+  disponible: boolean;
+  ubicacion_actual?: {
+    lat: number;
+    lng: number;
+    timestamp: string;
+  };
+  created_at: string;
+};

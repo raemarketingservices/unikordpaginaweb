@@ -19,6 +19,7 @@ const navegacion = [
   { label: "Inicio", to: "/" as const },
   { label: "Productos", to: "/productos" as const },
   { label: "Servicios", to: "/servicios" as const },
+  { label: "Vehículos", to: "/vehiculos" as const },
   { label: "Tiendas", to: "/tiendas" as const },
   { label: "Ofertas", to: "/ofertas" as const },
   { label: "Categorías", to: "/categorias" as const },

@@ -32,6 +32,8 @@ import {
   Sparkles,
   MapPin,
   Bot,
+  MessageSquare,
+  BarChart3,
   type LucideIcon,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -194,6 +196,8 @@ const SECCIONES: { id: SeccionAdmin; etiqueta: string; icono: LucideIcon }[] = [
   { id: "usuarios", etiqueta: "Usuarios", icono: Users },
   { id: "tiendas", etiqueta: "Tiendas", icono: Store },
   { id: "productos", etiqueta: "Artículos", icono: ShoppingBag },
+  { id: "crm", etiqueta: "CRM", icono: BarChart3 },
+  { id: "chat", etiqueta: "Chat", icono: MessageSquare },
   { id: "chatbot", etiqueta: "Chatbot", icono: Bot },
 ];
 
@@ -837,6 +841,7 @@ function Admin() {
   };
 
   // vista login / no admin
+  console.log('[DEBUG ADMIN] loading:', loading, 'session:', !!session, 'isAdmin:', isAdmin, 'seccion:', seccion);
   if (LOCAL_CATALOG) return <LocalAdmin onAuthChange={() => void router.invalidate()} />;
   if (CLOUDFLARE_API) return <CloudflareAdmin />;
   if (loading) {
@@ -906,8 +911,35 @@ function Admin() {
         })}
       </nav>
 
+      {console.log('[DEBUG RENDER] seccion:', seccion, 'match home:', seccion === "home")}
       {seccion === "home" && (
         <>
+          {/* Botones CRM y Chat */}
+          <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4" style={{border: '3px solid red', minHeight: '100px', background: 'yellow'}}>
+            {console.log('[DEBUG INSIDE DIV] Rendering buttons')}
+            <a
+              href="/admin/crm"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="card-uniko p-6 text-center hover:shadow-lg transition"
+              style={{border: '2px solid blue'}}
+            >
+              <BarChart3 className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+              <h3 className="font-bold text-foreground">CRM Dashboard</h3>
+              <p className="text-xs text-muted-foreground mt-1">Ver todas las tiendas</p>
+            </a>
+            <a
+              href="/admin/chat"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="card-uniko p-6 text-center hover:shadow-lg transition"
+            >
+              <MessageSquare className="h-8 w-8 mx-auto mb-2 text-green-600" />
+              <h3 className="font-bold text-foreground">Chat Admin</h3>
+              <p className="text-xs text-muted-foreground mt-1">Gestionar conversaciones</p>
+            </a>
+          </div>
+
           <div className="card-uniko overflow-hidden">
             <div className="border-b border-border p-4 flex items-center justify-between">
               <h2 className="font-semibold">Editor de bloques de la Home</h2>
@@ -1107,6 +1139,26 @@ function Admin() {
       {seccion === "productos" && (
         <div className="card-uniko overflow-hidden">
           <GestionProductos />
+        </div>
+      )}
+
+      {seccion === "crm" && (
+        <div className="p-6">
+          <iframe
+            src="/admin/crm"
+            className="w-full h-screen border-0 rounded-xl"
+            title="CRM Dashboard"
+          />
+        </div>
+      )}
+
+      {seccion === "chat" && (
+        <div className="p-6">
+          <iframe
+            src="/admin/chat"
+            className="w-full h-screen border-0 rounded-xl"
+            title="Chat Admin"
+          />
         </div>
       )}
 

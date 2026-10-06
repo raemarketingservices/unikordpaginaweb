@@ -316,6 +316,109 @@ export default {
         await env.DB.prepare('UPDATE purchase_requests SET status = ? WHERE id = ?').bind(status, id).run();
         return json({ ok: true });
       }
+      // Professional Services
+      if (path === '/api/professional-services' && request.method === 'GET') {
+        const { results } = await env.DB.prepare('SELECT * FROM professional_services ORDER BY created_at DESC LIMIT 500').all();
+        return json(results);
+      }
+      if (path === '/api/professional-services' && request.method === 'POST') {
+        if (!user) return bad('Inicia sesión.', 401);
+        const input = await body(request);
+        const name = string(input.name, 120), serviceType = string(input.service_type, 80);
+        if (!name || !serviceType) return bad('Nombre y tipo de servicio son obligatorios.');
+        const id = crypto.randomUUID();
+        await env.DB.prepare('INSERT INTO professional_services (id,user_id,service_type,name,description,phone,whatsapp,lat,lng,province,municipality,image) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
+          .bind(id, user.id, serviceType, name, string(input.description) || null, string(input.phone, 30) || null, string(input.whatsapp, 30) || null, Number(input.lat) || null, Number(input.lng) || null, string(input.province, 80) || null, string(input.municipality, 80) || null, string(input.image, 1000) || null).run();
+        return json({ id }, 201);
+      }
+
+      // Store Dashboard - Orders
+      if (path.match(/^\/api\/stores\/[^/]+\/orders$/) && request.method === 'GET') {
+        if (!user) return bad('Inicia sesión.', 401);
+        const storeId = path.split('/')[3];
+        const store = await env.DB.prepare('SELECT owner_id FROM stores WHERE id = ?').bind(storeId).first<{ owner_id: string }>();
+        if (!store || (user.role !== 'admin' && store.owner_id !== user.id)) return bad('No tienes acceso a esta tienda.', 403);
+        const { results } = await env.DB.prepare('SELECT * FROM orders WHERE store_id = ? ORDER BY created_at DESC LIMIT 250').bind(storeId).all();
+        return json(results);
+      }
+
+      // Store Dashboard - Messages
+      if (path.match(/^\/api\/stores\/[^/]+\/messages$/) && request.method === 'GET') {
+        if (!user) return bad('Inicia sesión.', 401);
+        const storeId = path.split('/')[3];
+        const store = await env.DB.prepare('SELECT owner_id FROM stores WHERE id = ?').bind(storeId).first<{ owner_id: string }>();
+        if (!store || (user.role !== 'admin' && store.owner_id !== user.id)) return bad('No tienes acceso a esta tienda.', 403);
+        const { results } = await env.DB.prepare('SELECT * FROM chat_messages WHERE store_id = ? AND read = 0 ORDER BY created_at DESC LIMIT 100').bind(storeId).all();
+        return json(results);
+      }
+
+      // Chat - Send message
+      if (path === '/api/chat/send' && request.method === 'POST') {
+        const input = await body(request);
+        const storeId = string(input.store_id, 100), message = string(input.message, 2000);
+        if (!storeId || !message) return bad('Tienda y mensaje son obligatorios.');
+        const id = crypto.randomUUID();
+        const customerId = user?.id ?? 'guest';
+        const customerName = user ? await env.DB.prepare('SELECT full_name FROM profiles WHERE id = ?').bind(user.id).first<{ full_name: string }>().then(r => r?.full_name || 'Cliente') : string(input.customer_name, 100) || 'Cliente';
+        await env.DB.prepare('INSERT INTO chat_messages (id,store_id,customer_id,customer_name,message,sender,read) VALUES (?,?,?,?,?,?,0)')
+          .bind(id, storeId, customerId, customerName, message, 'customer').run();
+        return json({ id }, 201);
+      }
+
+      // Orders - Create
+      if (path === '/api/orders' && request.method === 'POST') {
+        const input = await body(request);
+        const storeId = string(input.store_id, 100), productId = string(input.product_id, 100);
+        const quantity = Number(input.quantity), total = Number(input.total);
+        if (!storeId || !productId || !quantity || !total) return bad('Datos de pedido inválidos.');
+        const id = crypto.randomUUID();
+        const customerId = user?.id ?? 'guest';
+        const customerName = user ? await env.DB.prepare('SELECT full_name FROM profiles WHERE id = ?').bind(user.id).first<{ full_name: string }>().then(r => r?.full_name || '') : string(input.customer_name, 100);
+        await env.DB.prepare('INSERT INTO orders (id,store_id,customer_id,product_id,quantity,total,status,customer_name,customer_phone,delivery_address) VALUES (?,?,?,?,?,?,?,?,?,?)')
+          .bind(id, storeId, customerId, productId, quantity, total, 'pending', customerName, string(input.customer_phone, 30) || null, string(input.delivery_address, 300) || null).run();
+        return json({ id }, 201);
+      }
+
+      // Orders - Update status
+      if (path.match(/^\/api\/orders\/[^/]+$/) && request.method === 'PATCH') {
+        if (!user) return bad('Inicia sesión.', 401);
+        const orderId = path.split('/')[3];
+        const input = await body(request);
+        const status = string(input.status, 20);
+        if (!['pending', 'processing', 'shipped', 'completed', 'cancelled'].includes(status)) return bad('Estado inválido.');
+        const order = await env.DB.prepare('SELECT store_id FROM orders WHERE id = ?').bind(orderId).first<{ store_id: string }>();
+        if (!order) return bad('Pedido no encontrado.', 404);
+        if (user.role !== 'admin') {
+          const store = await env.DB.prepare('SELECT owner_id FROM stores WHERE id = ?').bind(order.store_id).first<{ owner_id: string }>();
+          if (!store || store.owner_id !== user.id) return bad('No puedes modificar este pedido.', 403);
+        }
+        await env.DB.prepare('UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').bind(status, orderId).run();
+        return json({ ok: true });
+      }
+
+      // Update store with location data
+      if (path.match(/^\/api\/stores\/[^/]+$/) && request.method === 'PATCH') {
+        if (!user) return bad('Inicia sesión.', 401);
+        const storeId = path.split('/')[3];
+        const store = await env.DB.prepare('SELECT owner_id FROM stores WHERE id = ?').bind(storeId).first<{ owner_id: string }>();
+        if (!store || (user.role !== 'admin' && store.owner_id !== user.id)) return bad('No tienes acceso a esta tienda.', 403);
+        const input = await body(request);
+        const updates: string[] = [];
+        const values: (string | number | null)[] = [];
+        if (input.whatsapp !== undefined) { updates.push('whatsapp = ?'); values.push(string(input.whatsapp, 30) || null); }
+        if (input.lat !== undefined) { updates.push('lat = ?'); values.push(Number(input.lat) || null); }
+        if (input.lng !== undefined) { updates.push('lng = ?'); values.push(Number(input.lng) || null); }
+        if (input.province !== undefined) { updates.push('province = ?'); values.push(string(input.province, 80) || null); }
+        if (input.municipality !== undefined) { updates.push('municipality = ?'); values.push(string(input.municipality, 80) || null); }
+        if (input.map_location !== undefined) { updates.push('map_location = ?'); values.push(string(input.map_location, 500) || null); }
+        if (input.logo !== undefined) { updates.push('logo = ?'); values.push(string(input.logo, 1000) || null); }
+        if (input.cover !== undefined) { updates.push('cover = ?'); values.push(string(input.cover, 1000) || null); }
+        if (!updates.length) return bad('No hay cambios.');
+        values.push(storeId);
+        await env.DB.prepare(`UPDATE stores SET ${updates.join(', ')} WHERE id = ?`).bind(...values).run();
+        return json({ ok: true });
+      }
+
       return bad('No encontrado.', 404);
     } catch (error) {
       console.error(error);
