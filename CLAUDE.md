@@ -25,36 +25,52 @@ Marketplace dominicano multi-vendor (productos + servicios) con **dos repos** (l
 
 ## 3. Mapa del repo web
 - `src/routes/` — rutas file-based: `index`, `ordenes`, `cuenta`, `vender`, `checkout`, `carrito`, `admin.tsx`, `auth.tsx`, `productos.*`, `tiendas.*`, `servicios.*`, `buscar`, `ofertas`, `favoritos`, `mensajes`, `legal.$doc`.
+  - `src/routes/admin/` — nuevos módulos admin: `crm.tsx` (dashboard CRM), `chat.tsx` (chat entre tiendas/vendedores), `support.tsx` (soporte admin↔tiendas), `ayuda.tsx` (interfaz tienda para contactar admin), `stores/$storeId.tsx` (detalle tienda).
 - `src/routes/api/` — endpoints server: `whatsapp.avisar.tsx` (POST) y `whatsapp.webhook.tsx` (GET verificación Meta + POST mensajes entrantes). Se definen con `createFileRoute(...){server:{handlers:{GET,POST}}}` (soportado por TanStack Start, ya verificado).
-- `src/components/admin/` — paneles (referencia de estilo: `GestionTiendas.tsx`).
+  - `src/routes/api/chat/` — endpoints chat: `send.ts`, `upload.ts`, `messages/[conversationId]/new.ts` (polling nuevos mensajes).
+- `src/components/admin/` — paneles (referencia de estilo: `GestionTiendas.tsx`). `CloudflareAdmin.tsx` es el componente real renderizado (no `admin.tsx`), con tabs: inicio, usuarios, tiendas, productos, servicios, **CRM**, **Chat**, **Soporte**, chatbot.
 - `src/components/vendedor/PanelOrdenes.tsx` — panel del vendedor (tiendas, filtros por estado, tabla desktop + tarjetas móvil, modal `ui/dialog`, cambio de `status` + aviso WhatsApp).
+- `src/components/chat/ChatWidget.tsx` — widget de chat reutilizable.
 - `src/components/ui/` — primitivas shadcn (dialog, alert-dialog, table, select, dropdown…).
 - `src/lib/supabase.ts` — único cliente; `VITE_SUPABASE_URL` (default `https://uniko-rd.com`) y `VITE_SUPABASE_PUBLISHABLE_KEY`.
 - `src/lib/auth.tsx` — `AuthProvider`/`useAuth` (`session`, `profile`, `isAdmin`).
+- `src/lib/chat-db.ts`, `src/lib/chat-realtime.ts`, `src/lib/chat-types.ts` — lógica del sistema de chat.
+- `src/lib/r2-client.ts` — cliente para subir archivos a Cloudflare R2 (upload de adjuntos en chat).
 - `src/styles.css` — tokens y utilidades del design system.
-- `supabase/` — `schema.sql`, `migration_v2..v8.sql`, `seed.sql`, **`OPERACION.md` (LEER PRIMERO)**.
+- `supabase/` — `schema.sql`, `migration_v2..v8.sql`, **`migration_admin_chat.sql`** (NUEVA: tablas admin_chat_conversations y admin_chat_messages), `seed.sql`, **`OPERACION.md` (LEER PRIMERO)**.
 - `scripts/` — `verify-marketplace.mjs` (test de integración), `vps-ssh.py`, `vps-upload.py`.
 - `Dockerfile` (multi-stage, `NITRO_PRESET=node-server`, Node 22, corre en :3000) y `docker-compose.yml` (contenedor `uniko-web`, publicado en el host **:8090**, etiquetas Traefik para `uniko-rd.com`).
 
-## 4. Supabase self-hosted (VPS `84.46.254.137`)
-- URL pública `https://uniko-rd.com` (mismo origen que la web → sin CORS ni contenido mixto).
+## 4. Supabase self-hosted (VPS)
+- **IMPORTANTE**: El VPS anterior (84.46.254.137) ya NO está disponible. Se requiere configurar VPS nuevo desde cero.
+- URL pública será `https://uniko-rd.com` (mismo origen que la web → sin CORS ni contenido mixto).
   Endpoints: `/rest/v1`, `/auth/v1`, `/storage/v1`, `/functions/v1`, `/realtime/v1` los sirve `supabase-envoy`.
 - Key publishable en cliente: `sb_publishable_qDTaqHyWWdy92o7G6InGDJ_WEugr_zv`.
 - Contenedores: `supabase-db` (user `supabase_admin`, db `postgres`), `supabase-auth`, `supabase-envoy`, `supabase-kong`, etc.
 - **Aplicar SQL** (el `-f` dentro del contenedor NO ve `/tmp` del host; hay que usar stdin):
-  `Get-Content supabase\migration_vN.sql -Raw | python scripts\vps-ssh.py "cat > /tmp/m.sql && docker exec -i supabase-db psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -f - < /tmp/m.sql"`
-- Migraciones `v2..v8` **ya aplicadas**. `migration_v8.sql` es clave:
+  `cat supabase/migration_vN.sql | python scripts/vps-ssh.py "cat > /tmp/m.sql && docker exec -i supabase-db psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -f - < /tmp/m.sql"`
+- **Migraciones a aplicar en VPS nuevo** (en orden):
+  1. `schema.sql` — esquema base completo
+  2. `migration_v2.sql` hasta `migration_v8.sql` — evolución del marketplace
+  3. **`migration_admin_chat.sql`** — sistema de chat admin↔tiendas (NUEVA, pendiente aplicar)
+- `migration_v8.sql` es clave:
   - `purchase_requests.store_ids text[]` + índice GIN.
   - RLS: select/update de vendedor si `store_ids &&` sus tiendas (respaldo: `items[].tienda` = `stores.name`), update admin, **revocado UPDATE general → solo se puede actualizar la columna `status`**.
   - RPC `public.tienda_contactos(nombres text[])` (security definer, grant a `anon` y `authenticated`) → devuelve teléfonos de vendedores (los perfiles de otros usuarios NO son legibles por RLS).
+- **`migration_admin_chat.sql`** agrega:
+  - Tablas `admin_chat_conversations` y `admin_chat_messages`
+  - RLS: admin ve todo, tiendas solo sus propias conversaciones
+  - Trigger para actualizar metadata de conversación en cada mensaje nuevo
+  - Políticas para que tiendas puedan crear conversaciones con admin
 - `stores.id` es **text**; `profiles` solo es legible por el propio usuario/admin.
 - Verificación sin sesión: simular JWT en SQL (no hay credenciales de vendedor reales para probar en UI).
 - Test de integración: `node --env-file=.env.local scripts/verify-marketplace.mjs` (requiere `SUPABASE_SERVICE_ROLE_KEY`, crea datos temporales y los borra). **Ojo**: los tests de WhatsApp envían mensajes REALES.
 
 ## 5. VPS + Coolify (deploy)
-- VPS `84.46.254.137`, password en la env `VPS_PASS`, helper `python scripts\vps-ssh.py "comando"`.
+- **VPS anterior (84.46.254.137) ya NO disponible**. Configurar VPS nuevo desde cero.
+- Password VPS en la env `VPS_PASS`, helper `python scripts/vps-ssh.py "comando"`.
   **Riesgo de ban**: tras varios intentos de SSH el host puede filtrar 22/443 manteniendo el ping OK (fail2ban/CSF). Si pasa, esperar y reintentar; no insistir.
-- **Coolify** hace deploy automático en cada `git push a main`: webhook de GitHub → reconstruye con el `Dockerfile` → redespliega el recurso `unikord-web` (proyecto `unikord` / environment `production`), sirve `https://uniko-rd.com` y `www`.
+- **Coolify** (opcional pero recomendado) hace deploy automático en cada `git push a main`: webhook de GitHub → reconstruye con el `Dockerfile` → redespliega el recurso `unikord-web` (proyecto `unikord` / environment `production`), sirve `https://uniko-rd.com` y `www`.
 - Rollback manual: el stack `/opt/uniko-rd` (`docker compose up -d --build`).
 - **Variables de entorno cifradas**: Coolify guarda los valores con `APP_KEY` de Laravel en formato `Crypt::encrypt()` (serialize=true).
   Para insertar/leer desde la DB de Coolify (`coolify-db`, user/db `coolify`, tabla `environment_variables`): usar **`$e->encrypt($valor)`** de Laravel; `Crypt::encryptString()` da `DecryptError` y el valor en croto da `DecryptException`.
@@ -74,9 +90,18 @@ Marketplace dominicano multi-vendor (productos + servicios) con **dos repos** (l
 - Eyebrows: `text-xs font-bold uppercase tracking-wide text-primary` con icono lucide (`h-4 w-4` / `h-3.5 w-3.5`).
 - Tablas: patrón de `GestionTiendas.tsx` — `overflow-x-auto` > `table w-full min-w-[…] text-left text-sm`, thead `border-b … text-xs uppercase text-muted-foreground`, filas `border-b border-border/60 hover:bg-muted/40`, celdas `px-4 py-3`.
 - Modales: `@/components/ui/dialog` / `alert-dialog`. Colores: `--brand` (rojo), `--primary` (azul), `--success`, `--destructive`; usar `bg-primary/10 text-primary` para pills.
+- **Chat UI**: mensajes del usuario alineados a la derecha con `bg-blue-600 text-white`, mensajes de otros a la izquierda con `bg-gray-100 text-gray-900` o `bg-white border`. Polling cada 3 segundos para actualización en tiempo real.
 - Todo en español (incluye textos, `aria-label` y toasts).
 
-## 8. App Android (`../Uniko-RD-App`)
+## 8. App móvil (Capacitor híbrida)
+- **Ubicación**: `../uniko-mobile-app` (no es Kotlin nativa, es Capacitor).
+- Usa el mismo código web compilado → carpeta `www/` contiene el build de la web app.
+- `capacitor.config.json` configura iOS y Android.
+- Para actualizar: `npm run build` en web-app-1 → copiar `.output` a `www/` → `npx cap sync` en uniko-mobile-app.
+- El sistema de chat admin-tienda funcionará automáticamente en móvil una vez desplegado en web (mismo backend Supabase).
+- Para build nativo: Android Studio (Android) o Xcode (iOS) desde las carpetas `android/` e `ios/`.
+
+**Repo Android nativa antigua** (`../Uniko-RD-App`, ya no en uso):
 - `data/Remoto.kt` → cliente HTTP directo a Supabase (`BASE = "https://uniko-rd.com"`, misma publishable key): auth (`signup`, `token`, `recover`), `stores`, `products`, y `POST /rest/v1/purchase_requests` (`enviarSolicitud`).
 - `data/` → Room (`AppDatabase`, `Daos`, `Entities`: `ProductEntity.storeId/storeName`), `UnikoRepository.kt` (sync BD local ↔ Supabase), `Sesion.kt`.
 - `ui/UnikoViewModel.kt` → estado global; `enviarSolicitudCompra(...)` arma el JSON del checkout y **ya envía `store_ids`** (array de `storeId` distintos del carrito) para que el vendedor vea las compras hechas desde la app.
@@ -95,6 +120,22 @@ Marketplace dominicano multi-vendor (productos + servicios) con **dos repos** (l
 - Documentación existente: **`supabase/OPERACION.md`** (BD, VPS, Coolify, WhatsApp, pruebas) y `README.md` (brief original + secciones "Despliegue" y "Ordenes y WhatsApp").
 
 ## 10. Estado conocido (punto de partida)
-- Web `main` = `d3ec07f` (panel de órdenes restyled con el design system) y app `main` = `e595be4` (`store_ids` en el checkout), ambos subidos.
-- El VPS puede estar filtrando nuestra IP en TCP (ping OK, 22/443 sin respuesta): si `https://uniko-rd.com` no responde, es eso y no un bug del código; local el SSR de `/` y `/vender` se colgará ~50 s por eso.
-- No hay credenciales de vendedor para probar la UI autenticada; la validación RLS se hace por SQL.
+- Web `main` = `9c882bf` (sistema completo de chat admin-tienda: CRM dashboard, soporte admin↔tiendas, chat tiendas/vendedores).
+- **VPS anterior (84.46.254.137) NO disponible** → requiere configurar VPS nuevo desde cero.
+- Migración `migration_admin_chat.sql` lista pero **pendiente de aplicar** en VPS nuevo.
+- App móvil usa Capacitor (híbrida) → mismo código web, funcionará automáticamente cuando VPS esté operativo.
+- Sistema de chat implementado:
+  - ✅ Admin puede ver conversaciones con tiendas (tab "Soporte" en panel admin)
+  - ✅ Tiendas pueden contactar admin (ruta `/admin/ayuda`)
+  - ✅ Polling tiempo real cada 3 segundos
+  - ✅ Envío de mensajes de texto
+  - ✅ Contadores de mensajes no leídos
+  - ✅ Botones de adjuntar archivo/imagen (upload a R2 pendiente implementar)
+  - ✅ RLS configurado: admin ve todo, tiendas solo sus conversaciones
+- Próximas tareas:
+  1. Configurar VPS nuevo con Supabase self-hosted
+  2. Aplicar todas las migraciones (schema.sql + v2..v8 + admin_chat)
+  3. Configurar Coolify para auto-deploy
+  4. Configurar DNS apuntando a nuevo VPS
+  5. Implementar upload de archivos a Cloudflare R2
+  6. Habilitar chat entre tiendas↔compradores (código base ya existe)
