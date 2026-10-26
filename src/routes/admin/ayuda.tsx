@@ -50,7 +50,7 @@ export function StoreHelpChat() {
       const { data, error } = await supabase
         .from('stores')
         .select('id')
-        .eq('user_id', profile.id)
+        .eq('owner_id', profile.id)
         .single();
 
       if (error) throw error;
