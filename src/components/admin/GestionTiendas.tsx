@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Search, Store, Trash2 } from "lucide-react";
+import { CheckCircle2, Clock, Search, Store, Trash2, XCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { fetchTiendasAdmin, fetchPerfilesAdmin } from "@/lib/queries";
 import { api, CLOUDFLARE_API } from "@/lib/cloudflare";
@@ -20,6 +20,7 @@ export function GestionTiendas() {
   const [tiendas, setTiendas] = useState<StoreRow[] | null>(null);
   const [duenos, setDuenos] = useState<Record<string, ProfileRow>>({});
   const [busqueda, setBusqueda] = useState("");
+  const [filtro, setFiltro] = useState<"todas" | "pendientes" | "aprobadas">("todas");
   const [guardandoId, setGuardandoId] = useState<string | null>(null);
   const [porEliminar, setPorEliminar] = useState<StoreRow | null>(null);
   const [confirmarTodas, setConfirmarTodas] = useState(false);
@@ -45,15 +46,17 @@ export function GestionTiendas() {
   const filtradas = useMemo(() => {
     if (!tiendas) return [];
     const q = busqueda.trim().toLowerCase();
-    if (!q) return tiendas;
-    return tiendas.filter((t) =>
-      [t.name, t.category, t.location, t.rnc]
+    return tiendas.filter((t) => {
+      if (filtro === "pendientes" && t.approved !== false) return false;
+      if (filtro === "aprobadas" && t.approved === false) return false;
+      if (!q) return true;
+      return [t.name, t.category, t.location, t.rnc]
         .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(q)),
-    );
-  }, [tiendas, busqueda]);
+        .some((v) => String(v).toLowerCase().includes(q));
+    });
+  }, [tiendas, busqueda, filtro]);
 
-  const alternar = async (id: string, campo: "verified" | "featured") => {
+  const alternar = async (id: string, campo: "verified" | "featured" | "approved") => {
     const tienda = tiendas?.find((t) => t.id === id);
     if (!tienda) return;
     const valor = !tienda[campo];
@@ -71,6 +74,13 @@ export function GestionTiendas() {
     setTiendas((prev) =>
       prev ? prev.map((t) => (t.id === id ? { ...t, [campo]: valor } : t)) : prev,
     );
+    if (campo === "approved") {
+      toast.success(
+        valor
+          ? "Tienda aprobada: ya es visible en el marketplace."
+          : "Tienda suspendida: vuelve a la cola de pendientes.",
+      );
+    }
   };
 
   const eliminar = async (ids: string[]) => {
@@ -115,12 +125,39 @@ export function GestionTiendas() {
     return <div className="p-8 text-center text-sm text-muted-foreground">Cargando tiendas…</div>;
   }
 
+  const pendientes = tiendas.filter((t) => t.approved === false).length;
+  const filtros = [
+    { valor: "todas", etiqueta: `Todas (${tiendas.length})` },
+    { valor: "pendientes", etiqueta: `Pendientes (${pendientes})` },
+    { valor: "aprobadas", etiqueta: "Aprobadas" },
+  ] as const;
+
   return (
     <div className="p-4">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="flex items-center gap-2 font-semibold">
-          <Store className="h-5 w-5 text-brand" /> Tiendas ({tiendas.length})
-        </h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className="flex items-center gap-2 font-semibold">
+            <Store className="h-5 w-5 text-brand" /> Tiendas ({tiendas.length})
+          </h2>
+          <div className="flex items-center gap-1 rounded-full border border-border bg-background p-1 text-xs font-semibold">
+            {filtros.map((op) => (
+              <button
+                key={op.valor}
+                type="button"
+                onClick={() => setFiltro(op.valor)}
+                className={`rounded-full px-3 py-1 ${
+                  filtro === op.valor
+                    ? op.valor === "pendientes" && pendientes > 0
+                      ? "bg-amber-500 text-black"
+                      : "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {op.etiqueta}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
@@ -143,13 +180,14 @@ export function GestionTiendas() {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] text-left text-sm">
+        <table className="w-full min-w-[1000px] text-left text-sm">
           <thead>
             <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
               <th className="py-2 pr-3">Tienda</th>
               <th className="py-2 pr-3">Propietario</th>
               <th className="py-2 pr-3">RNC</th>
               <th className="py-2 pr-3">Ubicación</th>
+              <th className="py-2 pr-3">Estado</th>
               <th className="py-2 pr-3">Rating</th>
               <th className="py-2 pr-3">Productos</th>
               <th className="py-2 pr-3">Verificada</th>
@@ -160,8 +198,12 @@ export function GestionTiendas() {
           <tbody>
             {filtradas.length === 0 && (
               <tr>
-                <td colSpan={9} className="py-8 text-center text-muted-foreground">
-                  Sin resultados para “{busqueda}”.
+                <td colSpan={10} className="py-8 text-center text-muted-foreground">
+                  {filtro === "pendientes"
+                    ? "No hay tiendas pendientes de aprobación."
+                    : busqueda.trim()
+                      ? `Sin resultados para “${busqueda}”.`
+                      : "Todavía no hay tiendas en la plataforma."}
                 </td>
               </tr>
             )}
@@ -189,6 +231,44 @@ export function GestionTiendas() {
                 </td>
                 <td className="py-2.5 pr-3 text-muted-foreground">{t.rnc ?? "—"}</td>
                 <td className="py-2.5 pr-3 text-muted-foreground">{t.location ?? "—"}</td>
+                <td className="py-2.5 pr-3">
+                  <div className="flex flex-col gap-1">
+                    <span
+                      className={`inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                        t.approved === false
+                          ? "bg-amber-500/15 text-amber-600"
+                          : "bg-emerald-500/15 text-emerald-600"
+                      }`}
+                    >
+                      {t.approved === false ? (
+                        <Clock className="h-3 w-3" />
+                      ) : (
+                        <CheckCircle2 className="h-3 w-3" />
+                      )}
+                      {t.approved === false ? "Pendiente" : "Aprobada"}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={guardandoId === t.id}
+                      onClick={() => alternar(t.id, "approved")}
+                      className={`inline-flex w-fit items-center gap-1 text-[11px] font-semibold ${
+                        t.approved === false
+                          ? "text-primary hover:underline"
+                          : "text-muted-foreground hover:text-destructive"
+                      }`}
+                    >
+                      {t.approved === false ? (
+                        <>
+                          <CheckCircle2 className="h-3 w-3" /> Aprobar
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="h-3 w-3" /> Suspender
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </td>
                 <td className="py-2.5 pr-3">
                   {Number(t.rating).toFixed(1)} ({t.reviews})
                 </td>

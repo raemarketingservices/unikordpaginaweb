@@ -9,6 +9,7 @@ export type CategoriaRow = {
 };
 
 export type StoreRow = {
+  approved?: boolean;
   id: string;
   owner_id: string | null;
   owner_name: string | null;
@@ -26,6 +27,7 @@ export type StoreRow = {
   logo: string | null;
   cover: string | null;
   created_at: string;
+  stock_enabled?: boolean;
 };
 
 export type ProductRow = {
@@ -49,10 +51,17 @@ export type ProductRow = {
   best_seller: boolean;
   is_new: boolean;
   created_at: string;
+  track_inventory?: boolean;
+  stock_quantity?: number;
 };
 
 export type ProductWithStoreRow = ProductRow & {
-  stores: { name?: string; verified?: boolean } | null;
+  // `| undefined` explícito: el proyecto va con `exactOptionalPropertyTypes`, y
+  // la rama de la API vieja (D1) escribe la clave con valor `undefined` porque
+  // ese worker nunca devolvió existencias. Unknown es un estado real aquí.
+  stores:
+    | { name?: string; verified?: boolean; stock_enabled?: boolean | undefined }
+    | null;
 };
 
 export type ServiceRow = {

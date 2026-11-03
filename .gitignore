@@ -35,3 +35,6 @@ dist-ssr
 # Scripts de comprobación locales: llevan la contraseña del panel en claro.
 check-admin.mjs
 check-local.mjs
+
+# Export de un solo archivo (5.5 MB) con el bundle inlinado: artifact, no fuente.
+exports/

@@ -108,9 +108,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(null);
         setLocalAdmin(false);
       } else if (CLOUDFLARE_API) {
-        await cloudLogout();
-        setSession(null);
-        setProfile(null);
+        try { await cloudLogout(); }
+        finally { setSession(null); setProfile(null); }
       } else await supabase.auth.signOut();
     },
     refreshLocal: () => {

@@ -288,3 +288,24 @@
   cursor: not-allowed;
   pointer-events: none;
 }
+
+@keyframes uniko-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.uniko-enter,
+form,
+article.card-uniko {
+  animation: uniko-enter 240ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uniko-enter, form, article.card-uniko { animation: none; }
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

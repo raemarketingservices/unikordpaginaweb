@@ -166,6 +166,8 @@ function Vender() {
         location: ubicacion || null,
         logo: logoUrl,
         cover: portadaUrl,
+        // El alta pública siempre entra por la cola de aprobación del panel.
+        approved: false,
       });
       if (error) throw new Error(error.message);
 
@@ -192,7 +194,7 @@ function Vender() {
           .is("terms_accepted_at", null);
       }
 
-      toast.success("¡Tu tienda está lista!");
+      toast.success("Tu tienda quedó registrada y está en revisión.");
       router.history.push("/publicar");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No pudimos crear la tienda.");

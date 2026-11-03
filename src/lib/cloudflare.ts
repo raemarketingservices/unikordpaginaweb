@@ -1,7 +1,8 @@
 import type { ProfileRow } from "./types";
+import { DATA_SOURCE } from "./data-source";
 
 const base = ((import.meta.env["VITE_CLOUDFLARE_API_URL"] as string | undefined) ?? "https://uniko-marketplace.aqui-rd.workers.dev").replace(/\/$/, "");
-export const CLOUDFLARE_API = import.meta.env["VITE_LOCAL_CATALOG"] !== "true";
+export const CLOUDFLARE_API = DATA_SOURCE === "cloudflare";
 const TOKEN = "unikord.cloudflare.session";
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -10,13 +11,20 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = typeof window === "undefined" ? null : sessionStorage.getItem(TOKEN);
   if (token) headers.set("Authorization", `Bearer ${token}`);
   if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
-  const response = await fetch(`${base}${path}`, { ...init, headers });
+  const response = await fetch(`${import.meta.env['VITE_LOCAL_ADMIN'] ? '/local-api/marketplace' : base}${path}`, { ...init, headers });
   const result = await response.json().catch(() => null) as { error?: string } | T | null;
   if (!response.ok) throw new Error((result && typeof result === "object" && "error" in result && result.error) || `Error HTTP ${response.status}`);
   return result as T;
 }
 
 export async function cloudLogin(email: string, password: string, admin = false): Promise<ProfileRow> {
+  if (!admin && !email.includes('@')) {
+    const response = await fetch('/local-api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: email, password }) });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error ?? 'Usuario o contraseña incorrectos.');
+    sessionStorage.setItem(TOKEN, result.token);
+    return result.profile;
+  }
   const result = await api<{ token: string; profile: ProfileRow }>(admin ? "/api/auth/admin" : "/api/auth/login", {
     method: "POST", body: JSON.stringify(admin ? { password } : { email, password }),
   });
@@ -25,6 +33,13 @@ export async function cloudLogin(email: string, password: string, admin = false)
 }
 
 export async function cloudRegister(input: Record<string, unknown>): Promise<ProfileRow> {
+  if (input['username']) {
+    const response = await fetch('/local-api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error ?? 'No se pudo crear la cuenta.');
+    sessionStorage.setItem(TOKEN, result.token);
+    return result.profile;
+  }
   const result = await api<{ token: string; profile: ProfileRow }>("/api/auth/register", {
     method: "POST", body: JSON.stringify(input),
   });

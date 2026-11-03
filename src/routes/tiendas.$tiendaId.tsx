@@ -193,7 +193,7 @@ function DetalleTienda() {
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">{tienda.nombre}</h2>
               <div className="flex gap-2">
-                <Link to="/mensajes" className="btn-base btn-outline">
+                <Link to="/mensajes" search={{ tienda: tienda.id }} className="btn-base btn-outline">
                   <MessageCircle className="h-4 w-4" /> Contactar
                 </Link>
                 <button className="btn-base btn-primary">Seguir</button>

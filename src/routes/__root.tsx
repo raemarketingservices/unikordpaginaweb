@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useRouterState,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -19,6 +20,7 @@ import { Header } from "@/components/uniko/Header";
 import { Footer } from "@/components/uniko/Footer";
 import { NavMovil } from "@/components/uniko/NavMovil";
 import { Chatbot } from "@/components/uniko/Chatbot";
+import { api } from '@/lib/cloudflare';
 
 function NotFoundComponent() {
   return (
@@ -139,6 +141,16 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    if (!import.meta.env['VITE_LOCAL_ADMIN']) return;
+    const update = () => { void api<Record<string,string>>('/api/app-settings').then(settings => {
+      for (const key of ['primary','brand']) if (settings[key]) document.documentElement.style.setProperty(`--${key}`, settings[key]);
+    }).catch(() => {}); };
+    update(); window.addEventListener('unikord:appearance', update);
+    return () => window.removeEventListener('unikord:appearance', update);
+  }, []);
+  const entrance = useRouterState({ select: s => s.location.pathname === '/auth' });
+  const pathname = useRouterState({ select: s => s.location.pathname });
   const router = useRouter();
   useEffect(() => {
     if (LOCAL_CATALOG) void router.invalidate();
@@ -149,7 +161,7 @@ function RootComponent() {
       <AuthProvider>
         <CartProvider>
           <div className="flex min-h-screen flex-col bg-background">
-            <Header />
+            {!entrance && <Header />}
             {LOCAL_CATALOG && (
               <p
                 role="status"
@@ -161,11 +173,11 @@ function RootComponent() {
             )}
             <main className="flex-1">
               {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-              <Outlet />
+              <div key={pathname} className="uniko-enter"><Outlet /></div>
             </main>
-            <Footer />
-            <NavMovil />
-            <Chatbot />
+            {!entrance && <Footer />}
+            {!entrance && <NavMovil />}
+            {!entrance && <Chatbot />}
           </div>
           <Toaster position="top-center" richColors closeButton />
         </CartProvider>

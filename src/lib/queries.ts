@@ -7,6 +7,7 @@ import type {
   ChatbotSettingsRow,
   PageBlockRow,
   ProductWithStoreRow,
+  ProductRow,
   ProfileRow,
   ServiceRow,
   StoreRow,
@@ -42,7 +43,7 @@ function mapProducto(r: ProductWithStoreRow): Producto {
     resenas: r.reviews,
     ubicacion: r.location ?? "",
     envioNacional: r.shipping,
-    imagen: r.image ?? "",
+    imagen: r.image?.startsWith("https://r2.uniko-marketplace.aqui-rd.workers.dev/products/") ? ({ prod_iphone15pro_001: "/products/iphone15pro-generated.png", prod_samsung_s24_001: "/products/samsungs24-generated.png", prod_vestido_001: "/products/vestido-verano-generated.png", prod_bandeja_001: "/products/bandeja-paisa-generated.png" } as Record<string, string>)[r.id] ?? r.image : r.image ?? "",
     destacado: r.featured,
     masVendido: r.best_seller,
     nuevo: r.is_new,
@@ -55,7 +56,22 @@ function mapProducto(r: ProductWithStoreRow): Producto {
   const videos = asArray(r.videos);
   if (gallery.length) p.galeria = gallery;
   if (videos.length) p.videos = videos;
+  if (esInventarioControlado(r)) p.inventario = { unidades: r.stock_quantity as number };
   return p;
+}
+
+/**
+ * Las dos banderas tienen que decir que sí, y el número tiene que venir: una
+ * fila sin columnas de inventario (el worker viejo, una tienda que apagó el
+ * control) NO se convierte en "quedan 0" — eso mandaría un producto vivo a
+ * agotado. Se deja sin disponibilidad y la UI no presume.
+ */
+function esInventarioControlado(r: ProductWithStoreRow): boolean {
+  return (
+    r.track_inventory === true &&
+    r.stores?.stock_enabled !== false &&
+    typeof r.stock_quantity === "number"
+  );
 }
 
 function mapServicio(r: ServiceRow): Servicio {
@@ -116,13 +132,14 @@ export async function fetchProductos(): Promise<Producto[]> {
     const [products, stores] = await Promise.all([api<ProductRow[]>("/api/products"), api<StoreRow[]>("/api/stores")]);
     return products.map((product) => mapProducto({ ...product,
       gallery: asArray(product.gallery), videos: asArray(product.videos),
-      stores: { name: stores.find((store) => store.id === product.store_id)?.name,
-        verified: stores.find((store) => store.id === product.store_id)?.verified },
+      stores: { name: stores.find((store) => store.id === product.store_id)?.name ?? '',
+        verified: stores.find((store) => store.id === product.store_id)?.verified ?? false,
+        stock_enabled: stores.find((store) => store.id === product.store_id)?.stock_enabled },
     }));
   }
   const { data, error } = await supabase
     .from("products")
-    .select("*, stores(name, verified)")
+    .select("*, stores(name, verified, stock_enabled)")
     .order("created_at", { ascending: false });
   if (error) fallo(error.message);
   return ((data ?? []) as ProductWithStoreRow[]).map(mapProducto);
@@ -398,12 +415,14 @@ export async function fetchProductosAdmin() {
   if (CLOUDFLARE_API) {
     const [products, stores] = await Promise.all([api<ProductRow[]>("/api/admin/products"), api<StoreRow[]>("/api/stores")]);
     return products.map((p) => ({ ...p, gallery: asArray(p.gallery), videos: asArray(p.videos),
-      stores: { name: stores.find((s) => s.id === p.store_id)?.name } }));
+      stores: { name: stores.find((s) => s.id === p.store_id)?.name ?? '' } }));
   }
   const { data, error } = await supabase
     .from("products")
-    .select("*, stores(name)")
+    .select("*, stores(name, stock_enabled)")
     .order("created_at", { ascending: false });
   if (error) fallo(error.message);
   return (data ?? []) as ProductWithStoreRow[];
 }
+
+

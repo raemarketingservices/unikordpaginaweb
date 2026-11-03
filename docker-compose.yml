@@ -1,29 +1,33 @@
 services:
   uniko-web:
-    build: .
+    build:
+      context: .
+      args:
+        # Vite los inyecta en el bundle: la URL pública tiene que existir ya.
+        VITE_DATA_SOURCE: supabase
+        VITE_SUPABASE_URL: https://uniko-rd.com
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${UNIKO_SUPABASE_ANON_KEY}
+        # El botón de Google sólo se pinta si GoTrue tiene el proveedor configurado.
+        VITE_GOOGLE_OAUTH: ${UNIKO_GOOGLE_OAUTH:-false}
     container_name: uniko-web
     restart: unless-stopped
     ports:
-      - "8090:3000"
-    environment:
-      - NODE_ENV=production
+      - "127.0.0.1:8090:3000"
     networks:
-      - default
-      - coolify
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=coolify"
-      - "traefik.http.routers.uniko-web.rule=Host(`uniko-rd.com`) || Host(`www.uniko-rd.com`)"
-      - "traefik.http.routers.uniko-web.entrypoints=https"
-      - "traefik.http.routers.uniko-web.tls=true"
-      - "traefik.http.routers.uniko-web.tls.certresolver=letsencrypt"
-      - "traefik.http.services.uniko-web.loadbalancer.server.port=3000"
-      - "traefik.http.routers.uniko-web-http.rule=Host(`uniko-rd.com`) || Host(`www.uniko-rd.com`)"
-      - "traefik.http.routers.uniko-web-http.entrypoints=http"
-      - "traefik.http.routers.uniko-web-http.middlewares=uniko-web-redirect"
-      - "traefik.http.middlewares.uniko-web-redirect.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.uniko-web-redirect.redirectscheme.permanent=true"
+      - uniko
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: uniko-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --config /etc/cloudflared/config.yml homelab-uniko
+    volumes:
+      - ./cloudflared:/etc/cloudflared:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - uniko
 
 networks:
-  coolify:
-    external: true
+  uniko:
+    name: uniko

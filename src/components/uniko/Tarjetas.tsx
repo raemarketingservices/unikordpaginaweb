@@ -1,12 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { Heart, MapPin, Truck, CalendarCheck, Store as StoreIcon, Users, ArrowUpRight, Package, Briefcase } from "lucide-react";
 import { formatearRD, type Producto, type Servicio, type Tienda } from "@/data/marketplace";
-import { BadgeVerificado, Estrellas, Etiqueta } from "./Primitivos";
+import { estadoInventario } from "@/lib/inventario";
+import { BadgeVerificado, ChipInventario, Estrellas, Etiqueta } from "./Primitivos";
 
 export function TarjetaProducto({ producto }: { producto: Producto }) {
   const descuento = producto.precioAnterior
     ? Math.round((1 - producto.precio / producto.precioAnterior) * 100)
     : 0;
+  const inventario = estadoInventario(producto);
+  const agotado = inventario.controlada && inventario.agotado;
 
   return (
     <article className="card-uniko group flex flex-col overflow-hidden">
@@ -15,11 +18,12 @@ export function TarjetaProducto({ producto }: { producto: Producto }) {
           src={producto.imagen}
           alt={producto.titulo}
           loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 ${agotado ? "opacity-55 grayscale" : ""}`}
         /> : <div className="grid h-full place-items-center text-muted-foreground"><Package className="h-10 w-10" /></div>}
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
           {descuento > 0 ? <Etiqueta>-{descuento}%</Etiqueta> : null}
-          {producto.nuevo ? <Etiqueta tono="primary">Nuevo</Etiqueta> : null}
+          {producto.nuevo && !agotado ? <Etiqueta tono="primary">Nuevo</Etiqueta> : null}
+          {agotado ? <Etiqueta tono="neutro">Agotado</Etiqueta> : null}
         </div>
         <button
           type="button"
@@ -40,7 +44,10 @@ export function TarjetaProducto({ producto }: { producto: Producto }) {
             </span>
           ) : null}
         </div>
-        <Estrellas rating={producto.rating} resenas={producto.resenas} />
+        <div className="flex flex-wrap items-center gap-2">
+          <Estrellas rating={producto.rating} resenas={producto.resenas} />
+          <ChipInventario producto={producto} />
+        </div>
         <div className="flex min-w-0 items-center gap-1.5 text-xs font-medium text-muted-foreground">
           <StoreIcon className="h-3.5 w-3.5 shrink-0" />
           <span className="truncate">{producto.tienda}</span>

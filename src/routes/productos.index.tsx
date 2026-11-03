@@ -36,7 +36,8 @@ function Productos() {
   const [provincia, setProvincia] = useState("todas");
   const [soloVerificados, setSoloVerificados] = useState(false);
   const [soloEnvio, setSoloEnvio] = useState(false);
-  const [maximo, setMaximo] = useState(100000);
+  const limitePrecio = Math.max(1000, Math.ceil(Math.max(0, ...productos.map(p => p.precio)) / 1000) * 1000);
+  const [maximo, setMaximo] = useState<number | null>(null);
   const [orden, setOrden] = useState("relevancia");
 
   const lista = useMemo(() => {
@@ -46,7 +47,7 @@ function Productos() {
         (provincia === "todas" || p.ubicacion.includes(provincia)) &&
         (!soloVerificados || p.verificado) &&
         (!soloEnvio || p.envioNacional) &&
-        p.precio <= maximo,
+        (maximo === null || p.precio <= maximo),
     );
     const copia = [...filtrada];
     if (orden === "precio-asc") copia.sort((a, b) => a.precio - b.precio);
@@ -94,13 +95,13 @@ function Productos() {
             </select>
           </Campo>
 
-          <Campo label={`Precio máximo: RD$${maximo.toLocaleString("es-DO")}`}>
+          <Campo label={`Precio máximo: RD$${(maximo ?? limitePrecio).toLocaleString("es-DO")}`}>
             <input
               type="range"
-              min={1000}
-              max={100000}
+              min={0}
+              max={limitePrecio}
               step={1000}
-              value={maximo}
+              value={maximo ?? limitePrecio}
               onChange={(e) => setMaximo(Number(e.target.value))}
               className="w-full accent-[var(--brand)]"
             />

@@ -89,9 +89,9 @@ function InicioEstatico({ data }: { data: HomeData }) {
             </div>
             <dl className="mt-8 grid grid-cols-3 gap-4 border-t border-border pt-6">
               {[
-                { k: "+12,000", v: "Productos publicados" },
-                { k: "+2,500", v: "Servicios y profesionales" },
-                { k: "32", v: "Provincias con cobertura" },
+                { k: String(productos.length), v: "Productos publicados" },
+                { k: String(servicios.length), v: "Servicios disponibles" },
+                { k: String(tiendas.length), v: "Tiendas locales" },
               ].map((s) => (
                 <div key={s.v} className="min-w-0">
                   <dt className="text-lg font-bold text-primary sm:text-xl">{s.k}</dt>

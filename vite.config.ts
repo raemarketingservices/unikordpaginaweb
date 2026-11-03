@@ -5,6 +5,8 @@
 //     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { localMessages } from "./local-messages";
+import { localAdmin } from "./local-admin";
 
 export default defineConfig({
   tanstackStart: {
@@ -14,6 +16,8 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    plugins: process.env["UNIKO_LOCAL_MESSAGES"] === "true" ? [localAdmin(), localMessages()] : [],
+    define: process.env["UNIKO_LOCAL_MESSAGES"] === "true" ? { 'import.meta.env.VITE_LOCAL_ADMIN': 'true' } : {},
     cacheDir: process.env["UNIKO_VITE_CACHE_DIR"] ?? "node_modules/.vite",
     server: { port: 5050, strictPort: true },
   },

@@ -52,18 +52,18 @@ const columnas = [
 
 export function Footer() {
   return (
-    <footer className="mt-16 bg-sidebar pb-24 pt-12 text-sidebar-foreground lg:pb-12">
+    <footer className="mt-8 bg-sidebar pb-[calc(5rem+env(safe-area-inset-bottom))] pt-6 text-sidebar-foreground lg:pb-6">
       <div className="mx-auto max-w-7xl px-4">
-        <div className="grid gap-8 lg:grid-cols-[1.2fr_repeat(5,minmax(0,1fr))]">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-3 lg:grid-cols-[1.2fr_repeat(5,minmax(0,1fr))]">
           <div className="min-w-0">
-            <Logo variante="blanco" className="h-14" />
-            <p className="mt-4 text-sm font-medium opacity-90">
+            <Logo variante="blanco" className="h-9" />
+            <p className="mt-2 text-xs font-medium opacity-90">
               Todo lo que buscas. En un solo lugar.
             </p>
-            <p className="mt-2 text-sm opacity-75">
+            <p className="mt-2 text-xs opacity-75">
               Conectamos personas, productos y oportunidades en toda República Dominicana.
             </p>
-            <div className="mt-4 flex gap-2">
+            <div className="mt-3 flex flex-wrap gap-1.5">
               {[Instagram, Facebook, Music2, Youtube].map((Icono, i) => (
                 <span
                   key={i}
@@ -78,21 +78,21 @@ export function Footer() {
           {columnas.map((col) => (
             <div key={col.titulo} className="min-w-0">
               <h3 className="text-sm font-bold text-white">{col.titulo}</h3>
-              <ul className="mt-3 space-y-2">
+              <ul className="mt-2 space-y-1">
                 {col.enlaces.map((e) => (
                   <li key={e.label}>
                     {"doc" in e ? (
                       <Link
                         to="/legal/$doc"
                         params={{ doc: e.doc }}
-                        className="text-sm opacity-80 hover:opacity-100 hover:underline"
+                        className="inline-block py-1 text-xs leading-5 opacity-80 hover:opacity-100 hover:underline"
                       >
                         {e.label}
                       </Link>
                     ) : (
                       <Link
                         to={e.to}
-                        className="text-sm opacity-80 hover:opacity-100 hover:underline"
+                        className="inline-block py-1 text-xs leading-5 opacity-80 hover:opacity-100 hover:underline"
                       >
                         {e.label}
                       </Link>
@@ -104,7 +104,7 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-10 border-t border-white/10 pt-6 text-xs opacity-70">
+        <div className="mt-5 border-t border-white/10 pt-3 text-xs opacity-70">
           © {new Date().getFullYear()} UNIKO-RD · Marketplace Dominicano. Todos los derechos
           reservados.
         </div>

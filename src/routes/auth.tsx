@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { LogIn, Store, Upload, UserPlus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -35,8 +35,63 @@ function mensajeError(msg: string): string {
   if (msg.toLowerCase().includes("invalid login")) return "Credenciales incorrectas.";
   if (msg.toLowerCase().includes("already registered")) return "Ese correo ya está registrado.";
   if (msg.toLowerCase().includes("password"))
-    return "La contraseña no cumple los requisitos (mínimo 6 caracteres).";
+    return "La contraseña no cumple los requisitos (mínimo 8 caracteres).";
   return msg;
+}
+
+/**
+ * El alta con Google sale de la página: el navegador salta a accounts.google.com y
+ * vuelve con el token en la URL, así que el formulario ya no existe. El borrador se
+ * guarda en sessionStorage (misma pestaña, se va al cerrar) y la tienda se crea al
+ * regresar, cuando ya hay sesión y el RLS deja insertarla.
+ */
+const CLAVE_BORRADOR = "uniko.borrador.tienda";
+
+type Borrador = {
+  nombres: string;
+  apellidos: string;
+  cedula: string;
+  telefono: string;
+  nombreTienda: string;
+  categoriaSlug: string;
+  ubicacion: string;
+  descripcion: string;
+  aceptaMarketing: boolean;
+  /** data URL del logo; sessionStorage no admite File. */
+  logo?: { nombre: string; tipo: string; data: string };
+};
+
+function leerBorrador(): Borrador | null {
+  try {
+    const crudo = sessionStorage.getItem(CLAVE_BORRADOR);
+    return crudo ? (JSON.parse(crudo) as Borrador) : null;
+  } catch {
+    return null;
+  }
+}
+
+function guardarBorrador(b: Borrador): void {
+  sessionStorage.setItem(CLAVE_BORRADOR, JSON.stringify(b));
+}
+
+function borrarBorrador(): void {
+  sessionStorage.removeItem(CLAVE_BORRADOR);
+}
+
+function aFile(logo: NonNullable<Borrador["logo"]>): File {
+  const bin = atob(logo.data.slice(logo.data.indexOf(",") + 1));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
+  return new File([bytes], logo.nombre, { type: logo.tipo });
+}
+
+function aDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(String(fr.result));
+    fr.onerror = () => reject(new Error("No se pudo leer el logo."));
+    fr.readAsDataURL(file);
+  });
 }
 
 function Auth() {
@@ -46,6 +101,7 @@ function Auth() {
   const { session, loading, refreshLocal } = useAuth();
   const [tab, setTab] = useState<"entrar" | "crear">(modo ?? "entrar");
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState("");
   const [nombres, setNombres] = useState("");
   const [apellidos, setApellidos] = useState("");
@@ -62,6 +118,10 @@ function Auth() {
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [aceptaMarketing, setAceptaMarketing] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  // GoTrue no publica qué proveedores están encendidos de forma legible desde el
+  // navegador, así que la imagen se construye con el flag del lado que sí está listo.
+  const googleListo =
+    !LOCAL_CATALOG && !CLOUDFLARE_API && import.meta.env["VITE_GOOGLE_OAUTH"] === "true";
 
   const destino = redirect ?? "/";
   const categoriasTienda = categorias.filter((c) => c.tipo !== "servicio");
@@ -111,8 +171,8 @@ function Auth() {
   const crear = async (e: React.FormEvent) => {
     e.preventDefault();
     if (enviando) return;
-    if (password.length < 6) {
-      toast.error("La contraseña debe tener al menos 6 caracteres.");
+    if (password.length < 8) {
+      toast.error("La contraseña debe tener al menos 8 caracteres.");
       return;
     }
     if (!nombres.trim() || !apellidos.trim()) {
@@ -166,7 +226,7 @@ function Auth() {
     }
     if (CLOUDFLARE_API) {
       try {
-        const user = await cloudRegister({ email, password, first_name: nombres, last_name: apellidos,
+        const user = await cloudRegister({ email, password, username, first_name: nombres, last_name: apellidos,
           cedula, phone: telefono, role: tipoCuenta === "vendedor" ? "vendor" : "user" });
         if (tipoCuenta === "vendedor") {
           const logo = logoTienda ? await cloudUpload(logoTienda) : "";
@@ -207,39 +267,72 @@ function Auth() {
       toast.error(mensajeError(error.message));
       return;
     }
+    // Con vendedor se guarda el borrador aunque haya sesión inmediata: si la tienda
+    // no se crea (corte, error de Storage), al volver a /auth se retoma sola.
+    const borrador = tipoCuenta === "vendedor" ? await construirBorrador() : null;
+    if (borrador) guardarBorrador(borrador);
+
     if (!data.session) {
-      toast.info("Revisa tu correo para confirmar tu cuenta y luego crea tu tienda en /vender.");
-      router.history.push("/vender");
+      toast.info(
+        borrador
+          ? "Revisa tu correo para confirmar la cuenta. Al volver, tu tienda quedará registrada en revisión."
+          : "Revisa tu correo para confirmar tu cuenta.",
+      );
+      router.history.push(borrador ? "/auth?modo=entrar" : "/vender");
       return;
     }
-    if (tipoCuenta !== "vendedor") {
+    if (!borrador) {
       toast.success("Cuenta creada. ¡Bienvenido!");
       irADestino();
       return;
     }
-    await crearTienda(data.session.user.id);
+    await crearTienda(data.session.user.id, borrador);
   };
 
-  const crearTienda = async (userId: string) => {
+  const crearTienda = async (userId: string, d: Borrador) => {
     setEnviando(true);
     try {
-      const cat = categoriasTienda.find((c) => c.slug === categoriaTienda);
+      const cat = categoriasTienda.find((c) => c.slug === d.categoriaSlug);
       let logoUrl: string | null = null;
-      if (logoTienda) logoUrl = await subirImagen(logoTienda, userId);
+      if (d.logo) logoUrl = await subirImagen(aFile(d.logo), userId);
+
+      // Google solo entrega nombre y correo: los datos que el vendedor escribió en el
+      // formulario (cédula, teléfono, rol y consentimientos) se escriben aquí.
+      const ahora = new Date().toISOString();
+      const perfil = await supabase
+        .from("profiles")
+        .update({
+          full_name: `${d.nombres} ${d.apellidos}`.trim(),
+          first_name: d.nombres,
+          last_name: d.apellidos,
+          phone: d.telefono || null,
+          cedula: d.cedula || null,
+          role: "vendor",
+          terms_accepted_at: ahora,
+          privacy_accepted_at: ahora,
+          marketing_accepted_at: d.aceptaMarketing ? ahora : null,
+          consent_version: "2026-09",
+        })
+        .eq("id", userId);
+      if (perfil.error) throw new Error(perfil.error.message);
 
       const { error } = await supabase.from("stores").insert({
-        id: slugUnico(nombreTienda),
+        id: slugUnico(d.nombreTienda),
         owner_id: userId,
-        owner_name: `${nombres.trim()} ${apellidos.trim()}`.trim(),
-        name: nombreTienda.trim(),
-        description: descripcionTienda.trim() || null,
+        owner_name: `${d.nombres} ${d.apellidos}`.trim(),
+        name: d.nombreTienda.trim(),
+        description: d.descripcion.trim() || null,
         category: cat?.nombre ?? null,
-        location: ubicacionTienda || null,
+        location: d.ubicacion || null,
         logo: logoUrl,
+        // Sin esto la tienda nacería aprobada por defecto si alguien cambia la
+        // columna más adelante; el alta pública siempre entra por la cola.
+        approved: false,
       });
       if (error) throw new Error(error.message);
 
-      toast.success("¡Cuenta y tienda creadas!");
+      borrarBorrador();
+      toast.success("Tu tienda quedó registrada y está en revisión.");
       router.history.push("/publicar");
     } catch (err) {
       toast.error(
@@ -248,6 +341,86 @@ function Auth() {
           : "La cuenta se creó, pero no la tienda.",
       );
       router.history.push("/vender");
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  // Volvió de Google con sesión y un borrador en el bolsillo: aquí se crea la tienda.
+  useEffect(() => {
+    if (!session || LOCAL_CATALOG || CLOUDFLARE_API) return;
+    const borrador = leerBorrador();
+    if (!borrador) return;
+    void crearTienda(session.user.id, borrador);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session]);
+
+  const construirBorrador = async (): Promise<Borrador> => {
+    const borrador: Borrador = {
+      nombres: nombres.trim(),
+      apellidos: apellidos.trim(),
+      cedula: cedula.trim(),
+      telefono: telefono.trim(),
+      nombreTienda: nombreTienda.trim(),
+      categoriaSlug: categoriaTienda,
+      ubicacion: ubicacionTienda,
+      descripcion: descripcionTienda.trim(),
+      aceptaMarketing,
+    };
+    if (logoTienda) {
+      // sessionStorage lleva ~5 MB; un logo de pantalla completa ya desborda y el
+      // alta se perdería en silencio, así que se guarda sin logo y se sube después.
+      if (logoTienda.size > 1_500_000) {
+        toast.error("El logo pesa demasiado para guardarlo durante el registro; súbelo después en Ajustes.");
+      } else {
+        borrador.logo = { nombre: logoTienda.name, tipo: logoTienda.type, data: await aDataURL(logoTienda) };
+      }
+    }
+    return borrador;
+  };
+
+  const conGoogle = async () => {
+    if (enviando) return;
+    if (tab === "crear" && tipoCuenta === "vendedor") {
+      const problema =
+        nombreTienda.trim().length < 3
+          ? "Escribe el nombre de tu tienda."
+          : !categoriaTienda
+            ? "Elige la categoría de tu tienda."
+            : !ubicacionTienda
+              ? "Elige la ubicación de tu tienda."
+              : !nombres.trim() || !apellidos.trim()
+                ? "Indica tus nombres y apellidos antes de continuar con Google."
+                : null;
+      if (problema) {
+        toast.error(problema);
+        return;
+      }
+    }
+    setEnviando(true);
+    try {
+      if (tab === "crear" && tipoCuenta === "vendedor") guardarBorrador(await construirBorrador());
+      else borrarBorrador();
+
+      // Se vuelve a /auth aunque exista un destino: el efecto que consume el borrador
+      // vive en esta página y desde aquí se navega al destino con la tienda creada.
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth${
+            redirect ? `?redirect=${encodeURIComponent(redirect)}` : ""
+          }`,
+        },
+      });
+      if (error) {
+        borrarBorrador();
+        toast.error(error.message);
+        return;
+      }
+      // El navegador se va a Google; no hay que limpiar nada ni navegar.
+    } catch (err) {
+      borrarBorrador();
+      toast.error(err instanceof Error ? err.message : "No se pudo iniciar el acceso con Google.");
     } finally {
       setEnviando(false);
     }
@@ -288,6 +461,7 @@ function Auth() {
 
   return (
     <div className="mx-auto max-w-md px-4 py-12">
+      <Link to="/" className="mb-6 inline-block text-sm font-semibold text-primary">← Volver al inicio</Link>
       <div className="card-uniko p-6 sm:p-8">
         <h1 className="text-2xl font-bold">
           {tab === "entrar" ? "Inicia sesión" : "Crea tu cuenta"}
@@ -319,11 +493,42 @@ function Auth() {
           </button>
         </div>
 
+        {googleListo && (
+          <>
+            <div className="mt-5 flex items-center gap-3">
+              <span className="h-px flex-1 bg-border" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                o
+              </span>
+              <span className="h-px flex-1 bg-border" />
+            </div>
+            <button
+              type="button"
+              onClick={conGoogle}
+              disabled={enviando}
+              className="btn-base btn-outline mt-5 w-full justify-center gap-2"
+            >
+              <GoogleMark />
+              {tab === "entrar"
+                ? "Continuar con Google"
+                : tipoCuenta === "vendedor"
+                  ? "Registrarse con Google"
+                  : "Continuar con Google"}
+            </button>
+            {tab === "crear" && tipoCuenta === "vendedor" && (
+              <p className="text-xs text-muted-foreground">
+                Tu tienda queda <strong>en revisión</strong>; UNIKO-RD la aprueba antes de
+                mostrarla en el marketplace.
+              </p>
+            )}
+          </>
+        )}
+
         {tab === "entrar" ? (
           <form onSubmit={entrar} className="mt-6 grid gap-4">
-            <Campo label="Correo electrónico">
+            <Campo label="Nombre de usuario o correo">
               <input
-                type="email"
+                type="text"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -350,6 +555,7 @@ function Auth() {
           </form>
         ) : (
           <form onSubmit={crear} className="mt-6 grid gap-4">
+            <Campo label="Nombre de usuario"><input required minLength={3} maxLength={30} pattern="[a-zA-Z0-9_]{3,30}" autoComplete="username" autoCapitalize="none" spellCheck={false} className="input-uniko text-base" value={username} onChange={e => setUsername(e.target.value)} placeholder="Ej: maria_rd" /><span className="text-xs text-muted-foreground">Letras, números o guion bajo. Lo usarás para entrar a la app.</span></Campo>
             <fieldset className="grid gap-1.5">
               <legend className="mb-1.5 text-xs font-bold uppercase tracking-wide text-primary">
                 Tipo de cuenta
@@ -536,10 +742,10 @@ function Auth() {
               <input
                 type="password"
                 required
-                minLength={6}
+                minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres"
                 className="input-uniko"
                 autoComplete="new-password"
               />
@@ -649,5 +855,29 @@ function Campo({ label, children }: { label: string; children: React.ReactNode }
       <span className="text-xs font-bold uppercase tracking-wide text-primary">{label}</span>
       {children}
     </label>
+  );
+}
+
+/** La G de Google: lucide no trae marcas registradas. */
+function GoogleMark() {
+  return (
+    <svg viewBox="0 0 48 48" className="h-4 w-4" aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.8-2.1 5.1-4.4 6.7v5.6h7.1c4.2-3.8 6.6-9.5 6.6-16.3z"
+      />
+      <path
+        fill="#34A853"
+        d="M24 48c6.5 0 11.9-2.1 15.9-5.7l-7.1-5.6c-2 1.3-4.5 2.1-8.8 2.1-6.8 0-12.5-4.6-14.6-10.7H2.2v5.8C6.2 42.7 14.6 48 24 48z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M9.4 28.1c-.5-1.5-.8-3.1-.8-4.6s.3-3.1.8-4.6V13.1H2.2C.6 16.5 0 20.1 0 23.5s.6 7 2.2 10.4l7.2-5.8z"
+      />
+      <path
+        fill="#EA4335"
+        d="M24 9.6c3.6 0 6.8 1.2 9.3 3.6l7-7C35.9 2.5 30.5 0 24 0 14.6 0 6.2 5.3 2.2 13.1l7.2 5.8C11.5 13.4 17.2 9.6 24 9.6z"
+      />
+    </svg>
   );
 }

@@ -1,6 +1,7 @@
 import { categorias, productos, servicios, tiendas, type Tienda } from "@/data/marketplace";
+import { DATA_SOURCE } from "./data-source";
 
-export const LOCAL_CATALOG = import.meta.env["VITE_LOCAL_CATALOG"] === "true";
+export const LOCAL_CATALOG = DATA_SOURCE === "local";
 
 const stores: Tienda[] = tiendas.map((store) => ({ ...store }));
 const products = productos.map((product) => {

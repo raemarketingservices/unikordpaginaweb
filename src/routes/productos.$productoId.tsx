@@ -12,10 +12,14 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { formatearRD } from "@/data/marketplace";
-import { BadgeVerificado, Estrellas, Etiqueta, TituloSeccion } from "@/components/uniko/Primitivos";
+import { BadgeVerificado, ChipInventario, Estrellas, Etiqueta, TituloSeccion } from "@/components/uniko/Primitivos";
 import { TarjetaProducto } from "@/components/uniko/Tarjetas";
 import { fetchProductos } from "@/lib/queries";
+import { cantidadDisponible, estadoInventario } from "@/lib/inventario";
 import { useCart } from "@/lib/cart";
+import { useAuth } from '@/lib/auth';
+import { CompraAcceso } from '@/components/uniko/CompraAcceso';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import type { Producto } from "@/data/marketplace";
 
 export const Route = createFileRoute("/productos/$productoId")({
@@ -53,10 +57,12 @@ export const Route = createFileRoute("/productos/$productoId")({
 });
 
 function DetalleProducto() {
+  const { session, loading } = useAuth();
+  const [pedirAcceso, setPedirAcceso] = useState(false);
   const { producto, productos } = Route.useLoaderData();
   const [cantidad, setCantidad] = useState(1);
   const [tab, setTab] = useState("descripcion");
-  const { agregar } = useCart();
+  const { agregar, items } = useCart();
   const navigate = useNavigate();
   const imagenes = producto.galeria?.length
     ? producto.galeria
@@ -72,6 +78,12 @@ function DetalleProducto() {
   const descuento = producto.precioAnterior
     ? Math.round((1 - producto.precio / producto.precioAnterior) * 100)
     : 0;
+
+  const inventario = estadoInventario(producto);
+  const inv = inventario.controlada ? inventario : null;
+  const disponible = cantidadDisponible(producto, items);
+  const sinStock = !!inv && disponible === 0;
+  const tope = disponible ?? Infinity;
 
   const tabs = [
     { id: "descripcion", label: "Descripción" },
@@ -130,7 +142,7 @@ function DetalleProducto() {
           <h1 className="text-2xl leading-snug sm:text-3xl">{producto.titulo}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <Estrellas rating={producto.rating} resenas={producto.resenas} />
-            <span className="text-xs font-semibold text-success">En stock</span>
+            <ChipInventario producto={producto} />
           </div>
 
           <div className="mt-4 flex flex-wrap items-baseline gap-3">
@@ -191,8 +203,9 @@ function DetalleProducto() {
               <button
                 type="button"
                 aria-label="Aumentar"
-                onClick={() => setCantidad((c) => c + 1)}
-                className="grid h-7 w-7 place-items-center rounded-full hover:bg-accent"
+                onClick={() => setCantidad((c) => Math.min(tope, c + 1))}
+                disabled={cantidad >= tope}
+                className="grid h-7 w-7 place-items-center rounded-full hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <Plus className="h-3.5 w-3.5" />
               </button>
@@ -204,29 +217,41 @@ function DetalleProducto() {
           </div>
 
           <div className="mt-5 grid gap-2 sm:grid-cols-2">
+            <Dialog open={pedirAcceso} onOpenChange={setPedirAcceso}><DialogContent><DialogHeader><DialogTitle>Tu cuenta para continuar</DialogTitle><DialogDescription>Compra en UNIKO-RD con tu cuenta.</DialogDescription></DialogHeader><CompraAcceso redirect={`/productos/${producto.id}`} /></DialogContent></Dialog>
             <button
               type="button"
               onClick={() => {
+                if (!session) { setPedirAcceso(true); return; }
                 agregar(producto, cantidad);
                 toast.success("Producto agregado al carrito");
               }}
               className="btn-base btn-brand"
+              disabled={loading || sinStock}
             >
               Agregar al carrito
             </button>
             <button
               type="button"
               onClick={() => {
+                if (!session) { setPedirAcceso(true); return; }
                 agregar(producto, cantidad);
                 navigate({ to: "/checkout" });
               }}
               className="btn-base btn-primary"
+              disabled={loading || sinStock}
             >
               Comprar ahora
             </button>
-            <Link to="/mensajes" className="btn-base btn-outline sm:col-span-2">
+            <Link to="/mensajes" search={{ tienda: producto.tiendaId }} className="btn-base btn-outline sm:col-span-2">
               Contactar vendedor
             </Link>
+            {sinStock && inv ? (
+              <p className="text-xs font-semibold text-destructive sm:col-span-2">
+                {inv.unidades <= 0
+                  ? "Agotado: no hay existencias ahora mismo. Pregunta al vendedor cuándo repone."
+                  : `No hay más unidades libres: las ${inv.unidades} están en tu carrito.`}
+              </p>
+            ) : null}
           </div>
 
           <ul className="mt-6 grid gap-2 text-xs text-muted-foreground">

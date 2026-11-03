@@ -10,6 +10,8 @@ export function GestionProductos() {
   const [productos, setProductos] = useState<ProductWithStoreRow[] | null>(null);
   const [busqueda, setBusqueda] = useState("");
   const [guardandoId, setGuardandoId] = useState<string | null>(null);
+  /** Lo tecleado y aún no guardado. Al fallar se descarta y el campo vuelve al número de la base. */
+  const [borrador, setBorrador] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let activo = true;
@@ -37,7 +39,10 @@ export function GestionProductos() {
     );
   }, [productos, busqueda]);
 
-  const alternar = async (id: string, campo: "featured" | "best_seller" | "verified") => {
+  const alternar = async (
+    id: string,
+    campo: "featured" | "best_seller" | "verified" | "track_inventory"
+  ) => {
     const producto = productos?.find((p) => p.id === id);
     if (!producto) return;
     const valor = !producto[campo];
@@ -55,6 +60,42 @@ export function GestionProductos() {
     setProductos((prev) =>
       prev ? prev.map((p) => (p.id === id ? { ...p, [campo]: valor } : p)) : prev,
     );
+  };
+
+  /** Cambiar el número NO es cambiar si el producto lleva inventario. */
+  const alternarInventario = (id: string) => alternar(id, "track_inventory");
+
+  /**
+   * Las existencias mandan: son lo que la ficha pinta como disponibilidad y lo
+   * que el kb-sync le cuenta al bot. Un guardado a medias se descarta y el
+   * campo vuelve al número de la base, no se queda mostrando un número falso.
+   */
+  const comprometerExistencias = async (id: string) => {
+    const producto = productos?.find((p) => p.id === id);
+    if (!producto) return;
+    const bruto = borrador[id];
+    setBorrador((prev) => {
+      const { [id]: _descarte, ...resto } = prev;
+      return resto;
+    });
+    if (bruto === undefined) return;
+    const valor = Math.max(0, Math.trunc(Number(bruto) || 0));
+    if (valor === (producto.stock_quantity ?? 0)) return;
+    setGuardandoId(id);
+    let error: Error | null = null;
+    try {
+      if (CLOUDFLARE_API) await api(`/api/admin/products/${id}`, { method: "PATCH", body: JSON.stringify({ stock_quantity: valor }) });
+      else { const result = await supabase.from("products").update({ stock_quantity: valor }).eq("id", id); if (result.error) error = new Error(result.error.message); }
+    } catch (err) { error = err instanceof Error ? err : new Error("No se pudo guardar."); }
+    setGuardandoId(null);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setProductos((prev) =>
+      prev ? prev.map((p) => (p.id === id ? { ...p, stock_quantity: valor } : p)) : prev,
+    );
+    toast.success(`${producto.title}: ${valor} unidades.`);
   };
 
   if (!productos) {
@@ -79,12 +120,13 @@ export function GestionProductos() {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[860px] text-left text-sm">
+        <table className="w-full min-w-[980px] text-left text-sm">
           <thead>
             <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
               <th className="py-2 pr-3">Artículo</th>
               <th className="py-2 pr-3">SKU</th>
               <th className="py-2 pr-3">Precio</th>
+              <th className="py-2 pr-3">Existencias</th>
               <th className="py-2 pr-3">Tienda</th>
               <th className="py-2 pr-3">Publicado</th>
               <th className="py-2 pr-3">Verificado</th>
@@ -96,7 +138,7 @@ export function GestionProductos() {
           <tbody>
             {filtrados.length === 0 && (
               <tr>
-                <td colSpan={9} className="py-8 text-center text-muted-foreground">
+                <td colSpan={10} className="py-8 text-center text-muted-foreground">
                   Sin resultados para “{busqueda}”.
                 </td>
               </tr>
@@ -119,6 +161,31 @@ export function GestionProductos() {
                   {p.sku ?? "—"}
                 </td>
                 <td className="py-2.5 pr-3">RD${p.price.toLocaleString("es-DO")}</td>
+                <td className="py-2.5 pr-3">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={p.track_inventory !== false}
+                      disabled={guardandoId === p.id}
+                      onChange={() => alternarInventario(p.id)}
+                      title="Llevar existencias de este producto"
+                      className="rounded border-border accent-brand"
+                    />
+                    <input
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={borrador[p.id] ?? String(p.stock_quantity ?? 0)}
+                      disabled={p.track_inventory === false || guardandoId === p.id}
+                      onChange={(e) => setBorrador((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                      onBlur={() => void comprometerExistencias(p.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                      }}
+                      className="w-20 rounded-lg border border-border bg-card px-2 py-1 text-sm disabled:opacity-40"
+                    />
+                  </div>
+                </td>
                 <td className="py-2.5 pr-3 text-muted-foreground">{p.stores?.name ?? "—"}</td>
                 <td className="py-2.5 pr-3 text-xs text-muted-foreground">
                   {new Date(p.created_at).toLocaleDateString("es-DO")}

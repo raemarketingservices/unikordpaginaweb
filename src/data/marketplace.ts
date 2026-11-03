@@ -79,6 +79,12 @@ export type Producto = {
   destacado?: boolean;
   masVendido?: boolean;
   nuevo?: boolean;
+  /**
+   * Solo existe cuando la tienda lleva existencias de verdad (ella activó el
+   * control y el producto lo trae). Sin este campo la disponibilidad es
+   * desconocida: la UI no puede afirmar que hay.
+   */
+  inventario?: { unidades: number };
 };
 
 const img = (q: string) => `https://images.unsplash.com/${q}?auto=format&fit=crop&w=800&q=70`;

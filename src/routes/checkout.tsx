@@ -5,6 +5,7 @@ import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 import { formatearRD } from "@/data/marketplace";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
+import { CompraAcceso } from '@/components/uniko/CompraAcceso';
 import { supabase } from "@/lib/supabase";
 import { api, CLOUDFLARE_API } from "@/lib/cloudflare";
 
@@ -19,7 +20,7 @@ const EMAIL_RE = /^\S+@\S+\.\S+$/;
 
 function CheckoutPagina() {
   const { items, total, vaciar } = useCart();
-  const { session, profile } = useAuth();
+  const { session, profile, loading } = useAuth();
 
   const [nombre, setNombre] = useState("");
   const [direccion, setDireccion] = useState("");
@@ -39,6 +40,7 @@ function CheckoutPagina() {
   }, [profile, session]);
 
   const enviar = async (e: React.FormEvent) => {
+    if (!session) { e.preventDefault(); return; }
     e.preventDefault();
     if (enviando) return;
 
@@ -172,6 +174,8 @@ function CheckoutPagina() {
 
   const campo = "input-uniko w-full";
 
+  if (loading) return <p className="p-8">Cargando…</p>;
+  if (!session) return <section className="card-uniko mx-auto my-8 max-w-md p-6"><h1 className="mb-4 text-2xl">Inicia sesión para comprar</h1><CompraAcceso redirect="/checkout" /></section>;
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <h1 className="text-2xl sm:text-3xl">Datos para tu compra</h1>

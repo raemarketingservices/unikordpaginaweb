@@ -1,5 +1,7 @@
 import { BadgeCheck, Star } from "lucide-react";
 import type { ReactNode } from "react";
+import { estadoInventario } from "@/lib/inventario";
+import type { Producto } from "@/data/marketplace";
 
 export function BadgeVerificado({ texto = "Verificado" }: { texto?: string }) {
   return (
@@ -7,6 +9,18 @@ export function BadgeVerificado({ texto = "Verificado" }: { texto?: string }) {
       <BadgeCheck className="h-4 w-4 shrink-0" />
       {texto}
     </span>
+  );
+}
+
+/**
+ * La disponibilidad real del producto. Una tienda sin control de existencias
+ * no pinta nada: no hay dato que respalde un "En stock".
+ */
+export function ChipInventario({ producto }: { producto: { inventario?: Producto["inventario"] } }) {
+  const estado = estadoInventario(producto);
+  if (!estado.controlada) return null;
+  return (
+    <span className={`text-xs font-semibold ${estado.clases}`}>{estado.texto}</span>
   );
 }
 

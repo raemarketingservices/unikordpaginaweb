@@ -41,6 +41,8 @@ function Publicar() {
   const [precioAnterior, setPrecioAnterior] = useState("");
   const [ubicacion, setUbicacion] = useState("");
   const [envioNacional, setEnvioNacional] = useState(true);
+  const [llevarInventario, setLlevarInventario] = useState(true);
+  const [unidades, setUnidades] = useState("");
   const [fotos, setFotos] = useState<File[]>([]);
   const [videos, setVideos] = useState<File[]>([]);
   const [enviando, setEnviando] = useState(false);
@@ -88,6 +90,12 @@ function Publicar() {
     };
   }, [userId]);
 
+  // El interruptor es de la tienda: quien publica sin llevar existencias no debe
+  // ver el campo marcado por defecto.
+  useEffect(() => {
+    if (tienda?.stock_enabled === false) setLlevarInventario(false);
+  }, [tienda]);
+
   const crear = async (e: React.FormEvent) => {
     e.preventDefault();
     if (enviando || !session || !tienda) return;
@@ -103,6 +111,15 @@ function Publicar() {
       toast.error("El precio anterior debe ser mayor que el precio actual.");
       return;
     }
+    // Un producto con control de existencias y número vacío se publicaría en
+    // cero: la ficha diría "Agotado" y el bot lo repetiría. Se prefiere preguntar.
+    if (
+      llevarInventario &&
+      (unidades.trim() === "" || !Number.isInteger(Number(unidades)) || Number(unidades) < 0)
+    ) {
+      toast.error("Indica cuántas unidades tienes, o desmarca el control de existencias.");
+      return;
+    }
     setEnviando(true);
     try {
       const id = slugUnico(titulo);
@@ -115,7 +132,8 @@ function Publicar() {
           ...(precioAnterior ? { precioAnterior: Number(precioAnterior) } : {}),
           tienda: tienda.name, tiendaId: tienda.id, sku, verificado: false,
           rating: 0, resenas: 0, ubicacion: ubicacion || tienda.location || "",
-          envioNacional, imagen: fotosUrls[0] ?? "", galeria: fotosUrls, videos: videosUrls, nuevo: true });
+          envioNacional, imagen: fotosUrls[0] ?? "", galeria: fotosUrls, videos: videosUrls, nuevo: true,
+          ...(llevarInventario ? { inventario: { unidades: Number(unidades) } } : {}) });
         await router.invalidate();
         toast.success(`¡Producto publicado! SKU ${sku}`);
         router.history.push(`/productos/${id}`);
@@ -154,6 +172,8 @@ function Publicar() {
           gallery: fotosUrls,
           videos: videosUrls,
           is_new: true,
+          track_inventory: llevarInventario,
+          stock_quantity: llevarInventario ? Number(unidades) : 0,
         })
         .select("sku")
         .single();
@@ -234,6 +254,7 @@ function Publicar() {
   return (
     <div className="mx-auto max-w-xl px-4 py-10">
       <h1 className="text-2xl sm:text-3xl">Publicar producto en {tienda.name}</h1>
+      {tienda.approved === false && <p role="status" className="my-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">Tu tienda está pendiente de aprobación. El administrador debe aprobarla antes de que puedas publicar productos.</p>}
       <p className="mt-2 text-sm text-muted-foreground">
         Completa la información y tu producto aparecerá en el marketplace al instante.
       </p>
@@ -342,6 +363,37 @@ function Publicar() {
               Envíos a todo el país
             </label>
           </Campo>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-3">
+          <Campo>
+            <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+              <input
+                type="checkbox"
+                checked={llevarInventario}
+                onChange={(e) => setLlevarInventario(e.target.checked)}
+                className="rounded border-border accent-brand"
+              />
+              Llevo control de existencias
+            </label>
+          </Campo>
+          <Campo label="Unidades disponibles">
+            <input
+              type="number"
+              min="0"
+              step="1"
+              disabled={!llevarInventario}
+              value={unidades}
+              onChange={(e) => setUnidades(e.target.value)}
+              placeholder="0"
+              className="input-uniko disabled:opacity-50"
+            />
+          </Campo>
+          <p className="self-center text-xs text-muted-foreground">
+            {llevarInventario
+              ? "Con existencias: la ficha muestra cuántas quedan y el bot de WhatsApp responde con ese número."
+              : "Sin control: la ficha no afirma disponibilidad y el bot ofrecerá confirmarlo contigo."}
+          </p>
         </div>
 
         <Campo label="Fotos del producto (varias)">
