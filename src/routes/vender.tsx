@@ -259,6 +259,28 @@ function Vender() {
             Tu tienda “{tienda.name}” está activa. Publica productos para que aparezcan en el
             marketplace.
           </p>
+          <div className="mt-5 rounded-lg border bg-muted/40 p-3 text-left">
+            <p className="text-xs font-bold uppercase tracking-wide text-primary">Tu Store ID</p>
+            <div className="mt-1 flex items-center gap-2">
+              <code className="min-w-0 flex-1 truncate font-mono text-sm">{tienda.id}</code>
+              <button
+                type="button"
+                className="btn-base btn-outline"
+                onClick={() =>
+                  navigator.clipboard
+                    .writeText(tienda.id)
+                    .then(() => toast.success("Store ID copiado."))
+                    .catch(() => toast.error("No se pudo copiar."))
+                }
+              >
+                Copiar
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Pégalo en tu CRM (Configuración → Agente IA) para que tu bot de WhatsApp responda
+              sobre tus productos.
+            </p>
+          </div>
           <div className="mt-6 flex flex-col gap-2">
             <Link to="/publicar" className="btn-base btn-brand">
               Publicar un producto
