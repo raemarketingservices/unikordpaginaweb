@@ -21,6 +21,8 @@ import { Footer } from "@/components/uniko/Footer";
 import { NavMovil } from "@/components/uniko/NavMovil";
 import { Chatbot } from "@/components/uniko/Chatbot";
 import { api } from '@/lib/cloudflare';
+import { DATA_SOURCE } from "@/lib/data-source";
+import { supabase } from "@/lib/supabase";
 
 function NotFoundComponent() {
   return (
@@ -154,6 +156,23 @@ function RootComponent() {
   const router = useRouter();
   useEffect(() => {
     if (LOCAL_CATALOG) void router.invalidate();
+  }, [router]);
+  // Catálogo en vivo: lo publicado en la web, la app o la APK se ve en las demás sin recargar.
+  useEffect(() => {
+    if (DATA_SOURCE !== "supabase") return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const refrescar = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => void router.invalidate(), 800);
+    };
+    let canal = supabase.channel("uniko-catalogo");
+    for (const table of ["products", "stores", "services", "categories"])
+      canal = canal.on("postgres_changes", { event: "*", schema: "public", table }, refrescar);
+    canal.subscribe();
+    return () => {
+      clearTimeout(timer);
+      void supabase.removeChannel(canal);
+    };
   }, [router]);
 
   return (
