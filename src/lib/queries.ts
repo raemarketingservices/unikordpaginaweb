@@ -109,7 +109,6 @@ function mapTienda(r: StoreRow): Tienda {
   if (r.featured) t.destacado = true;
   if (r.rnc) t.rnc = r.rnc;
   if (r.description) t.descripcion = r.description;
-  if (r.owner_name) t.propietario = r.owner_name;
   return t;
 }
 

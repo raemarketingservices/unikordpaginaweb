@@ -9,7 +9,6 @@ import {
   ShieldCheck,
   RotateCcw,
   CreditCard,
-  User,
 } from "lucide-react";
 import { formatearRD } from "@/data/marketplace";
 import { BadgeVerificado, Estrellas, Etiqueta, TituloSeccion } from "@/components/uniko/Primitivos";
@@ -167,12 +166,6 @@ function DetalleTienda() {
             <p className="text-xs text-muted-foreground">
               {tienda.categoria} · {tienda.ubicacion}
             </p>
-            {tienda.propietario && (
-              <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                <User className="h-3.5 w-3.5" /> Propietario:{" "}
-                <span className="font-semibold text-foreground">{tienda.propietario}</span>
-              </p>
-            )}
             {tienda.descripcion && (
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {tienda.descripcion}
@@ -203,12 +196,6 @@ function DetalleTienda() {
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" /> {tienda.ubicacion}
               </div>
-              {tienda.propietario && (
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" /> Propietario:{" "}
-                  <span className="font-semibold text-foreground">{tienda.propietario}</span>
-                </div>
-              )}
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4" /> {tienda.seguidores.toLocaleString("es-DO")} seguidores
               </div>
@@ -258,11 +245,6 @@ function DetalleTienda() {
               )}
               {tab === "info" && (
                 <div className="space-y-3 text-sm text-muted-foreground">
-                  {tienda.propietario && (
-                    <p>
-                      <strong className="text-foreground">Propietario:</strong> {tienda.propietario}
-                    </p>
-                  )}
                   {tienda.descripcion && (
                     <p>
                       <strong className="text-foreground">Descripción:</strong> {tienda.descripcion}
