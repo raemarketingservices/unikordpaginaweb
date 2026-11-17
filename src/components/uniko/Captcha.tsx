@@ -58,6 +58,7 @@ export const Captcha = forwardRef<CaptchaRef, { onToken: (t: string | null) => v
             sitekey: SITE_KEY,
             language: "es",
             theme: "light",
+            size: "flexible",
             callback: (tok: string) => cb.current(tok),
             "expired-callback": () => cb.current(null),
             "error-callback": () => cb.current(null),
@@ -70,6 +71,6 @@ export const Captcha = forwardRef<CaptchaRef, { onToken: (t: string | null) => v
       };
     }, []);
 
-    return <div ref={el} className="flex min-h-[65px] justify-center" />;
+    return <div ref={el} className="min-h-[65px] w-full" />;
   },
 );
