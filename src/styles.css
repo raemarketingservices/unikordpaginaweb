@@ -168,6 +168,11 @@
     color: var(--primary);
     letter-spacing: -0.015em;
   }
+
+  /* Sobre fondos de color el título hereda el texto claro del bloque, no el azul global. */
+  :is(.bg-primary, .bg-brand) :is(h1, h2, h3, h4) {
+    color: inherit;
+  }
 }
 
 @utility section-muted {
