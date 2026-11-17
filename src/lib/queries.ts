@@ -141,7 +141,10 @@ export async function fetchProductos(): Promise<Producto[]> {
   }
   const { data, error } = await supabase
     .from("products")
-    .select("*, stores(name, verified, stock_enabled)")
+    // Solo tiendas publicadas: el admin (o el dueño) puede leer las ocultas por RLS,
+    // pero en las páginas públicas no deben aparecer.
+    .select("*, stores!inner(name, verified, stock_enabled, approved)")
+    .eq("stores.approved", true)
     .order("created_at", { ascending: false });
   if (error) fallo(error.message);
   return ((data ?? []) as ProductWithStoreRow[]).map(mapProducto);
@@ -164,6 +167,7 @@ export async function fetchTiendas(): Promise<Tienda[]> {
   const { data, error } = await supabase
     .from("stores")
     .select("*")
+    .eq("approved", true)
     .order("featured", { ascending: false });
   if (error) fallo(error.message);
   return ((data ?? []) as StoreRow[]).map(mapTienda);

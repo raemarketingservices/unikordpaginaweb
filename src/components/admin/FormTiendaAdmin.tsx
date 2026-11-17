@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { slugUnico, subirImagen } from "@/lib/queries";
 import { provincias } from "@/data/marketplace";
 import { SelectorUbicacion, type Punto } from "@/components/uniko/Mapa";
+import { CampoBanner } from "@/components/uniko/CampoBanner";
 import type { StoreRow } from "@/lib/types";
 import {
   Dialog,
@@ -31,6 +32,7 @@ export function FormTiendaAdmin({
   const [descripcion, setDescripcion] = useState(tienda?.description ?? "");
   const [rnc, setRnc] = useState(tienda?.rnc ?? "");
   const [logo, setLogo] = useState<File | null>(null);
+  const [banner, setBanner] = useState<File | null>(null);
   const [punto, setPunto] = useState<Punto | null>(
     tienda?.lat != null && tienda.lng != null ? { lat: tienda.lat, lng: tienda.lng } : null,
   );
@@ -43,7 +45,9 @@ export function FormTiendaAdmin({
     setGuardando(true);
     try {
       const { data: sesion } = await supabase.auth.getSession();
-      const logoUrl = logo ? await subirImagen(logo, sesion.session?.user.id ?? "admin") : undefined;
+      const carpeta = sesion.session?.user.id ?? "admin";
+      const logoUrl = logo ? await subirImagen(logo, carpeta) : undefined;
+      const bannerUrl = banner ? await subirImagen(banner, carpeta) : undefined;
       const campos = {
         name: nombre.trim(),
         category: categoria.trim() || null,
@@ -52,7 +56,8 @@ export function FormTiendaAdmin({
         rnc: rnc.trim() || null,
         lat: punto?.lat ?? null,
         lng: punto?.lng ?? null,
-        ...(logoUrl ? { logo: logoUrl, cover: tienda?.cover ?? logoUrl } : {}),
+        ...(logoUrl ? { logo: logoUrl } : {}),
+        ...(bannerUrl ? { cover: bannerUrl } : {}),
       };
       const res = tienda
         ? await supabase.from("stores").update(campos).eq("id", tienda.id).select().single()
@@ -110,6 +115,7 @@ export function FormTiendaAdmin({
               <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => setLogo(e.target.files?.[0] ?? null)} />
             </span>
           </Campo>
+          <CampoBanner actual={tienda?.cover} archivo={banner} onArchivo={setBanner} />
           <div className="grid gap-1.5">
             <span className="text-xs font-bold uppercase tracking-wide text-primary">Ubicación en el mapa</span>
             <SelectorUbicacion value={punto} onChange={setPunto} />

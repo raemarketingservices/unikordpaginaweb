@@ -144,7 +144,7 @@ function DetalleTienda() {
     <div className="mx-auto max-w-7xl px-4 py-8">
       <div className="grid gap-8 lg:grid-cols-[1.1fr_minmax(0,0.9fr)]">
         <div className="min-w-0">
-          <div className="h-24 overflow-hidden bg-muted">
+          <div className={`overflow-hidden rounded-2xl bg-muted ${tienda.portada ? "aspect-[3/1]" : "h-24"}`}>
             <img
               src={tienda.portada}
               alt=""

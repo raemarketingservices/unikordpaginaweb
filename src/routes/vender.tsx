@@ -13,6 +13,7 @@ import { provincias } from "@/data/marketplace";
 import type { Categoria } from "@/data/marketplace";
 import type { StoreRow } from "@/lib/types";
 import { SelectorUbicacion, type Punto } from "@/components/uniko/Mapa";
+import { CampoBanner } from "@/components/uniko/CampoBanner";
 
 export const Route = createFileRoute("/vender")({
   loader: async () => ({ categorias: await fetchCategorias() }),
@@ -427,19 +428,9 @@ function Vender() {
               />
             </label>
           </Campo>
-          <Campo label="Foto de portada (opcional)">
-            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-background px-3 py-3 text-xs font-semibold text-muted-foreground hover:border-brand hover:text-brand">
-              <Upload className="h-4 w-4" />
-              {portada ? portada.name : "Subir portada"}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => setPortada(e.target.files?.[0] ?? null)}
-              />
-            </label>
-          </Campo>
         </div>
+
+        <CampoBanner archivo={portada} onArchivo={setPortada} />
 
         {faltaConsentimiento && (
           <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-background p-4">
@@ -490,28 +481,39 @@ function UbicacionTienda({ tienda }: { tienda: StoreRow }) {
   const router = useRouter();
   const inicial = tienda.lat != null && tienda.lng != null ? { lat: tienda.lat, lng: tienda.lng } : null;
   const [punto, setPunto] = useState<Punto | null>(inicial);
+  const [banner, setBanner] = useState<File | null>(null);
   const [guardando, setGuardando] = useState(false);
-  const cambiado = punto && (punto.lat !== inicial?.lat || punto.lng !== inicial?.lng);
+  const cambiado =
+    !!banner || (punto && (punto.lat !== inicial?.lat || punto.lng !== inicial?.lng));
 
   const guardar = async () => {
-    if (!punto) return;
     setGuardando(true);
+    let cover: string | undefined;
+    try {
+      if (banner) cover = await subirImagen(banner, tienda.owner_id ?? tienda.id);
+    } catch (err) {
+      setGuardando(false);
+      toast.error(err instanceof Error ? err.message : "No se pudo subir el banner.");
+      return;
+    }
     const { error } = await supabase
       .from("stores")
-      .update({ lat: punto.lat, lng: punto.lng })
+      .update({ ...(punto ? { lat: punto.lat, lng: punto.lng } : {}), ...(cover ? { cover } : {}) })
       .eq("id", tienda.id);
     setGuardando(false);
     if (error) {
       toast.error(error.message);
       return;
     }
-    toast.success("Ubicación guardada. Ya apareces en el mapa.");
+    setBanner(null);
+    toast.success("Cambios guardados.");
     await router.invalidate();
   };
 
   return (
     <div className="mt-5 grid gap-2 text-left">
-      <p className="text-xs font-bold uppercase tracking-wide text-primary">
+      <CampoBanner actual={tienda.cover} archivo={banner} onArchivo={setBanner} />
+      <p className="mt-3 text-xs font-bold uppercase tracking-wide text-primary">
         Ubicación en el mapa
       </p>
       {!inicial && (
@@ -522,7 +524,7 @@ function UbicacionTienda({ tienda }: { tienda: StoreRow }) {
       <SelectorUbicacion value={punto} onChange={setPunto} />
       {cambiado && (
         <button type="button" className="btn-base btn-brand" onClick={guardar} disabled={guardando}>
-          {guardando ? "Guardando…" : "Guardar ubicación"}
+          {guardando ? "Guardando…" : "Guardar cambios"}
         </button>
       )}
     </div>

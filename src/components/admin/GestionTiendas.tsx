@@ -79,8 +79,8 @@ export function GestionTiendas() {
     if (campo === "approved") {
       toast.success(
         valor
-          ? "Tienda aprobada: ya es visible en el marketplace."
-          : "Tienda suspendida: vuelve a la cola de pendientes.",
+          ? "Tienda publicada: ya es visible en el marketplace."
+          : "Tienda oculta: el público ya no la ve (no se borró). Para borrarla usa «Eliminar».",
       );
     }
   };
@@ -130,8 +130,8 @@ export function GestionTiendas() {
   const pendientes = tiendas.filter((t) => t.approved === false).length;
   const filtros = [
     { valor: "todas", etiqueta: `Todas (${tiendas.length})` },
-    { valor: "pendientes", etiqueta: `Pendientes (${pendientes})` },
-    { valor: "aprobadas", etiqueta: "Aprobadas" },
+    { valor: "pendientes", etiqueta: `Ocultas (${pendientes})` },
+    { valor: "aprobadas", etiqueta: "Publicadas" },
   ] as const;
 
   return (
@@ -197,15 +197,14 @@ export function GestionTiendas() {
               <th className="py-2 pr-3">Productos</th>
               <th className="py-2 pr-3">Verificada</th>
               <th className="py-2 pr-3">Destacada</th>
-              <th className="py-2">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {filtradas.length === 0 && (
               <tr>
-                <td colSpan={10} className="py-8 text-center text-muted-foreground">
+                <td colSpan={9} className="py-8 text-center text-muted-foreground">
                   {filtro === "pendientes"
-                    ? "No hay tiendas pendientes de aprobación."
+                    ? "No hay tiendas ocultas."
                     : busqueda.trim()
                       ? `Sin resultados para “${busqueda}”.`
                       : "Todavía no hay tiendas en la plataforma."}
@@ -224,6 +223,23 @@ export function GestionTiendas() {
                       </span>
                     )}
                     <span className="truncate">{t.name}</span>
+                  </div>
+                  <div className="mt-1.5 flex gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setEditando(t)}
+                      className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-semibold text-primary hover:bg-primary/10"
+                    >
+                      <Pencil className="h-3 w-3" /> Editar
+                    </button>
+                    <button
+                      type="button"
+                      disabled={eliminando}
+                      onClick={() => setPorEliminar(t)}
+                      className="inline-flex items-center gap-1 rounded-full border border-destructive/40 px-2.5 py-1 text-[11px] font-semibold text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-3 w-3" /> Eliminar
+                    </button>
                   </div>
                 </td>
                 <td className="py-2.5 pr-3 text-muted-foreground">
@@ -250,7 +266,7 @@ export function GestionTiendas() {
                       ) : (
                         <CheckCircle2 className="h-3 w-3" />
                       )}
-                      {t.approved === false ? "Pendiente" : "Aprobada"}
+                      {t.approved === false ? "Oculta" : "Publicada"}
                     </span>
                     <button
                       type="button"
@@ -264,11 +280,11 @@ export function GestionTiendas() {
                     >
                       {t.approved === false ? (
                         <>
-                          <CheckCircle2 className="h-3 w-3" /> Aprobar
+                          <CheckCircle2 className="h-3 w-3" /> Publicar
                         </>
                       ) : (
                         <>
-                          <XCircle className="h-3 w-3" /> Suspender
+                          <XCircle className="h-3 w-3" /> Ocultar
                         </>
                       )}
                     </button>
@@ -295,27 +311,6 @@ export function GestionTiendas() {
                     onChange={() => alternar(t.id, "featured")}
                     className="rounded border-border accent-brand"
                   />
-                </td>
-                <td className="flex gap-1 py-2.5">
-                  <button
-                    type="button"
-                    onClick={() => setEditando(t)}
-                    aria-label={`Editar ${t.name}`}
-                    title="Editar tienda"
-                    className="grid h-7 w-7 place-items-center rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    disabled={eliminando}
-                    onClick={() => setPorEliminar(t)}
-                    aria-label={`Eliminar ${t.name}`}
-                    title="Eliminar tienda"
-                    className="grid h-7 w-7 place-items-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
                 </td>
               </tr>
             ))}
