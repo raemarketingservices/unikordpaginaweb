@@ -1056,8 +1056,7 @@ function Admin() {
               <Key className="h-5 w-5" /> Cambiar contraseña de admin
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              La contraseña actual es {profile?.email}. Cambiarla afecta al inicio de sesión en
-              /admin.
+              Cambiarla afecta al inicio de sesión en /admin.
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 max-w-md">
               <Campo label="Nueva contraseña">
@@ -1122,21 +1121,23 @@ function Admin() {
 function AdminLogin() {
   const router = useRouter();
   const { session, loading } = useAuth();
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [enviando, setEnviando] = useState(false);
 
   const entrar = async (e: React.FormEvent) => {
     e.preventDefault();
+    // La cuenta admin es fija (build arg VITE_ADMIN_EMAIL); el panel solo pide su contraseña.
+    const email = import.meta.env["VITE_ADMIN_EMAIL"] as string | undefined;
+    if (!email) {
+      toast.error("El acceso de administración no está configurado.");
+      return;
+    }
     setEnviando(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     setEnviando(false);
     if (error) {
       toast.error(
-        error.message.includes("Invalid login") ? "Credenciales incorrectas." : error.message,
+        error.message.includes("Invalid login") ? "Contraseña incorrecta." : error.message,
       );
       return;
     }
@@ -1150,21 +1151,10 @@ function AdminLogin() {
           <Lock className="mx-auto h-10 w-10 text-brand" />
           <h1 className="mt-3 text-xl font-bold">Área de administración</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Inicia sesión con tu cuenta de administrador.
+            Escribe la contraseña de administración.
           </p>
         </div>
         <form onSubmit={entrar} className="grid gap-4">
-          <Campo label="Correo electrónico">
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@unikord.do"
-              className="input-uniko"
-              autoComplete="email"
-            />
-          </Campo>
           <Campo label="Contraseña">
             <input
               type="password"
@@ -1181,9 +1171,6 @@ function AdminLogin() {
             {enviando ? "Entrando…" : "Entrar"}
           </button>
         </form>
-        <p className="mt-5 text-center text-xs text-muted-foreground">
-          Contraseña por defecto: <code className="bg-muted px-1 rounded">unikoadmin</code>
-        </p>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { LogOut, Key, Settings, Mail, Shield, Camera, Save, User } from "lucide-react";
+import { LogOut, Key, Mail, Shield, Camera, Save, User } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { LOCAL_CATALOG } from "@/lib/local-catalog";
@@ -317,14 +317,6 @@ function Cuenta() {
         </Link>
       </div>
 
-      {isAdmin && (
-        <Link
-          to="/admin"
-          className="mt-4 flex items-center justify-center gap-2 text-sm font-semibold text-brand hover:underline"
-        >
-          <Settings className="h-4 w-4" /> Panel de administración
-        </Link>
-      )}
 
       <button
         onClick={salir}

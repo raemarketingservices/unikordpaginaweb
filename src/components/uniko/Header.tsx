@@ -27,7 +27,7 @@ const navegacion = [
 
 export function Header() {
   const navigate = useNavigate();
-  const { session, profile, loading, salir, isAdmin } = useAuth();
+  const { session, profile, loading, salir } = useAuth();
   const { unidades } = useCart();
   const [abierto, setAbierto] = useState(false);
   const [consulta, setConsulta] = useState("");
@@ -91,7 +91,6 @@ export function Header() {
           </form>
 
           <div className="flex shrink-0 items-center gap-1">
-            <Link to="/admin" className="hidden px-2 text-xs font-semibold text-muted-foreground hover:text-brand lg:block">Admin</Link>
             <Link
               to="/favoritos"
               aria-label="Favoritos"
@@ -120,14 +119,6 @@ export function Header() {
             </Link>
             {autenticado ? (
               <>
-                {isAdmin ? (
-                  <Link
-                    to="/admin"
-                    className="ml-1 hidden text-sm font-semibold text-brand hover:underline lg:block"
-                  >
-                    Admin
-                  </Link>
-                ) : null}
                 <Link
                   to="/cuenta"
                   className="ml-1 hidden max-w-[11rem] truncate text-sm font-semibold text-primary hover:underline lg:block"
