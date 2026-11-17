@@ -23,6 +23,7 @@ import { Chatbot } from "@/components/uniko/Chatbot";
 import { api } from '@/lib/cloudflare';
 import { DATA_SOURCE } from "@/lib/data-source";
 import { supabase } from "@/lib/supabase";
+import { aplicarApariencia, fetchApariencia } from "@/lib/apariencia";
 
 function NotFoundComponent() {
   return (
@@ -157,6 +158,19 @@ function RootComponent() {
   useEffect(() => {
     if (LOCAL_CATALOG) void router.invalidate();
   }, [router]);
+  // Apariencia (letra, tamaños, reemplazos de texto) editable desde /admin, aplicada en vivo.
+  useEffect(() => {
+    if (DATA_SOURCE !== "supabase") return;
+    const cargar = () => void fetchApariencia().then(aplicarApariencia).catch(() => {});
+    cargar();
+    const canal = supabase
+      .channel("uniko-apariencia")
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_appearance" }, cargar)
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(canal);
+    };
+  }, []);
   // Catálogo en vivo: lo publicado en la web, la app o la APK se ve en las demás sin recargar.
   useEffect(() => {
     if (DATA_SOURCE !== "supabase") return;

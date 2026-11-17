@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { SelectorUbicacion, type Punto } from "@/components/uniko/Mapa";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Captcha, type CaptchaRef } from "@/components/uniko/Captcha";
 import { toast } from "sonner";
 import { LogIn, Store, Upload, UserPlus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -118,6 +119,8 @@ function Auth() {
   const [categoriaTienda, setCategoriaTienda] = useState("");
   const [ubicacionTienda, setUbicacionTienda] = useState("");
   const [puntoTienda, setPuntoTienda] = useState<Punto | null>(null);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const captchaRef = useRef<CaptchaRef>(null);
   const [descripcionTienda, setDescripcionTienda] = useState("");
   const [logoTienda, setLogoTienda] = useState<File | null>(null);
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
@@ -160,10 +163,17 @@ function Auth() {
       finally { setEnviando(false); }
       return;
     }
+    if (!captcha) {
+      setEnviando(false);
+      toast.error("Completa la verificación anti-bots.");
+      return;
+    }
     const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
+      options: { captchaToken: captcha },
     });
+    captchaRef.current?.reset(); // el token es de un solo uso
     setEnviando(false);
     if (error) {
       toast.error(mensajeError(error.message));
@@ -252,11 +262,17 @@ function Auth() {
       finally { setEnviando(false); }
       return;
     }
+    if (!captcha) {
+      setEnviando(false);
+      toast.error("Completa la verificación anti-bots.");
+      return;
+    }
     const ahora = new Date().toISOString();
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
+        captchaToken: captcha,
         data: {
           full_name: nombreCompleto,
           first_name: nombres.trim(),
@@ -271,6 +287,7 @@ function Auth() {
         },
       },
     });
+    captchaRef.current?.reset();
     setEnviando(false);
     if (error) {
       toast.error(mensajeError(error.message));
@@ -559,6 +576,7 @@ function Auth() {
                 autoComplete="current-password"
               />
             </Campo>
+            <Captcha ref={captchaRef} onToken={setCaptcha} />
             <button type="submit" disabled={enviando} className="btn-base btn-brand">
               <LogIn className="h-4 w-4" />
               {enviando ? "Entrando…" : "Entrar"}
@@ -813,6 +831,7 @@ function Auth() {
               </label>
             </div>
 
+            <Captcha ref={captchaRef} onToken={setCaptcha} />
             <button type="submit" disabled={enviando} className="btn-base btn-brand">
               <UserPlus className="h-4 w-4" />
               {enviando

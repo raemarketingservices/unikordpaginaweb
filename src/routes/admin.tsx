@@ -32,6 +32,7 @@ import {
   Sparkles,
   MapPin,
   Bot,
+  Type,
   type LucideIcon,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -41,6 +42,8 @@ import { GestionUsuarios } from "@/components/admin/GestionUsuarios";
 import { GestionTiendas } from "@/components/admin/GestionTiendas";
 import { GestionProductos } from "@/components/admin/GestionProductos";
 import { ConfigChatbot } from "@/components/admin/ConfigChatbot";
+import { PanelApariencia } from "@/components/admin/Apariencia";
+import { Captcha, type CaptchaRef } from "@/components/uniko/Captcha";
 import { LocalAdmin } from "@/components/admin/LocalAdmin";
 import { LOCAL_CATALOG } from "@/lib/local-catalog";
 import { CLOUDFLARE_API } from "@/lib/cloudflare";
@@ -187,7 +190,7 @@ function mergeConfig(type: TipoBloque, db: Record<string, unknown>): Record<stri
   return out;
 }
 
-type SeccionAdmin = "home" | "usuarios" | "tiendas" | "productos" | "chatbot";
+type SeccionAdmin = "home" | "usuarios" | "tiendas" | "productos" | "chatbot" | "apariencia";
 
 const SECCIONES: { id: SeccionAdmin; etiqueta: string; icono: LucideIcon }[] = [
   { id: "home", etiqueta: "Home", icono: Home },
@@ -195,6 +198,7 @@ const SECCIONES: { id: SeccionAdmin; etiqueta: string; icono: LucideIcon }[] = [
   { id: "tiendas", etiqueta: "Tiendas", icono: Store },
   { id: "productos", etiqueta: "Artículos", icono: ShoppingBag },
   { id: "chatbot", etiqueta: "Chatbot", icono: Bot },
+  { id: "apariencia", etiqueta: "Apariencia", icono: Type },
 ];
 
 function Admin() {
@@ -1109,6 +1113,12 @@ function Admin() {
         </div>
       )}
 
+      {seccion === "apariencia" && (
+        <div className="card-uniko overflow-hidden">
+          <PanelApariencia />
+        </div>
+      )}
+
       {seccion === "chatbot" && (
         <div className="card-uniko overflow-hidden">
           <ConfigChatbot />
@@ -1123,6 +1133,8 @@ function AdminLogin() {
   const { session, loading } = useAuth();
   const [password, setPassword] = useState("");
   const [enviando, setEnviando] = useState(false);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const captchaRef = useRef<CaptchaRef>(null);
 
   const entrar = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1132,8 +1144,17 @@ function AdminLogin() {
       toast.error("El acceso de administración no está configurado.");
       return;
     }
+    if (!captcha) {
+      toast.error("Completa la verificación anti-bots.");
+      return;
+    }
     setEnviando(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: { captchaToken: captcha },
+    });
+    captchaRef.current?.reset();
     setEnviando(false);
     if (error) {
       toast.error(
@@ -1166,6 +1187,7 @@ function AdminLogin() {
               autoComplete="current-password"
             />
           </Campo>
+          <Captcha ref={captchaRef} onToken={setCaptcha} />
           <button type="submit" disabled={enviando} className="btn-base btn-brand">
             <Lock className="h-4 w-4" />
             {enviando ? "Entrando…" : "Entrar"}

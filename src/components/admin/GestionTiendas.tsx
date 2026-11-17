@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, Clock, Search, Store, Trash2, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Pencil, Plus, Search, Store, Trash2, XCircle } from "lucide-react";
+import { FormTiendaAdmin } from "@/components/admin/FormTiendaAdmin";
 import { supabase } from "@/lib/supabase";
 import { fetchTiendasAdmin, fetchPerfilesAdmin } from "@/lib/queries";
 import { api, CLOUDFLARE_API } from "@/lib/cloudflare";
@@ -25,6 +26,7 @@ export function GestionTiendas() {
   const [porEliminar, setPorEliminar] = useState<StoreRow | null>(null);
   const [confirmarTodas, setConfirmarTodas] = useState(false);
   const [eliminando, setEliminando] = useState(false);
+  const [editando, setEditando] = useState<StoreRow | "nueva" | null>(null);
 
   useEffect(() => {
     let activo = true;
@@ -159,6 +161,9 @@ export function GestionTiendas() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <button type="button" onClick={() => setEditando("nueva")} className="btn-base btn-brand">
+            <Plus className="h-4 w-4" /> Nueva tienda
+          </button>
           <button
             type="button"
             disabled={!tiendas.length || eliminando}
@@ -291,7 +296,16 @@ export function GestionTiendas() {
                     className="rounded border-border accent-brand"
                   />
                 </td>
-                <td className="py-2.5">
+                <td className="flex gap-1 py-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setEditando(t)}
+                    aria-label={`Editar ${t.name}`}
+                    title="Editar tienda"
+                    className="grid h-7 w-7 place-items-center rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
                   <button
                     type="button"
                     disabled={eliminando}
@@ -308,6 +322,23 @@ export function GestionTiendas() {
           </tbody>
         </table>
       </div>
+
+      {editando && (
+        <FormTiendaAdmin
+          key={editando === "nueva" ? "nueva" : editando.id}
+          tienda={editando === "nueva" ? null : editando}
+          abierto
+          onCerrar={() => setEditando(null)}
+          onGuardada={(g) =>
+            setTiendas((prev) => {
+              const lista = prev ?? [];
+              return lista.some((t) => t.id === g.id)
+                ? lista.map((t) => (t.id === g.id ? g : t))
+                : [g, ...lista];
+            })
+          }
+        />
+      )}
 
       <AlertDialog
         open={!!porEliminar}

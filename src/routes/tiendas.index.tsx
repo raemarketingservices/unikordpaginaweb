@@ -10,13 +10,13 @@ export const Route = createFileRoute("/tiendas/")({
   loader: async () => ({ tiendas: await fetchTiendas() }),
   head: () => ({
     meta: [
-      { title: "Tiendas dominicanas · UNIKO-RD" },
+      { title: "Tiendas DOMINICANAS · UNIKO-RD" },
       {
         name: "description",
         content:
           "Descubre tiendas y negocios dominicanos verificados con envíos a todo el país en UNIKO-RD.",
       },
-      { property: "og:title", content: "Tiendas dominicanas · UNIKO-RD" },
+      { property: "og:title", content: "Tiendas DOMINICANAS · UNIKO-RD" },
       {
         property: "og:description",
         content: "Sigue tus negocios favoritos y compra directo a vendedores locales.",
@@ -37,7 +37,7 @@ function Tiendas() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <h1 className="text-2xl sm:text-3xl">Tiendas dominicanas</h1>
+      <h1 className="text-2xl sm:text-3xl">Tiendas DOMINICANAS</h1>
       <p className="mt-1 text-sm text-muted-foreground">{lista.length} tiendas encontradas</p>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
