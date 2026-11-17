@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { provincias } from "@/data/marketplace";
 import type { Categoria } from "@/data/marketplace";
 import type { StoreRow } from "@/lib/types";
+import { SelectorUbicacion, type Punto } from "@/components/uniko/Mapa";
 
 export const Route = createFileRoute("/vender")({
   loader: async () => ({ categorias: await fetchCategorias() }),
@@ -41,6 +42,7 @@ function Vender() {
   const [descripcion, setDescripcion] = useState("");
   const [categoria, setCategoria] = useState("");
   const [ubicacion, setUbicacion] = useState("");
+  const [punto, setPunto] = useState<Punto | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
   const [portada, setPortada] = useState<File | null>(null);
   const [faltaConsentimiento, setFaltaConsentimiento] = useState(false);
@@ -121,6 +123,10 @@ function Vender() {
       toast.error("El logo debe ser una imagen PNG o JPG.");
       return;
     }
+    if (!punto) {
+      toast.error("Marca en el mapa la ubicación exacta de tu tienda.");
+      return;
+    }
     if (faltaConsentimiento && !aceptaNormas) {
       toast.error("Debes aceptar los Términos y las normas de venta para crear la tienda.");
       return;
@@ -166,8 +172,8 @@ function Vender() {
         location: ubicacion || null,
         logo: logoUrl,
         cover: portadaUrl,
-        // El alta pública siempre entra por la cola de aprobación del panel.
-        approved: false,
+        lat: punto.lat,
+        lng: punto.lng,
       });
       if (error) throw new Error(error.message);
 
@@ -194,7 +200,7 @@ function Vender() {
           .is("terms_accepted_at", null);
       }
 
-      toast.success("Tu tienda quedó registrada y está en revisión.");
+      toast.success("¡Tu tienda ya está publicada!");
       router.history.push("/publicar");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No pudimos crear la tienda.");
@@ -281,6 +287,7 @@ function Vender() {
               sobre tus productos.
             </p>
           </div>
+          <UbicacionTienda tienda={tienda} />
           <div className="mt-6 flex flex-col gap-2">
             <Link to="/publicar" className="btn-base btn-brand">
               Publicar un producto
@@ -361,6 +368,13 @@ function Vender() {
               ))}
             </select>
           </Campo>
+        </div>
+
+        <div className="grid gap-1.5">
+          <span className="text-xs font-bold uppercase tracking-wide text-primary">
+            Ubicación exacta en el mapa
+          </span>
+          <SelectorUbicacion value={punto} onChange={setPunto} />
         </div>
 
         <Campo label="Descripción de la tienda">
@@ -467,6 +481,50 @@ function Vender() {
           UNIKO-RD.
         </p>
       </form>
+    </div>
+  );
+}
+
+/** Fija o cambia el punto de una tienda ya creada (las anteriores al mapa no tienen). */
+function UbicacionTienda({ tienda }: { tienda: StoreRow }) {
+  const router = useRouter();
+  const inicial = tienda.lat != null && tienda.lng != null ? { lat: tienda.lat, lng: tienda.lng } : null;
+  const [punto, setPunto] = useState<Punto | null>(inicial);
+  const [guardando, setGuardando] = useState(false);
+  const cambiado = punto && (punto.lat !== inicial?.lat || punto.lng !== inicial?.lng);
+
+  const guardar = async () => {
+    if (!punto) return;
+    setGuardando(true);
+    const { error } = await supabase
+      .from("stores")
+      .update({ lat: punto.lat, lng: punto.lng })
+      .eq("id", tienda.id);
+    setGuardando(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Ubicación guardada. Ya apareces en el mapa.");
+    await router.invalidate();
+  };
+
+  return (
+    <div className="mt-5 grid gap-2 text-left">
+      <p className="text-xs font-bold uppercase tracking-wide text-primary">
+        Ubicación en el mapa
+      </p>
+      {!inicial && (
+        <p className="text-xs text-muted-foreground">
+          Tu tienda aún no aparece en el mapa. Marca su ubicación exacta.
+        </p>
+      )}
+      <SelectorUbicacion value={punto} onChange={setPunto} />
+      {cambiado && (
+        <button type="button" className="btn-base btn-brand" onClick={guardar} disabled={guardando}>
+          {guardando ? "Guardando…" : "Guardar ubicación"}
+        </button>
+      )}
     </div>
   );
 }

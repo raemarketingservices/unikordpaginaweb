@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { SelectorUbicacion, type Punto } from "@/components/uniko/Mapa";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { LogIn, Store, Upload, UserPlus } from "lucide-react";
@@ -55,6 +56,9 @@ type Borrador = {
   nombreTienda: string;
   categoriaSlug: string;
   ubicacion: string;
+  /** Punto exacto en el mapa. */
+  lat?: number;
+  lng?: number;
   descripcion: string;
   aceptaMarketing: boolean;
   /** data URL del logo; sessionStorage no admite File. */
@@ -113,6 +117,7 @@ function Auth() {
   const [nombreTienda, setNombreTienda] = useState("");
   const [categoriaTienda, setCategoriaTienda] = useState("");
   const [ubicacionTienda, setUbicacionTienda] = useState("");
+  const [puntoTienda, setPuntoTienda] = useState<Punto | null>(null);
   const [descripcionTienda, setDescripcionTienda] = useState("");
   const [logoTienda, setLogoTienda] = useState<File | null>(null);
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
@@ -194,6 +199,10 @@ function Auth() {
       }
       if (!ubicacionTienda) {
         toast.error("Elige la ubicación de tu tienda.");
+        return;
+      }
+      if (!puntoTienda) {
+        toast.error("Marca en el mapa la ubicación exacta de tu tienda.");
         return;
       }
       if (logoTienda && !["image/png", "image/jpeg"].includes(logoTienda.type)) {
@@ -325,14 +334,13 @@ function Auth() {
         category: cat?.nombre ?? null,
         location: d.ubicacion || null,
         logo: logoUrl,
-        // Sin esto la tienda nacería aprobada por defecto si alguien cambia la
-        // columna más adelante; el alta pública siempre entra por la cola.
-        approved: false,
+        lat: d.lat ?? null,
+        lng: d.lng ?? null,
       });
       if (error) throw new Error(error.message);
 
       borrarBorrador();
-      toast.success("Tu tienda quedó registrada y está en revisión.");
+      toast.success("¡Tu tienda ya está publicada!");
       router.history.push("/publicar");
     } catch (err) {
       toast.error(
@@ -364,6 +372,7 @@ function Auth() {
       nombreTienda: nombreTienda.trim(),
       categoriaSlug: categoriaTienda,
       ubicacion: ubicacionTienda,
+      ...(puntoTienda ?? {}),
       descripcion: descripcionTienda.trim(),
       aceptaMarketing,
     };
@@ -389,6 +398,8 @@ function Auth() {
             ? "Elige la categoría de tu tienda."
             : !ubicacionTienda
               ? "Elige la ubicación de tu tienda."
+              : !puntoTienda
+                ? "Marca en el mapa la ubicación exacta de tu tienda."
               : !nombres.trim() || !apellidos.trim()
                 ? "Indica tus nombres y apellidos antes de continuar con Google."
                 : null;
@@ -691,6 +702,13 @@ function Auth() {
                       ))}
                     </select>
                   </Campo>
+                </div>
+
+                <div className="grid gap-1.5">
+                  <span className="text-xs font-bold uppercase tracking-wide text-primary">
+                    Ubicación exacta en el mapa
+                  </span>
+                  <SelectorUbicacion value={puntoTienda} onChange={setPuntoTienda} />
                 </div>
 
                 <Campo label="Descripción de la tienda">

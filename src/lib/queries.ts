@@ -89,6 +89,8 @@ function mapServicio(r: ServiceRow): Servicio {
     imagen: r.image ?? "",
   };
   if (r.recommended) s.recomendado = true;
+  if (r.store_id) s.tiendaId = r.store_id;
+  if (r.lat != null && r.lng != null) { s.lat = r.lat; s.lng = r.lng; }
   return s;
 }
 
@@ -109,6 +111,7 @@ function mapTienda(r: StoreRow): Tienda {
   if (r.featured) t.destacado = true;
   if (r.rnc) t.rnc = r.rnc;
   if (r.description) t.descripcion = r.description;
+  if (r.lat != null && r.lng != null) { t.lat = r.lat; t.lng = r.lng; }
   return t;
 }
 

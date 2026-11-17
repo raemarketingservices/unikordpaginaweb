@@ -24,6 +24,8 @@ import type { Categoria, Producto, Servicio, Tienda } from "@/data/marketplace";
 import { notFound } from "@tanstack/react-router";
 import { LOCAL_CATALOG } from "@/lib/local-catalog";
 import { getLocalData } from "@/lib/local-db";
+import { Fragment } from "react";
+import { MapaMarketplace, puntosMapa } from "@/components/uniko/Mapa";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -113,6 +115,8 @@ function InicioEstatico({ data }: { data: HomeData }) {
           </div>
         </div>
       </section>
+
+      <MapaMarketplace puntos={puntosMapa(tiendas, servicios)} />
 
       {/* CONFIANZA */}
       <section className="section-muted border-b border-border">
@@ -258,11 +262,13 @@ function InicioPorBloques({
   return (
     <div>
       {bloques.map((b) => (
-        <Bloque
-          key={b.id}
-          bloque={b}
-          data={{ categorias, productos, servicios, tiendas, ofertas, masVendidos, nuevos }}
-        />
+        <Fragment key={b.id}>
+          <Bloque
+            bloque={b}
+            data={{ categorias, productos, servicios, tiendas, ofertas, masVendidos, nuevos }}
+          />
+          {b.type === "hero" && <MapaMarketplace puntos={puntosMapa(tiendas, servicios)} />}
+        </Fragment>
       ))}
     </div>
   );

@@ -223,6 +223,9 @@ export type Servicio = {
   cobertura: string;
   imagen: string;
   recomendado?: boolean;
+  tiendaId?: string;
+  lat?: number;
+  lng?: number;
 };
 
 export const servicios: Servicio[] = [
@@ -351,6 +354,8 @@ export type Tienda = {
   logo: string;
   portada: string;
   destacado?: boolean;
+  lat?: number;
+  lng?: number;
 };
 
 export const tiendas: Tienda[] = [

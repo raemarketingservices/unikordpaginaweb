@@ -28,6 +28,8 @@ export type StoreRow = {
   cover: string | null;
   created_at: string;
   stock_enabled?: boolean;
+  lat?: number | null;
+  lng?: number | null;
 };
 
 export type ProductRow = {
@@ -80,6 +82,8 @@ export type ServiceRow = {
   image: string | null;
   recommended: boolean;
   created_at: string;
+  lat?: number | null;
+  lng?: number | null;
 };
 
 export type ProfileRow = {
