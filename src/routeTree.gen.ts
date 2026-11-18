@@ -29,6 +29,9 @@ import { Route as LegalIndexRouteImport } from './routes/legal.index'
 import { Route as LegalDocRouteImport } from './routes/legal.$doc'
 import { Route as ProductosIndexRouteImport } from './routes/productos.index'
 import { Route as ProductosProductoIdRouteImport } from './routes/productos.$productoId'
+import { Route as PropiedadesIndexRouteImport } from './routes/propiedades.index'
+import { Route as PropiedadesPropiedadIdRouteImport } from './routes/propiedades.$propiedadId'
+import { Route as PropiedadesPublicarRouteImport } from './routes/propiedades.publicar'
 import { Route as ServiciosIndexRouteImport } from './routes/servicios.index'
 import { Route as ServiciosServicioIdRouteImport } from './routes/servicios.$servicioId'
 import { Route as TiendasIndexRouteImport } from './routes/tiendas.index'
@@ -136,6 +139,21 @@ const ProductosProductoIdRoute = ProductosProductoIdRouteImport.update({
   path: '/productos/$productoId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PropiedadesIndexRoute = PropiedadesIndexRouteImport.update({
+  id: '/propiedades/',
+  path: '/propiedades/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PropiedadesPropiedadIdRoute = PropiedadesPropiedadIdRouteImport.update({
+  id: '/propiedades/$propiedadId',
+  path: '/propiedades/$propiedadId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PropiedadesPublicarRoute = PropiedadesPublicarRouteImport.update({
+  id: '/propiedades/publicar',
+  path: '/propiedades/publicar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServiciosIndexRoute = ServiciosIndexRouteImport.update({
   id: '/servicios/',
   path: '/servicios/',
@@ -186,10 +204,13 @@ export interface FileRoutesByFullPath {
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
   '/legal/$doc': typeof LegalDocRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
+  '/propiedades/$propiedadId': typeof PropiedadesPropiedadIdRoute
+  '/propiedades/publicar': typeof PropiedadesPublicarRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
   '/legal/': typeof LegalIndexRoute
   '/productos/': typeof ProductosIndexRoute
+  '/propiedades/': typeof PropiedadesIndexRoute
   '/servicios/': typeof ServiciosIndexRoute
   '/tiendas/': typeof TiendasIndexRoute
   '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
@@ -214,10 +235,13 @@ export interface FileRoutesByTo {
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
   '/legal/$doc': typeof LegalDocRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
+  '/propiedades/$propiedadId': typeof PropiedadesPropiedadIdRoute
+  '/propiedades/publicar': typeof PropiedadesPublicarRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
   '/legal': typeof LegalIndexRoute
   '/productos': typeof ProductosIndexRoute
+  '/propiedades': typeof PropiedadesIndexRoute
   '/servicios': typeof ServiciosIndexRoute
   '/tiendas': typeof TiendasIndexRoute
   '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
@@ -243,10 +267,13 @@ export interface FileRoutesById {
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
   '/legal/$doc': typeof LegalDocRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
+  '/propiedades/$propiedadId': typeof PropiedadesPropiedadIdRoute
+  '/propiedades/publicar': typeof PropiedadesPublicarRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
   '/legal/': typeof LegalIndexRoute
   '/productos/': typeof ProductosIndexRoute
+  '/propiedades/': typeof PropiedadesIndexRoute
   '/servicios/': typeof ServiciosIndexRoute
   '/tiendas/': typeof TiendasIndexRoute
   '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
@@ -273,10 +300,13 @@ export interface FileRouteTypes {
     | '/categorias/$categoriaSlug'
     | '/legal/$doc'
     | '/productos/$productoId'
+    | '/propiedades/$propiedadId'
+    | '/propiedades/publicar'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
     | '/legal/'
     | '/productos/'
+    | '/propiedades/'
     | '/servicios/'
     | '/tiendas/'
     | '/api/whatsapp/avisar'
@@ -301,10 +331,13 @@ export interface FileRouteTypes {
     | '/categorias/$categoriaSlug'
     | '/legal/$doc'
     | '/productos/$productoId'
+    | '/propiedades/$propiedadId'
+    | '/propiedades/publicar'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
     | '/legal'
     | '/productos'
+    | '/propiedades'
     | '/servicios'
     | '/tiendas'
     | '/api/whatsapp/avisar'
@@ -329,10 +362,13 @@ export interface FileRouteTypes {
     | '/categorias/$categoriaSlug'
     | '/legal/$doc'
     | '/productos/$productoId'
+    | '/propiedades/$propiedadId'
+    | '/propiedades/publicar'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
     | '/legal/'
     | '/productos/'
+    | '/propiedades/'
     | '/servicios/'
     | '/tiendas/'
     | '/api/whatsapp/avisar'
@@ -357,10 +393,13 @@ export interface RootRouteChildren {
   VenderRoute: typeof VenderRoute
   LegalDocRoute: typeof LegalDocRoute
   ProductosProductoIdRoute: typeof ProductosProductoIdRoute
+  PropiedadesPropiedadIdRoute: typeof PropiedadesPropiedadIdRoute
+  PropiedadesPublicarRoute: typeof PropiedadesPublicarRoute
   ServiciosServicioIdRoute: typeof ServiciosServicioIdRoute
   TiendasTiendaIdRoute: typeof TiendasTiendaIdRoute
   LegalIndexRoute: typeof LegalIndexRoute
   ProductosIndexRoute: typeof ProductosIndexRoute
+  PropiedadesIndexRoute: typeof PropiedadesIndexRoute
   ServiciosIndexRoute: typeof ServiciosIndexRoute
   TiendasIndexRoute: typeof TiendasIndexRoute
   ApiWhatsappAvisarRoute: typeof ApiWhatsappAvisarRoute
@@ -509,6 +548,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductosProductoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/propiedades/': {
+      id: '/propiedades/'
+      path: '/propiedades'
+      fullPath: '/propiedades/'
+      preLoaderRoute: typeof PropiedadesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/propiedades/$propiedadId': {
+      id: '/propiedades/$propiedadId'
+      path: '/propiedades/$propiedadId'
+      fullPath: '/propiedades/$propiedadId'
+      preLoaderRoute: typeof PropiedadesPropiedadIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/propiedades/publicar': {
+      id: '/propiedades/publicar'
+      path: '/propiedades/publicar'
+      fullPath: '/propiedades/publicar'
+      preLoaderRoute: typeof PropiedadesPublicarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/servicios/': {
       id: '/servicios/'
       path: '/servicios'
@@ -584,10 +644,13 @@ const rootRouteChildren: RootRouteChildren = {
   VenderRoute: VenderRoute,
   LegalDocRoute: LegalDocRoute,
   ProductosProductoIdRoute: ProductosProductoIdRoute,
+  PropiedadesPropiedadIdRoute: PropiedadesPropiedadIdRoute,
+  PropiedadesPublicarRoute: PropiedadesPublicarRoute,
   ServiciosServicioIdRoute: ServiciosServicioIdRoute,
   TiendasTiendaIdRoute: TiendasTiendaIdRoute,
   LegalIndexRoute: LegalIndexRoute,
   ProductosIndexRoute: ProductosIndexRoute,
+  PropiedadesIndexRoute: PropiedadesIndexRoute,
   ServiciosIndexRoute: ServiciosIndexRoute,
   TiendasIndexRoute: TiendasIndexRoute,
   ApiWhatsappAvisarRoute: ApiWhatsappAvisarRoute,

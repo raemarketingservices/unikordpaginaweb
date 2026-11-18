@@ -11,14 +11,16 @@ export type Punto = { lat: number; lng: number };
 export type PuntoMapa = Punto & {
   id: string;
   nombre: string;
-  tipo: "tienda" | "servicio";
+  tipo: "tienda" | "servicio" | "propiedad";
   provincia: string;
   detalle: string;
 };
 
 const CENTRO_RD: L.LatLngTuple = [18.8, -70.3];
 const ZOOM_RD = 7;
-const COLOR = { tienda: "#cd002b", servicio: "#0b3fae", yo: "#16a34a" } as const;
+const COLOR = { tienda: "#cd002b", servicio: "#0b3fae", propiedad: "#ea580c", yo: "#16a34a" } as const;
+const RUTA = { tienda: "/tiendas", servicio: "/servicios", propiedad: "/propiedades" } as const;
+const NOMBRE = { tienda: "Tienda", servicio: "Servicio", propiedad: "Propiedad" } as const;
 
 function crearMapa(el: HTMLElement) {
   const mapa = L.map(el, { scrollWheelZoom: false }).setView(CENTRO_RD, ZOOM_RD);
@@ -140,7 +142,17 @@ export function puntosMapa(tiendas: Tienda[], servicios: Servicio[]): PuntoMapa[
 }
 
 /** Mapa principal: todas las tiendas y servicios con punto, filtro por provincia y «cerca de mí». */
-export function MapaMarketplace({ puntos }: { puntos: PuntoMapa[] }) {
+export function MapaMarketplace({
+  puntos,
+  titulo = "Tiendas cerca de mí",
+  resumen = "tiendas y servicios con ubicación en el mapa",
+  leyenda = "Rojo: tiendas · Azul: servicios.",
+}: {
+  puntos: PuntoMapa[];
+  titulo?: string;
+  resumen?: string;
+  leyenda?: string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const mapa = useRef<L.Map | null>(null);
   const capa = useRef<L.LayerGroup | null>(null);
@@ -185,14 +197,14 @@ export function MapaMarketplace({ puntos }: { puntos: PuntoMapa[] }) {
     if (!m || !c) return;
     c.clearLayers();
     for (const p of visibles) {
-      const enlace = p.tipo === "tienda" ? `/tiendas/${p.id}` : `/servicios/${p.id}`;
+      const enlace = `${RUTA[p.tipo]}/${p.id}`;
       const popup = document.createElement("div");
       const titulo = document.createElement("a");
       titulo.href = enlace;
       titulo.textContent = p.nombre;
       titulo.style.fontWeight = "700";
       const sub = document.createElement("div");
-      sub.textContent = [p.tipo === "tienda" ? "Tienda" : "Servicio", p.detalle, p.provincia]
+      sub.textContent = [NOMBRE[p.tipo], p.detalle, p.provincia]
         .filter(Boolean)
         .join(" · ");
       popup.append(titulo, sub);
@@ -223,9 +235,9 @@ export function MapaMarketplace({ puntos }: { puntos: PuntoMapa[] }) {
           <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-primary">
             <MapPin className="h-4 w-4" /> Mapa de República Dominicana
           </p>
-          <h2 className="mt-1 text-2xl">Tiendas cerca de mí</h2>
+          <h2 className="mt-1 text-2xl">{titulo}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {puntos.length} tiendas y servicios con ubicación en el mapa.
+            {puntos.length} {resumen}.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -243,7 +255,7 @@ export function MapaMarketplace({ puntos }: { puntos: PuntoMapa[] }) {
             ))}
           </select>
           <button type="button" className="btn-base btn-brand" onClick={buscarCerca} disabled={buscando}>
-            <LocateFixed className="h-4 w-4" /> {buscando ? "Buscando…" : "Tiendas cerca de mí"}
+            <LocateFixed className="h-4 w-4" /> {buscando ? "Buscando…" : titulo}
           </button>
         </div>
       </div>
@@ -264,7 +276,7 @@ export function MapaMarketplace({ puntos }: { puntos: PuntoMapa[] }) {
               {cercanos.map((p) => (
                 <li key={`${p.tipo}-${p.id}`}>
                   <a
-                    href={p.tipo === "tienda" ? `/tiendas/${p.id}` : `/servicios/${p.id}`}
+                    href={`${RUTA[p.tipo]}/${p.id}`}
                     className="flex items-center justify-between gap-2 rounded-lg border border-border p-2 text-sm hover:bg-muted/40"
                   >
                     <span className="min-w-0 truncate font-semibold">{p.nombre}</span>
@@ -275,13 +287,13 @@ export function MapaMarketplace({ puntos }: { puntos: PuntoMapa[] }) {
                 </li>
               ))}
               {!cercanos.length && (
-                <li className="text-sm text-muted-foreground">No hay tiendas en esta provincia.</li>
+                <li className="text-sm text-muted-foreground">No hay resultados en esta provincia.</li>
               )}
             </ul>
           ) : (
             <p className="mt-2 text-sm text-muted-foreground">
               Pulsa «Tiendas cerca de mí» para ver las más cercanas, o toca un punto del mapa para ver
-              la tienda. Rojo: tiendas · Azul: servicios.
+              el detalle. {leyenda}
             </p>
           )}
         </div>

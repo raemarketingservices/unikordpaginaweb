@@ -33,6 +33,7 @@ import {
   MapPin,
   Bot,
   Type,
+  Building2,
   type LucideIcon,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -43,6 +44,7 @@ import { GestionTiendas } from "@/components/admin/GestionTiendas";
 import { GestionProductos } from "@/components/admin/GestionProductos";
 import { ConfigChatbot } from "@/components/admin/ConfigChatbot";
 import { PanelApariencia } from "@/components/admin/Apariencia";
+import { GestionPropiedades } from "@/components/admin/GestionPropiedades";
 import { Captcha, type CaptchaRef } from "@/components/uniko/Captcha";
 import { LocalAdmin } from "@/components/admin/LocalAdmin";
 import { LOCAL_CATALOG } from "@/lib/local-catalog";
@@ -190,13 +192,14 @@ function mergeConfig(type: TipoBloque, db: Record<string, unknown>): Record<stri
   return out;
 }
 
-type SeccionAdmin = "home" | "usuarios" | "tiendas" | "productos" | "chatbot" | "apariencia";
+type SeccionAdmin = "home" | "usuarios" | "tiendas" | "productos" | "propiedades" | "chatbot" | "apariencia";
 
 const SECCIONES: { id: SeccionAdmin; etiqueta: string; icono: LucideIcon }[] = [
   { id: "home", etiqueta: "Home", icono: Home },
   { id: "usuarios", etiqueta: "Usuarios", icono: Users },
   { id: "tiendas", etiqueta: "Tiendas", icono: Store },
   { id: "productos", etiqueta: "Artículos", icono: ShoppingBag },
+  { id: "propiedades", etiqueta: "Propiedades", icono: Building2 },
   { id: "chatbot", etiqueta: "Chatbot", icono: Bot },
   { id: "apariencia", etiqueta: "Apariencia", icono: Type },
 ];
@@ -1110,6 +1113,12 @@ function Admin() {
       {seccion === "productos" && (
         <div className="card-uniko overflow-hidden">
           <GestionProductos />
+        </div>
+      )}
+
+      {seccion === "propiedades" && (
+        <div className="card-uniko overflow-hidden">
+          <GestionPropiedades />
         </div>
       )}
 
