@@ -180,7 +180,7 @@ function RootComponent() {
       timer = setTimeout(() => void router.invalidate(), 800);
     };
     let canal = supabase.channel("uniko-catalogo");
-    for (const table of ["products", "stores", "services", "categories", "properties", "property_agents"])
+    for (const table of ["products", "stores", "services", "categories", "properties", "property_agents", "vehicles", "vehicle_providers"])
       canal = canal.on("postgres_changes", { event: "*", schema: "public", table }, refrescar);
     canal.subscribe();
     return () => {

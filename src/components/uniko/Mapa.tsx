@@ -11,16 +11,16 @@ export type Punto = { lat: number; lng: number };
 export type PuntoMapa = Punto & {
   id: string;
   nombre: string;
-  tipo: "tienda" | "servicio" | "propiedad";
+  tipo: "tienda" | "servicio" | "propiedad" | "vehiculo";
   provincia: string;
   detalle: string;
 };
 
 const CENTRO_RD: L.LatLngTuple = [18.8, -70.3];
 const ZOOM_RD = 7;
-const COLOR = { tienda: "#cd002b", servicio: "#0b3fae", propiedad: "#ea580c", yo: "#16a34a" } as const;
-const RUTA = { tienda: "/tiendas", servicio: "/servicios", propiedad: "/propiedades" } as const;
-const NOMBRE = { tienda: "Tienda", servicio: "Servicio", propiedad: "Propiedad" } as const;
+const COLOR = { tienda: "#cd002b", servicio: "#0b3fae", propiedad: "#ea580c", vehiculo: "#7c3aed", yo: "#16a34a" } as const;
+const RUTA = { tienda: "/tiendas", servicio: "/servicios", propiedad: "/propiedades", vehiculo: "/vehiculos" } as const;
+const NOMBRE = { tienda: "Tienda", servicio: "Servicio", propiedad: "Propiedad", vehiculo: "Vehículo" } as const;
 
 function crearMapa(el: HTMLElement) {
   const mapa = L.map(el, { scrollWheelZoom: false }).setView(CENTRO_RD, ZOOM_RD);

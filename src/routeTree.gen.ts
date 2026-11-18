@@ -36,6 +36,9 @@ import { Route as ServiciosIndexRouteImport } from './routes/servicios.index'
 import { Route as ServiciosServicioIdRouteImport } from './routes/servicios.$servicioId'
 import { Route as TiendasIndexRouteImport } from './routes/tiendas.index'
 import { Route as TiendasTiendaIdRouteImport } from './routes/tiendas.$tiendaId'
+import { Route as VehiculosIndexRouteImport } from './routes/vehiculos.index'
+import { Route as VehiculosVehiculoIdRouteImport } from './routes/vehiculos.$vehiculoId'
+import { Route as VehiculosPublicarRouteImport } from './routes/vehiculos.publicar'
 import { Route as ApiWhatsappAvisarRouteImport } from './routes/api/whatsapp.avisar'
 import { Route as ApiWhatsappWebhookRouteImport } from './routes/api/whatsapp.webhook'
 
@@ -174,6 +177,21 @@ const TiendasTiendaIdRoute = TiendasTiendaIdRouteImport.update({
   path: '/tiendas/$tiendaId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VehiculosIndexRoute = VehiculosIndexRouteImport.update({
+  id: '/vehiculos/',
+  path: '/vehiculos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VehiculosVehiculoIdRoute = VehiculosVehiculoIdRouteImport.update({
+  id: '/vehiculos/$vehiculoId',
+  path: '/vehiculos/$vehiculoId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VehiculosPublicarRoute = VehiculosPublicarRouteImport.update({
+  id: '/vehiculos/publicar',
+  path: '/vehiculos/publicar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWhatsappAvisarRoute = ApiWhatsappAvisarRouteImport.update({
   id: '/api/whatsapp/avisar',
   path: '/api/whatsapp/avisar',
@@ -208,11 +226,14 @@ export interface FileRoutesByFullPath {
   '/propiedades/publicar': typeof PropiedadesPublicarRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
+  '/vehiculos/$vehiculoId': typeof VehiculosVehiculoIdRoute
+  '/vehiculos/publicar': typeof VehiculosPublicarRoute
   '/legal/': typeof LegalIndexRoute
   '/productos/': typeof ProductosIndexRoute
   '/propiedades/': typeof PropiedadesIndexRoute
   '/servicios/': typeof ServiciosIndexRoute
   '/tiendas/': typeof TiendasIndexRoute
+  '/vehiculos/': typeof VehiculosIndexRoute
   '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
   '/api/whatsapp/webhook': typeof ApiWhatsappWebhookRoute
 }
@@ -239,11 +260,14 @@ export interface FileRoutesByTo {
   '/propiedades/publicar': typeof PropiedadesPublicarRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
+  '/vehiculos/$vehiculoId': typeof VehiculosVehiculoIdRoute
+  '/vehiculos/publicar': typeof VehiculosPublicarRoute
   '/legal': typeof LegalIndexRoute
   '/productos': typeof ProductosIndexRoute
   '/propiedades': typeof PropiedadesIndexRoute
   '/servicios': typeof ServiciosIndexRoute
   '/tiendas': typeof TiendasIndexRoute
+  '/vehiculos': typeof VehiculosIndexRoute
   '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
   '/api/whatsapp/webhook': typeof ApiWhatsappWebhookRoute
 }
@@ -271,11 +295,14 @@ export interface FileRoutesById {
   '/propiedades/publicar': typeof PropiedadesPublicarRoute
   '/servicios/$servicioId': typeof ServiciosServicioIdRoute
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
+  '/vehiculos/$vehiculoId': typeof VehiculosVehiculoIdRoute
+  '/vehiculos/publicar': typeof VehiculosPublicarRoute
   '/legal/': typeof LegalIndexRoute
   '/productos/': typeof ProductosIndexRoute
   '/propiedades/': typeof PropiedadesIndexRoute
   '/servicios/': typeof ServiciosIndexRoute
   '/tiendas/': typeof TiendasIndexRoute
+  '/vehiculos/': typeof VehiculosIndexRoute
   '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
   '/api/whatsapp/webhook': typeof ApiWhatsappWebhookRoute
 }
@@ -304,11 +331,14 @@ export interface FileRouteTypes {
     | '/propiedades/publicar'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
+    | '/vehiculos/$vehiculoId'
+    | '/vehiculos/publicar'
     | '/legal/'
     | '/productos/'
     | '/propiedades/'
     | '/servicios/'
     | '/tiendas/'
+    | '/vehiculos/'
     | '/api/whatsapp/avisar'
     | '/api/whatsapp/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -335,11 +365,14 @@ export interface FileRouteTypes {
     | '/propiedades/publicar'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
+    | '/vehiculos/$vehiculoId'
+    | '/vehiculos/publicar'
     | '/legal'
     | '/productos'
     | '/propiedades'
     | '/servicios'
     | '/tiendas'
+    | '/vehiculos'
     | '/api/whatsapp/avisar'
     | '/api/whatsapp/webhook'
   id:
@@ -366,11 +399,14 @@ export interface FileRouteTypes {
     | '/propiedades/publicar'
     | '/servicios/$servicioId'
     | '/tiendas/$tiendaId'
+    | '/vehiculos/$vehiculoId'
+    | '/vehiculos/publicar'
     | '/legal/'
     | '/productos/'
     | '/propiedades/'
     | '/servicios/'
     | '/tiendas/'
+    | '/vehiculos/'
     | '/api/whatsapp/avisar'
     | '/api/whatsapp/webhook'
   fileRoutesById: FileRoutesById
@@ -397,11 +433,14 @@ export interface RootRouteChildren {
   PropiedadesPublicarRoute: typeof PropiedadesPublicarRoute
   ServiciosServicioIdRoute: typeof ServiciosServicioIdRoute
   TiendasTiendaIdRoute: typeof TiendasTiendaIdRoute
+  VehiculosVehiculoIdRoute: typeof VehiculosVehiculoIdRoute
+  VehiculosPublicarRoute: typeof VehiculosPublicarRoute
   LegalIndexRoute: typeof LegalIndexRoute
   ProductosIndexRoute: typeof ProductosIndexRoute
   PropiedadesIndexRoute: typeof PropiedadesIndexRoute
   ServiciosIndexRoute: typeof ServiciosIndexRoute
   TiendasIndexRoute: typeof TiendasIndexRoute
+  VehiculosIndexRoute: typeof VehiculosIndexRoute
   ApiWhatsappAvisarRoute: typeof ApiWhatsappAvisarRoute
   ApiWhatsappWebhookRoute: typeof ApiWhatsappWebhookRoute
 }
@@ -597,6 +636,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TiendasTiendaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vehiculos/': {
+      id: '/vehiculos/'
+      path: '/vehiculos'
+      fullPath: '/vehiculos/'
+      preLoaderRoute: typeof VehiculosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vehiculos/$vehiculoId': {
+      id: '/vehiculos/$vehiculoId'
+      path: '/vehiculos/$vehiculoId'
+      fullPath: '/vehiculos/$vehiculoId'
+      preLoaderRoute: typeof VehiculosVehiculoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vehiculos/publicar': {
+      id: '/vehiculos/publicar'
+      path: '/vehiculos/publicar'
+      fullPath: '/vehiculos/publicar'
+      preLoaderRoute: typeof VehiculosPublicarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/whatsapp/avisar': {
       id: '/api/whatsapp/avisar'
       path: '/api/whatsapp/avisar'
@@ -648,11 +708,14 @@ const rootRouteChildren: RootRouteChildren = {
   PropiedadesPublicarRoute: PropiedadesPublicarRoute,
   ServiciosServicioIdRoute: ServiciosServicioIdRoute,
   TiendasTiendaIdRoute: TiendasTiendaIdRoute,
+  VehiculosVehiculoIdRoute: VehiculosVehiculoIdRoute,
+  VehiculosPublicarRoute: VehiculosPublicarRoute,
   LegalIndexRoute: LegalIndexRoute,
   ProductosIndexRoute: ProductosIndexRoute,
   PropiedadesIndexRoute: PropiedadesIndexRoute,
   ServiciosIndexRoute: ServiciosIndexRoute,
   TiendasIndexRoute: TiendasIndexRoute,
+  VehiculosIndexRoute: VehiculosIndexRoute,
   ApiWhatsappAvisarRoute: ApiWhatsappAvisarRoute,
   ApiWhatsappWebhookRoute: ApiWhatsappWebhookRoute,
 }
