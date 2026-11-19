@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Package, Search, Trash2 } from "lucide-react";
+import { Package, Plus, Search, Trash2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase";
 import { fetchProductosAdmin } from "@/lib/queries";
 import type { ProductWithStoreRow } from "@/lib/types";
@@ -107,6 +108,9 @@ export function GestionProductos() {
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="flex items-center gap-2 font-semibold">
           <Package className="h-5 w-5 text-brand" /> Artículos ({productos.length})
+          <Link to="/publicar" className="btn-base btn-brand ml-2">
+            <Plus className="h-4 w-4" /> Nuevo producto
+          </Link>
         </h2>
         <label className="relative sm:w-72">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

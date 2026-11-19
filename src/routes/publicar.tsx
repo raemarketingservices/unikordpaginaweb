@@ -7,12 +7,16 @@ import { LOCAL_CATALOG } from "@/lib/local-catalog";
 import { addLocalProduct, localFileUrl, localStoreForOwner } from "@/lib/local-db";
 import { api, CLOUDFLARE_API, cloudUpload } from "@/lib/cloudflare";
 import { useAuth } from "@/lib/auth";
-import { fetchCategorias, generarSku, slugUnico, subirArchivos } from "@/lib/queries";
+import { fetchCategorias, fetchTiendasAdmin, generarSku, slugUnico, subirArchivos } from "@/lib/queries";
 import { provincias } from "@/data/marketplace";
 import type { Categoria } from "@/data/marketplace";
 import type { StoreRow } from "@/lib/types";
 
 export const Route = createFileRoute("/publicar")({
+  // ?tienda=<id>: el admin llega desde su panel con la tienda ya elegida.
+  validateSearch: (s): { tienda?: string | undefined } => ({
+    tienda: typeof s["tienda"] === "string" ? s["tienda"] : undefined,
+  }),
   loader: async () => ({ categorias: await fetchCategorias() }),
   head: () => ({
     meta: [
@@ -30,7 +34,10 @@ export const Route = createFileRoute("/publicar")({
 function Publicar() {
   const { categorias } = Route.useLoaderData();
   const router = useRouter();
-  const { session, loading } = useAuth();
+  const { session, loading, isAdmin } = useAuth();
+  const { tienda: tiendaPedida } = Route.useSearch();
+  // El admin publica en cualquier tienda sin tener que entrar como su dueño (RLS ya lo permite).
+  const [todas, setTodas] = useState<StoreRow[]>([]);
 
   const [tienda, setTienda] = useState<StoreRow | null>(null);
   const [cargandoTienda, setCargandoTienda] = useState(true);
@@ -74,6 +81,19 @@ function Publicar() {
       }).catch(() => { if (activo) setCargandoTienda(false); });
       return () => { activo = false; };
     }
+    if (isAdmin) {
+      fetchTiendasAdmin()
+        .then((lista) => {
+          if (!activo) return;
+          setTodas(lista);
+          setTienda(lista.find((t) => t.id === tiendaPedida) ?? lista[0] ?? null);
+          setCargandoTienda(false);
+        })
+        .catch(() => activo && setCargandoTienda(false));
+      return () => {
+        activo = false;
+      };
+    }
     supabase
       .from("stores")
       .select("*")
@@ -88,7 +108,7 @@ function Publicar() {
     return () => {
       activo = false;
     };
-  }, [userId]);
+  }, [userId, isAdmin, tiendaPedida]);
 
   // El interruptor es de la tienda: quien publica sin llevar existencias no debe
   // ver el campo marcado por defecto.
@@ -254,6 +274,25 @@ function Publicar() {
   return (
     <div className="mx-auto max-w-xl px-4 py-10">
       <h1 className="text-2xl sm:text-3xl">Publicar producto en {tienda.name}</h1>
+      {isAdmin && todas.length > 0 && (
+        <label className="card-uniko mt-4 grid gap-1.5 p-4">
+          <span className="text-xs font-bold uppercase tracking-wide text-primary">
+            Publicar en la tienda (admin)
+          </span>
+          <select
+            className="select-uniko"
+            value={tienda.id}
+            onChange={(e) => setTienda(todas.find((t) => t.id === e.target.value) ?? tienda)}
+          >
+            {todas.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+                {t.approved === false ? " (oculta)" : ""}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       {tienda.approved === false && <p role="status" className="my-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">Tu tienda está pendiente de aprobación. El administrador debe aprobarla antes de que puedas publicar productos.</p>}
       <p className="mt-2 text-sm text-muted-foreground">
         Completa la información y tu producto aparecerá en el marketplace al instante.

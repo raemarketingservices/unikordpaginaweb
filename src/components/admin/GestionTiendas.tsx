@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, Clock, Pencil, Plus, Search, Store, Trash2, XCircle } from "lucide-react";
 import { FormTiendaAdmin } from "@/components/admin/FormTiendaAdmin";
+import { Link } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase";
 import { fetchTiendasAdmin, fetchPerfilesAdmin } from "@/lib/queries";
 import { api, CLOUDFLARE_API } from "@/lib/cloudflare";
@@ -232,6 +233,13 @@ export function GestionTiendas() {
                     >
                       <Pencil className="h-3 w-3" /> Editar
                     </button>
+                    <Link
+                      to="/publicar"
+                      search={{ tienda: t.id }}
+                      className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-semibold text-primary hover:bg-primary/10"
+                    >
+                      <Plus className="h-3 w-3" /> Producto
+                    </Link>
                     <button
                       type="button"
                       disabled={eliminando}
