@@ -5,6 +5,7 @@ import { api, CLOUDFLARE_API } from "@/lib/cloudflare";
 import { useAuth } from "@/lib/auth";
 import { formatearRD } from "@/data/marketplace";
 import { toast } from "sonner";
+import { EnvioSacha } from "@/components/vendedor/EnvioSacha";
 import {
   ClipboardList,
   Clock3,
@@ -47,6 +48,9 @@ type Orden = {
   total: number | null;
   status: string;
   store_ids?: string[];
+  province?: string | null;
+  sacha_tracking?: string | null;
+  sacha_sent_at?: string | null;
 };
 
 const ESTADOS = ["pendiente", "confirmada", "enviada", "completada", "cancelada"];
@@ -588,6 +592,23 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
                   <span>{formatearRD(Number(detalle.total) || 0)}</span>
                 </div>
               </div>
+
+              {!CLOUDFLARE_API && (
+                <EnvioSacha
+                  key={detalle.id}
+                  orden={detalle}
+                  onEnviado={(tracking, province) => {
+                    const cambio = {
+                      sacha_tracking: tracking,
+                      sacha_sent_at: new Date().toISOString(),
+                      province,
+                      status: ["pendiente", "confirmada"].includes(detalle.status) ? "enviada" : detalle.status,
+                    };
+                    setOrdenes((l) => l.map((x) => (x.id === detalle.id ? { ...x, ...cambio } : x)));
+                    setDetalle((d) => (d ? { ...d, ...cambio } : d));
+                  }}
+                />
+              )}
 
               <DialogFooter className="gap-2 sm:justify-between">
                 <label className="flex items-center gap-2 text-sm">

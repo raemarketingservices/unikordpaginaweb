@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
-import { formatearRD } from "@/data/marketplace";
+import { formatearRD, provincias } from "@/data/marketplace";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { CompraAcceso } from '@/components/uniko/CompraAcceso';
@@ -24,6 +24,7 @@ function CheckoutPagina() {
 
   const [nombre, setNombre] = useState("");
   const [direccion, setDireccion] = useState("");
+  const [provincia, setProvincia] = useState("");
   const [telefono, setTelefono] = useState("");
   const [correo, setCorreo] = useState("");
   const [cedula, setCedula] = useState("");
@@ -50,6 +51,10 @@ function CheckoutPagina() {
     }
     if (direccion.trim().length < 5) {
       toast.error("Escribe tu dirección de entrega.");
+      return;
+    }
+    if (!provincia) {
+      toast.error("Elige la provincia de entrega.");
       return;
     }
     if ((telefono.match(/\d/g) ?? []).length < 10) {
@@ -92,6 +97,7 @@ function CheckoutPagina() {
       const { error } = await supabase.from("purchase_requests").insert({
         full_name: nombre.trim(),
         address: direccion.trim(),
+        province: provincia,
         phone: telefono.trim(),
         email: correo.trim(),
         cedula: cedula.trim(),
@@ -208,9 +214,26 @@ function CheckoutPagina() {
               className={campo}
               value={direccion}
               onChange={(e) => setDireccion(e.target.value)}
-              placeholder="Calle, número, sector, ciudad, provincia"
+              placeholder="Calle, número, sector, ciudad"
               autoComplete="street-address"
             />
+          </div>
+
+          <div className="grid gap-1.5">
+            <label htmlFor="co-provincia" className="text-sm font-semibold">
+              Provincia de entrega *
+            </label>
+            <select
+              id="co-provincia"
+              className="select-uniko w-full"
+              value={provincia}
+              onChange={(e) => setProvincia(e.target.value)}
+            >
+              <option value="">Selecciona…</option>
+              {provincias.map((p) => (
+                <option key={p}>{p}</option>
+              ))}
+            </select>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">

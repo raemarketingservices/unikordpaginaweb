@@ -39,6 +39,7 @@ import { Route as TiendasTiendaIdRouteImport } from './routes/tiendas.$tiendaId'
 import { Route as VehiculosIndexRouteImport } from './routes/vehiculos.index'
 import { Route as VehiculosVehiculoIdRouteImport } from './routes/vehiculos.$vehiculoId'
 import { Route as VehiculosPublicarRouteImport } from './routes/vehiculos.publicar'
+import { Route as ApiDeliverySachaRouteImport } from './routes/api/delivery.sacha'
 import { Route as ApiWhatsappAvisarRouteImport } from './routes/api/whatsapp.avisar'
 import { Route as ApiWhatsappWebhookRouteImport } from './routes/api/whatsapp.webhook'
 
@@ -192,6 +193,11 @@ const VehiculosPublicarRoute = VehiculosPublicarRouteImport.update({
   path: '/vehiculos/publicar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDeliverySachaRoute = ApiDeliverySachaRouteImport.update({
+  id: '/api/delivery/sacha',
+  path: '/api/delivery/sacha',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWhatsappAvisarRoute = ApiWhatsappAvisarRouteImport.update({
   id: '/api/whatsapp/avisar',
   path: '/api/whatsapp/avisar',
@@ -234,6 +240,7 @@ export interface FileRoutesByFullPath {
   '/servicios/': typeof ServiciosIndexRoute
   '/tiendas/': typeof TiendasIndexRoute
   '/vehiculos/': typeof VehiculosIndexRoute
+  '/api/delivery/sacha': typeof ApiDeliverySachaRoute
   '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
   '/api/whatsapp/webhook': typeof ApiWhatsappWebhookRoute
 }
@@ -268,6 +275,7 @@ export interface FileRoutesByTo {
   '/servicios': typeof ServiciosIndexRoute
   '/tiendas': typeof TiendasIndexRoute
   '/vehiculos': typeof VehiculosIndexRoute
+  '/api/delivery/sacha': typeof ApiDeliverySachaRoute
   '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
   '/api/whatsapp/webhook': typeof ApiWhatsappWebhookRoute
 }
@@ -303,6 +311,7 @@ export interface FileRoutesById {
   '/servicios/': typeof ServiciosIndexRoute
   '/tiendas/': typeof TiendasIndexRoute
   '/vehiculos/': typeof VehiculosIndexRoute
+  '/api/delivery/sacha': typeof ApiDeliverySachaRoute
   '/api/whatsapp/avisar': typeof ApiWhatsappAvisarRoute
   '/api/whatsapp/webhook': typeof ApiWhatsappWebhookRoute
 }
@@ -339,6 +348,7 @@ export interface FileRouteTypes {
     | '/servicios/'
     | '/tiendas/'
     | '/vehiculos/'
+    | '/api/delivery/sacha'
     | '/api/whatsapp/avisar'
     | '/api/whatsapp/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -373,6 +383,7 @@ export interface FileRouteTypes {
     | '/servicios'
     | '/tiendas'
     | '/vehiculos'
+    | '/api/delivery/sacha'
     | '/api/whatsapp/avisar'
     | '/api/whatsapp/webhook'
   id:
@@ -407,6 +418,7 @@ export interface FileRouteTypes {
     | '/servicios/'
     | '/tiendas/'
     | '/vehiculos/'
+    | '/api/delivery/sacha'
     | '/api/whatsapp/avisar'
     | '/api/whatsapp/webhook'
   fileRoutesById: FileRoutesById
@@ -441,6 +453,7 @@ export interface RootRouteChildren {
   ServiciosIndexRoute: typeof ServiciosIndexRoute
   TiendasIndexRoute: typeof TiendasIndexRoute
   VehiculosIndexRoute: typeof VehiculosIndexRoute
+  ApiDeliverySachaRoute: typeof ApiDeliverySachaRoute
   ApiWhatsappAvisarRoute: typeof ApiWhatsappAvisarRoute
   ApiWhatsappWebhookRoute: typeof ApiWhatsappWebhookRoute
 }
@@ -657,6 +670,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VehiculosPublicarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/delivery/sacha': {
+      id: '/api/delivery/sacha'
+      path: '/api/delivery/sacha'
+      fullPath: '/api/delivery/sacha'
+      preLoaderRoute: typeof ApiDeliverySachaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/whatsapp/avisar': {
       id: '/api/whatsapp/avisar'
       path: '/api/whatsapp/avisar'
@@ -716,6 +736,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServiciosIndexRoute: ServiciosIndexRoute,
   TiendasIndexRoute: TiendasIndexRoute,
   VehiculosIndexRoute: VehiculosIndexRoute,
+  ApiDeliverySachaRoute: ApiDeliverySachaRoute,
   ApiWhatsappAvisarRoute: ApiWhatsappAvisarRoute,
   ApiWhatsappWebhookRoute: ApiWhatsappWebhookRoute,
 }
