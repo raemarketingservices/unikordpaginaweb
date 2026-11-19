@@ -8,8 +8,10 @@ import {
   Menu,
   X,
   ChevronDown,
+  Package,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useAvisosPedidos, usePedidosNuevos } from "@/lib/avisos-pedidos";
 import { Logo } from "./Logo";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
@@ -34,6 +36,9 @@ export function Header() {
   const [abierto, setAbierto] = useState(false);
   const [consulta, setConsulta] = useState("");
   const [ubicacion, setUbicacion] = useState("Toda RD");
+  const irAOrdenes = useCallback(() => void navigate({ to: "/ordenes" }), [navigate]);
+  useAvisosPedidos(session?.user.id ?? null, irAOrdenes);
+  const pedidosNuevos = usePedidosNuevos();
   const autenticado = !loading && session;
 
   const buscar = (e: React.FormEvent) => {
@@ -107,6 +112,19 @@ export function Header() {
             >
               <MessageCircle className="h-5 w-5" />
             </Link>
+            {pedidosNuevos > 0 && (
+              <Link
+                to="/ordenes"
+                aria-label={`${pedidosNuevos} pedidos nuevos`}
+                title="Pedidos nuevos"
+                className="relative grid h-10 w-10 place-items-center rounded-full text-primary hover:bg-accent"
+              >
+                <Package className="h-5 w-5" />
+                <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[10px] font-bold text-brand-foreground">
+                  {pedidosNuevos}
+                </span>
+              </Link>
+            )}
             <Link
               to="/carrito"
               aria-label="Carrito"

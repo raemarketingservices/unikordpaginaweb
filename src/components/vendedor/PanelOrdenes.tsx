@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { formatearRD } from "@/data/marketplace";
 import { toast } from "sonner";
 import { EnvioSacha } from "@/components/vendedor/EnvioSacha";
+import { marcarPedidosVistos } from "@/lib/avisos-pedidos";
 import {
   ClipboardList,
   Clock3,
@@ -141,6 +142,14 @@ export function PanelOrdenes({ modo = "seller" }: { modo?: "seller" | "admin" })
 
   useEffect(() => {
     void cargar();
+    marcarPedidosVistos();
+    // Pedido nuevo en vivo (avisos-pedidos): recargar la lista sin que el vendedor toque nada.
+    const nuevo = () => {
+      void cargar();
+      marcarPedidosVistos();
+    };
+    window.addEventListener("uniko:pedido-nuevo", nuevo);
+    return () => window.removeEventListener("uniko:pedido-nuevo", nuevo);
   }, [cargar]);
 
   const misNombres = new Set(tiendas.map((t) => t.name));
