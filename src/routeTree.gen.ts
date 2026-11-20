@@ -24,6 +24,10 @@ import { Route as OfertasRouteImport } from './routes/ofertas'
 import { Route as OrdenesRouteImport } from './routes/ordenes'
 import { Route as PublicarRouteImport } from './routes/publicar'
 import { Route as VenderRouteImport } from './routes/vender'
+import { Route as AfiliadosIndexRouteImport } from './routes/afiliados.index'
+import { Route as AfiliadosSlugRouteImport } from './routes/afiliados.$slug'
+import { Route as AfiliadosPanelRouteImport } from './routes/afiliados.panel'
+import { Route as AfiliadosTerminosRouteImport } from './routes/afiliados.terminos'
 import { Route as CategoriasCategoriaSlugRouteImport } from './routes/categorias.$categoriaSlug'
 import { Route as LegalIndexRouteImport } from './routes/legal.index'
 import { Route as LegalDocRouteImport } from './routes/legal.$doc'
@@ -116,6 +120,26 @@ const PublicarRoute = PublicarRouteImport.update({
 const VenderRoute = VenderRouteImport.update({
   id: '/vender',
   path: '/vender',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AfiliadosIndexRoute = AfiliadosIndexRouteImport.update({
+  id: '/afiliados/',
+  path: '/afiliados/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AfiliadosSlugRoute = AfiliadosSlugRouteImport.update({
+  id: '/afiliados/$slug',
+  path: '/afiliados/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AfiliadosPanelRoute = AfiliadosPanelRouteImport.update({
+  id: '/afiliados/panel',
+  path: '/afiliados/panel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AfiliadosTerminosRoute = AfiliadosTerminosRouteImport.update({
+  id: '/afiliados/terminos',
+  path: '/afiliados/terminos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriasCategoriaSlugRoute = CategoriasCategoriaSlugRouteImport.update({
@@ -225,6 +249,9 @@ export interface FileRoutesByFullPath {
   '/ordenes': typeof OrdenesRoute
   '/publicar': typeof PublicarRoute
   '/vender': typeof VenderRoute
+  '/afiliados/$slug': typeof AfiliadosSlugRoute
+  '/afiliados/panel': typeof AfiliadosPanelRoute
+  '/afiliados/terminos': typeof AfiliadosTerminosRoute
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
   '/legal/$doc': typeof LegalDocRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
@@ -234,6 +261,7 @@ export interface FileRoutesByFullPath {
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
   '/vehiculos/$vehiculoId': typeof VehiculosVehiculoIdRoute
   '/vehiculos/publicar': typeof VehiculosPublicarRoute
+  '/afiliados/': typeof AfiliadosIndexRoute
   '/legal/': typeof LegalIndexRoute
   '/productos/': typeof ProductosIndexRoute
   '/propiedades/': typeof PropiedadesIndexRoute
@@ -260,6 +288,9 @@ export interface FileRoutesByTo {
   '/ordenes': typeof OrdenesRoute
   '/publicar': typeof PublicarRoute
   '/vender': typeof VenderRoute
+  '/afiliados/$slug': typeof AfiliadosSlugRoute
+  '/afiliados/panel': typeof AfiliadosPanelRoute
+  '/afiliados/terminos': typeof AfiliadosTerminosRoute
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
   '/legal/$doc': typeof LegalDocRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
@@ -269,6 +300,7 @@ export interface FileRoutesByTo {
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
   '/vehiculos/$vehiculoId': typeof VehiculosVehiculoIdRoute
   '/vehiculos/publicar': typeof VehiculosPublicarRoute
+  '/afiliados': typeof AfiliadosIndexRoute
   '/legal': typeof LegalIndexRoute
   '/productos': typeof ProductosIndexRoute
   '/propiedades': typeof PropiedadesIndexRoute
@@ -296,6 +328,9 @@ export interface FileRoutesById {
   '/ordenes': typeof OrdenesRoute
   '/publicar': typeof PublicarRoute
   '/vender': typeof VenderRoute
+  '/afiliados/$slug': typeof AfiliadosSlugRoute
+  '/afiliados/panel': typeof AfiliadosPanelRoute
+  '/afiliados/terminos': typeof AfiliadosTerminosRoute
   '/categorias/$categoriaSlug': typeof CategoriasCategoriaSlugRoute
   '/legal/$doc': typeof LegalDocRoute
   '/productos/$productoId': typeof ProductosProductoIdRoute
@@ -305,6 +340,7 @@ export interface FileRoutesById {
   '/tiendas/$tiendaId': typeof TiendasTiendaIdRoute
   '/vehiculos/$vehiculoId': typeof VehiculosVehiculoIdRoute
   '/vehiculos/publicar': typeof VehiculosPublicarRoute
+  '/afiliados/': typeof AfiliadosIndexRoute
   '/legal/': typeof LegalIndexRoute
   '/productos/': typeof ProductosIndexRoute
   '/propiedades/': typeof PropiedadesIndexRoute
@@ -333,6 +369,9 @@ export interface FileRouteTypes {
     | '/ordenes'
     | '/publicar'
     | '/vender'
+    | '/afiliados/$slug'
+    | '/afiliados/panel'
+    | '/afiliados/terminos'
     | '/categorias/$categoriaSlug'
     | '/legal/$doc'
     | '/productos/$productoId'
@@ -342,6 +381,7 @@ export interface FileRouteTypes {
     | '/tiendas/$tiendaId'
     | '/vehiculos/$vehiculoId'
     | '/vehiculos/publicar'
+    | '/afiliados/'
     | '/legal/'
     | '/productos/'
     | '/propiedades/'
@@ -368,6 +408,9 @@ export interface FileRouteTypes {
     | '/ordenes'
     | '/publicar'
     | '/vender'
+    | '/afiliados/$slug'
+    | '/afiliados/panel'
+    | '/afiliados/terminos'
     | '/categorias/$categoriaSlug'
     | '/legal/$doc'
     | '/productos/$productoId'
@@ -377,6 +420,7 @@ export interface FileRouteTypes {
     | '/tiendas/$tiendaId'
     | '/vehiculos/$vehiculoId'
     | '/vehiculos/publicar'
+    | '/afiliados'
     | '/legal'
     | '/productos'
     | '/propiedades'
@@ -403,6 +447,9 @@ export interface FileRouteTypes {
     | '/ordenes'
     | '/publicar'
     | '/vender'
+    | '/afiliados/$slug'
+    | '/afiliados/panel'
+    | '/afiliados/terminos'
     | '/categorias/$categoriaSlug'
     | '/legal/$doc'
     | '/productos/$productoId'
@@ -412,6 +459,7 @@ export interface FileRouteTypes {
     | '/tiendas/$tiendaId'
     | '/vehiculos/$vehiculoId'
     | '/vehiculos/publicar'
+    | '/afiliados/'
     | '/legal/'
     | '/productos/'
     | '/propiedades/'
@@ -439,6 +487,9 @@ export interface RootRouteChildren {
   OrdenesRoute: typeof OrdenesRoute
   PublicarRoute: typeof PublicarRoute
   VenderRoute: typeof VenderRoute
+  AfiliadosSlugRoute: typeof AfiliadosSlugRoute
+  AfiliadosPanelRoute: typeof AfiliadosPanelRoute
+  AfiliadosTerminosRoute: typeof AfiliadosTerminosRoute
   LegalDocRoute: typeof LegalDocRoute
   ProductosProductoIdRoute: typeof ProductosProductoIdRoute
   PropiedadesPropiedadIdRoute: typeof PropiedadesPropiedadIdRoute
@@ -447,6 +498,7 @@ export interface RootRouteChildren {
   TiendasTiendaIdRoute: typeof TiendasTiendaIdRoute
   VehiculosVehiculoIdRoute: typeof VehiculosVehiculoIdRoute
   VehiculosPublicarRoute: typeof VehiculosPublicarRoute
+  AfiliadosIndexRoute: typeof AfiliadosIndexRoute
   LegalIndexRoute: typeof LegalIndexRoute
   ProductosIndexRoute: typeof ProductosIndexRoute
   PropiedadesIndexRoute: typeof PropiedadesIndexRoute
@@ -563,6 +615,34 @@ declare module '@tanstack/react-router' {
       path: '/vender'
       fullPath: '/vender'
       preLoaderRoute: typeof VenderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/afiliados/': {
+      id: '/afiliados/'
+      path: '/afiliados'
+      fullPath: '/afiliados/'
+      preLoaderRoute: typeof AfiliadosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/afiliados/$slug': {
+      id: '/afiliados/$slug'
+      path: '/afiliados/$slug'
+      fullPath: '/afiliados/$slug'
+      preLoaderRoute: typeof AfiliadosSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/afiliados/panel': {
+      id: '/afiliados/panel'
+      path: '/afiliados/panel'
+      fullPath: '/afiliados/panel'
+      preLoaderRoute: typeof AfiliadosPanelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/afiliados/terminos': {
+      id: '/afiliados/terminos'
+      path: '/afiliados/terminos'
+      fullPath: '/afiliados/terminos'
+      preLoaderRoute: typeof AfiliadosTerminosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/categorias/$categoriaSlug': {
@@ -722,6 +802,9 @@ const rootRouteChildren: RootRouteChildren = {
   OrdenesRoute: OrdenesRoute,
   PublicarRoute: PublicarRoute,
   VenderRoute: VenderRoute,
+  AfiliadosSlugRoute: AfiliadosSlugRoute,
+  AfiliadosPanelRoute: AfiliadosPanelRoute,
+  AfiliadosTerminosRoute: AfiliadosTerminosRoute,
   LegalDocRoute: LegalDocRoute,
   ProductosProductoIdRoute: ProductosProductoIdRoute,
   PropiedadesPropiedadIdRoute: PropiedadesPropiedadIdRoute,
@@ -730,6 +813,7 @@ const rootRouteChildren: RootRouteChildren = {
   TiendasTiendaIdRoute: TiendasTiendaIdRoute,
   VehiculosVehiculoIdRoute: VehiculosVehiculoIdRoute,
   VehiculosPublicarRoute: VehiculosPublicarRoute,
+  AfiliadosIndexRoute: AfiliadosIndexRoute,
   LegalIndexRoute: LegalIndexRoute,
   ProductosIndexRoute: ProductosIndexRoute,
   PropiedadesIndexRoute: PropiedadesIndexRoute,

@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { capturarRef } from "@/lib/afiliados";
 import { toast } from "sonner";
 import {
   MapPin,
@@ -60,6 +61,10 @@ function DetalleProducto() {
   const { session, loading } = useAuth();
   const [pedirAcceso, setPedirAcceso] = useState(false);
   const { producto, productos } = Route.useLoaderData();
+  // Uniko Afiliados: /productos/<id>?ref=<slug> guarda el ref y cuenta el clic.
+  useEffect(() => {
+    capturarRef(producto.id, new URLSearchParams(window.location.search).get("ref"));
+  }, [producto.id]);
   const [cantidad, setCantidad] = useState(1);
   const [tab, setTab] = useState("descripcion");
   const { agregar, items } = useCart();

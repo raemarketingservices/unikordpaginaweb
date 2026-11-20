@@ -24,6 +24,7 @@ const navegacion = [
   { label: "Tiendas", to: "/tiendas" as const },
   { label: "Propiedades", to: "/propiedades" as const },
   { label: "Vehículos", to: "/vehiculos" as const },
+  { label: "Afiliados", to: "/afiliados" as const },
   { label: "Ofertas", to: "/ofertas" as const },
   { label: "Categorías", to: "/categorias" as const },
   { label: "Vender en UNIKO-RD", to: "/vender" as const },

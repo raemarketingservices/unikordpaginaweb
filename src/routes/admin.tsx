@@ -35,6 +35,7 @@ import {
   Type,
   Building2,
   CarFront,
+  BadgePercent,
   type LucideIcon,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -47,6 +48,7 @@ import { ConfigChatbot } from "@/components/admin/ConfigChatbot";
 import { PanelApariencia } from "@/components/admin/Apariencia";
 import { GestionPropiedades } from "@/components/admin/GestionPropiedades";
 import { GestionVehiculos } from "@/components/admin/GestionVehiculos";
+import { GestionAfiliados } from "@/components/admin/GestionAfiliados";
 import { Captcha, type CaptchaRef } from "@/components/uniko/Captcha";
 import { LocalAdmin } from "@/components/admin/LocalAdmin";
 import { LOCAL_CATALOG } from "@/lib/local-catalog";
@@ -194,7 +196,7 @@ function mergeConfig(type: TipoBloque, db: Record<string, unknown>): Record<stri
   return out;
 }
 
-type SeccionAdmin = "home" | "usuarios" | "tiendas" | "productos" | "propiedades" | "vehiculos" | "chatbot" | "apariencia";
+type SeccionAdmin = "home" | "usuarios" | "tiendas" | "productos" | "propiedades" | "vehiculos" | "afiliados" | "chatbot" | "apariencia";
 
 const SECCIONES: { id: SeccionAdmin; etiqueta: string; icono: LucideIcon }[] = [
   { id: "home", etiqueta: "Home", icono: Home },
@@ -203,6 +205,7 @@ const SECCIONES: { id: SeccionAdmin; etiqueta: string; icono: LucideIcon }[] = [
   { id: "productos", etiqueta: "Artículos", icono: ShoppingBag },
   { id: "propiedades", etiqueta: "Propiedades", icono: Building2 },
   { id: "vehiculos", etiqueta: "Vehículos", icono: CarFront },
+  { id: "afiliados", etiqueta: "Afiliados", icono: BadgePercent },
   { id: "chatbot", etiqueta: "Chatbot", icono: Bot },
   { id: "apariencia", etiqueta: "Apariencia", icono: Type },
 ];
@@ -1128,6 +1131,12 @@ function Admin() {
       {seccion === "vehiculos" && (
         <div className="card-uniko overflow-hidden">
           <GestionVehiculos />
+        </div>
+      )}
+
+      {seccion === "afiliados" && (
+        <div className="card-uniko overflow-hidden">
+          <GestionAfiliados />
         </div>
       )}
 

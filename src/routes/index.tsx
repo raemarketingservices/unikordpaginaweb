@@ -26,6 +26,7 @@ import { LOCAL_CATALOG } from "@/lib/local-catalog";
 import { getLocalData } from "@/lib/local-db";
 import { Fragment } from "react";
 import { MapaMarketplace, puntosMapa } from "@/components/uniko/Mapa";
+import { PromoAfiliados } from "@/components/afiliados/PromoAfiliados";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -117,6 +118,7 @@ function InicioEstatico({ data }: { data: HomeData }) {
       </section>
 
       <MapaMarketplace puntos={puntosMapa(tiendas, servicios)} />
+      <PromoAfiliados />
 
       {/* CONFIANZA */}
       <section className="section-muted border-b border-border">
@@ -267,7 +269,12 @@ function InicioPorBloques({
             bloque={b}
             data={{ categorias, productos, servicios, tiendas, ofertas, masVendidos, nuevos }}
           />
-          {b.type === "hero" && <MapaMarketplace puntos={puntosMapa(tiendas, servicios)} />}
+          {b.type === "hero" && (
+            <>
+              <MapaMarketplace puntos={puntosMapa(tiendas, servicios)} />
+              <PromoAfiliados />
+            </>
+          )}
         </Fragment>
       ))}
     </div>

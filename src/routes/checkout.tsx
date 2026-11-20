@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 import { formatearRD, provincias } from "@/data/marketplace";
+import { refDe } from "@/lib/afiliados";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { CompraAcceso } from '@/components/uniko/CompraAcceso';
@@ -108,6 +109,8 @@ function CheckoutPagina() {
           tienda: i.tienda,
           precio: i.precio,
           cantidad: i.cantidad,
+          // Uniko Afiliados: el trigger de la BD crea la comisión con el precio real.
+          ...(refDe(i.id) ? { ref: refDe(i.id) } : {}),
         })),
         store_ids: storeIds,
         total,
